@@ -3,5 +3,5 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("user-service started")
+	fmt.Println("workout-service started")
 }

@@ -10,27 +10,33 @@ service AiService {
     rpc GetGenerationStatus(GetGenerationStatusRequest) returns (GetGenerationStatusResponse);
 }
 
+
+enum PlanType {
+    PLAN_TYPE_UNSPECIFIED = 0;
+    PLAN_TYPE_ALL = 1;        // Сгенерировать и тренировки, и питание (для регистрации)
+    PLAN_TYPE_WORKOUT = 2;    // Перегенерировать только план тренировок
+    PLAN_TYPE_NUTRITION = 3;  // Перегенерировать только план питания
+}
+
+
+enum GenerationStatus {
+    GENERATION_STATUS_UNSPECIFIED = 0;
+    GENERATION_STATUS_PENDING = 1; // В процессе генерации
+    GENERATION_STATUS_DONE = 2;    // Генерация успешно завершена
+    GENERATION_STATUS_FAILED = 3;  // Ошибка при генерации
+}
+
 message StartGenerationRequest {
     string user_id = 1;
-    
-    bool generate_workout = 2; // Если true, генерируем зал
-    bool generate_nutrition = 3; // Если true, генерируем еду
+    PlanType plan_type = 2;
 }
 
 message StartGenerationResponse {
-    // Возвращаем ID, чтобы клиент мог по нему спрашивать статус
     string generation_id = 1;
 }
 
 message GetGenerationStatusRequest {
     string generation_id = 1;
-}
-
-enum GenerationStatus {
-    GENERATION_STATUS_UNSPECIFIED = 0;
-    GENERATION_STATUS_PENDING = 1; // Еще думает
-    GENERATION_STATUS_DONE = 2;    // Готово!
-    GENERATION_STATUS_FAILED = 3;  // Ошибка (нейросеть упала)
 }
 
 message GetGenerationStatusResponse {

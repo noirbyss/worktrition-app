@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package ai;
+
+option go_package = "github.com/noirbyss/worktrition-app/gen/ai-service;ai";
+
+service AiService {
+	rpc StartGeneration(StartGenerationRequest) returns (StartGenerationResponse);
+	rpc GetGenerationStatus(GetGenerationStatusRequest) returns (GetGenerationStatusResponse);
+}
+
+enum PlanType {
+	PLAN_TYPE_UNSPECIFIED = 0;
+	PLAN_TYPE_ALL = 1;
+	PLAN_TYPE_WORKOUT = 2;
+	PLAN_TYPE_NUTRITION = 3;
+}
+
+enum GenerationStatus {
+	GENERATION_STATUS_UNSPECIFIED  = 0;
+	GENERATION_STATUS_PENDING = 1;
+	GENERATION_STATUS_DONE = 2;
+	GENERATION_STATUS_FAILED = 3;
+}
+
+message StartGenerationRequest {
+	string user_id = 1;
+	PlanType plan_type = 2;
+}
+
+message StartGenerationResponse {
+	string generation_id = 1;
+	GenerationStatus status = 2;
+}
+
+message GetGenerationStatusRequest {
+	string generation_id = 1;
+}
+
+message GetGenerationStatusResponse {
+	string generation_id = 1;
+	GenerationStatus status = 2;
+	string error_message = 3;
+}

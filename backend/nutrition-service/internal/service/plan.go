@@ -1,27 +1,5 @@
 package service
 
-import "context"
-
-type NutritionService struct {
-	repo Repository
-}
-
-func New(repository Repository) *NutritionService {
-	return &NutritionService{repo: repository}
-}
-
-func (ns *NutritionService) SavePlan(ctx context.Context, plan CreatePlanRequest) error {
-	if err := plan.Validate(); err != nil {
-		return err
-	}
-
-	if err := ns.repo.SavePlan(ctx, plan); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 type DaysOfWeek int32
 
 func (d DaysOfWeek) isValid() bool {
@@ -40,20 +18,20 @@ const (
 )
 
 type CreatePlanRequest struct {
-	UserID string
-	GenID  string
-	Meals  []CreateMealRequest
+	UserID       string
+	GenerationID string
+	Meals        []CreateMealRequest
 	NutritionFacts
 	WaterGoalMl int32
 }
 
-func (cp *CreatePlanRequest) Validate() error {
+func (cp CreatePlanRequest) validate() error {
 	if cp.UserID == "" {
 		return ErrEmptyUserID
 	}
 
-	if cp.GenID == "" {
-		return ErrEmptyGenerateID
+	if cp.GenerationID == "" {
+		return ErrEmptyGenerationID
 	}
 
 	if len(cp.Meals) == 0 {
@@ -61,12 +39,12 @@ func (cp *CreatePlanRequest) Validate() error {
 	}
 
 	for _, meal := range cp.Meals {
-		if err := meal.Validate(); err != nil {
+		if err := meal.validate(); err != nil {
 			return err
 		}
 	}
 
-	if err := cp.NutritionFacts.Validate(); err != nil {
+	if err := cp.NutritionFacts.validate(); err != nil {
 		return err
 	}
 
@@ -75,4 +53,25 @@ func (cp *CreatePlanRequest) Validate() error {
 	}
 
 	return nil
+}
+
+type GetDayPlanRequest struct {
+	UserID string
+	Day    DaysOfWeek
+}
+
+func (dpr GetDayPlanRequest) validate() error {
+	if dpr.UserID == "" {
+		return ErrEmptyUserID
+	}
+
+	if !dpr.Day.isValid() {
+		return ErrInvalidDayOfWeek
+	}
+
+	return nil
+}
+
+type GetDayPlanResponse struct {
+	Meals []GetMealResponse
 }

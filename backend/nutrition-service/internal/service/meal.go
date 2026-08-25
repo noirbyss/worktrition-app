@@ -2,26 +2,26 @@ package service
 
 type NutritionFacts struct {
 	Calories float64
-	Proteins float64
-	Fats     float64
-	Carbs    float64
+	Protein  float64
+	Fat      float64
+	Carb     float64
 }
 
-func (nf *NutritionFacts) Validate() error {
+func (nf NutritionFacts) validate() error {
 	if nf.Calories <= 0 {
 		return ErrInvalidCalories
 	}
 
-	if nf.Proteins <= 0 {
-		return ErrInvalidProteins
+	if nf.Protein <= 0 {
+		return ErrInvalidProtein
 	}
 
-	if nf.Fats <= 0 {
-		return ErrInvalidFats
+	if nf.Fat <= 0 {
+		return ErrInvalidFat
 	}
 
-	if nf.Carbs <= 0 {
-		return ErrInvalidCarbs
+	if nf.Carb <= 0 {
+		return ErrInvalidCarb
 	}
 
 	return nil
@@ -34,7 +34,7 @@ type CreateMealRequest struct {
 	NutritionFacts
 }
 
-func (cm *CreateMealRequest) Validate() error {
+func (cm CreateMealRequest) validate() error {
 	if !cm.Day.isValid() {
 		return ErrInvalidDayOfWeek
 	}
@@ -47,8 +47,33 @@ func (cm *CreateMealRequest) Validate() error {
 		return ErrEmptyMealItems
 	}
 
-	if err := cm.NutritionFacts.Validate(); err != nil {
+	if err := cm.NutritionFacts.validate(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+type GetMealResponse struct {
+	ID    int32
+	Name  string
+	Items []string
+	NutritionFacts
+	Completed bool
+}
+
+type CompleteMealRequest struct {
+	UserID string
+	MealID int32
+}
+
+func (cmr CompleteMealRequest) validate() error {
+	if cmr.UserID == "" {
+		return ErrEmptyUserID
+	}
+
+	if cmr.MealID <= 0 {
+		return ErrInvalidMealID
 	}
 
 	return nil

@@ -41,3 +41,11 @@ func (nss *NutririonServiceServer) GetDayPlan(ctx context.Context, r *pb.GetDayP
 
 	return toPBGetDayPlanResponse(serviceGetDayPlanResponse), nil
 }
+
+func (nss *NutririonServiceServer) CompleteWater(ctx context.Context, r *pb.CompleteWaterRequest) (*emptypb.Empty, error) {
+	if err := nss.service.CompleteWater(ctx, toServiceCompleteWaterRequest(r)); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error()) // TODO: добавить валидацию
+	}
+
+	return &emptypb.Empty{}, nil
+}

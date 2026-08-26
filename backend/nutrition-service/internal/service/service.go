@@ -30,3 +30,15 @@ func (s *Service) GetDayPlan(ctx context.Context, r GetDayPlanRequest) (GetDayPl
 
 	return dayPlan, nil
 }
+
+func (s *Service) CompleteWater(ctx context.Context, r CompleteWaterRequest) error {
+	if err := r.validate(); err != nil {
+		return err
+	}
+
+	if err := s.repo.CompleteWater(r); err != nil {
+		return err
+	}
+
+	return nil
+}

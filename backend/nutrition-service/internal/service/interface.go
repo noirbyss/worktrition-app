@@ -4,4 +4,5 @@ type Repository interface {
 	// TODO: реализовать
 	SavePlan(SaveGeneratedPlanRequest) error
 	GetDayPlan(GetDayPlanRequest) (GetDayPlanResponse, error)
+	CompleteWater(CompleteWaterRequest) error
 }

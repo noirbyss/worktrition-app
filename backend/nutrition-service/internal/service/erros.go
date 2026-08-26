@@ -15,4 +15,5 @@ var (
 	ErrCarbTooLow               = errors.New("carb must be at least the minimal allowed value")
 	ErrEmptyName                = errors.New("name must not be empty")
 	ErrEmptyRecipe              = errors.New("recipe must not be empty")
+	ErrAmountMlTooLow           = errors.New("amount ml must be at least the minimal allowed value")
 )

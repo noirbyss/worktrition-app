@@ -91,7 +91,7 @@ type NutritionFacts struct {
 	Calories      float64                `protobuf:"fixed64,1,opt,name=calories,proto3" json:"calories,omitempty"`
 	Protein       float64                `protobuf:"fixed64,2,opt,name=protein,proto3" json:"protein,omitempty"`
 	Fat           float64                `protobuf:"fixed64,3,opt,name=fat,proto3" json:"fat,omitempty"`
-	Carbs         float64                `protobuf:"fixed64,4,opt,name=carbs,proto3" json:"carbs,omitempty"`
+	Carb          float64                `protobuf:"fixed64,4,opt,name=carb,proto3" json:"carb,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -147,37 +147,36 @@ func (x *NutritionFacts) GetFat() float64 {
 	return 0
 }
 
-func (x *NutritionFacts) GetCarbs() float64 {
+func (x *NutritionFacts) GetCarb() float64 {
 	if x != nil {
-		return x.Carbs
+		return x.Carb
 	}
 	return 0
 }
 
-type PlannedMeal struct {
+type MealItemsRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	DayOfWeek      DaysOfWeek             `protobuf:"varint,1,opt,name=day_of_week,json=dayOfWeek,proto3,enum=nutrition.DaysOfWeek" json:"day_of_week,omitempty"`
-	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	MealItems      []string               `protobuf:"bytes,3,rep,name=meal_items,json=mealItems,proto3" json:"meal_items,omitempty"`
-	NutritionFacts *NutritionFacts        `protobuf:"bytes,4,opt,name=nutrition_facts,json=nutritionFacts,proto3" json:"nutrition_facts,omitempty"`
+	Name           string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Recipe         string                 `protobuf:"bytes,2,opt,name=recipe,proto3" json:"recipe,omitempty"`
+	NutritionFacts *NutritionFacts        `protobuf:"bytes,3,opt,name=nutrition_facts,json=nutritionFacts,proto3" json:"nutrition_facts,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
 
-func (x *PlannedMeal) Reset() {
-	*x = PlannedMeal{}
+func (x *MealItemsRequest) Reset() {
+	*x = MealItemsRequest{}
 	mi := &file_nutrition_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *PlannedMeal) String() string {
+func (x *MealItemsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PlannedMeal) ProtoMessage() {}
+func (*MealItemsRequest) ProtoMessage() {}
 
-func (x *PlannedMeal) ProtoReflect() protoreflect.Message {
+func (x *MealItemsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_nutrition_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -189,33 +188,86 @@ func (x *PlannedMeal) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PlannedMeal.ProtoReflect.Descriptor instead.
-func (*PlannedMeal) Descriptor() ([]byte, []int) {
+// Deprecated: Use MealItemsRequest.ProtoReflect.Descriptor instead.
+func (*MealItemsRequest) Descriptor() ([]byte, []int) {
 	return file_nutrition_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *PlannedMeal) GetDayOfWeek() DaysOfWeek {
-	if x != nil {
-		return x.DayOfWeek
-	}
-	return DaysOfWeek_DAYS_OF_WEEK_UNSPECIFIED
-}
-
-func (x *PlannedMeal) GetName() string {
+func (x *MealItemsRequest) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *PlannedMeal) GetMealItems() []string {
+func (x *MealItemsRequest) GetRecipe() string {
+	if x != nil {
+		return x.Recipe
+	}
+	return ""
+}
+
+func (x *MealItemsRequest) GetNutritionFacts() *NutritionFacts {
+	if x != nil {
+		return x.NutritionFacts
+	}
+	return nil
+}
+
+type PlannedMealsRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	DayOfWeek      DaysOfWeek             `protobuf:"varint,1,opt,name=day_of_week,json=dayOfWeek,proto3,enum=nutrition.DaysOfWeek" json:"day_of_week,omitempty"`
+	MealItems      []*MealItemsRequest    `protobuf:"bytes,2,rep,name=meal_items,json=mealItems,proto3" json:"meal_items,omitempty"`
+	NutritionFacts *NutritionFacts        `protobuf:"bytes,3,opt,name=nutrition_facts,json=nutritionFacts,proto3" json:"nutrition_facts,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *PlannedMealsRequest) Reset() {
+	*x = PlannedMealsRequest{}
+	mi := &file_nutrition_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlannedMealsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlannedMealsRequest) ProtoMessage() {}
+
+func (x *PlannedMealsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_nutrition_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlannedMealsRequest.ProtoReflect.Descriptor instead.
+func (*PlannedMealsRequest) Descriptor() ([]byte, []int) {
+	return file_nutrition_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *PlannedMealsRequest) GetDayOfWeek() DaysOfWeek {
+	if x != nil {
+		return x.DayOfWeek
+	}
+	return DaysOfWeek_DAYS_OF_WEEK_UNSPECIFIED
+}
+
+func (x *PlannedMealsRequest) GetMealItems() []*MealItemsRequest {
 	if x != nil {
 		return x.MealItems
 	}
 	return nil
 }
 
-func (x *PlannedMeal) GetNutritionFacts() *NutritionFacts {
+func (x *PlannedMealsRequest) GetNutritionFacts() *NutritionFacts {
 	if x != nil {
 		return x.NutritionFacts
 	}
@@ -226,7 +278,7 @@ type SaveGeneratedPlanRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	UserId         string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	GenerationId   string                 `protobuf:"bytes,2,opt,name=generation_id,json=generationId,proto3" json:"generation_id,omitempty"`
-	Meals          []*PlannedMeal         `protobuf:"bytes,3,rep,name=meals,proto3" json:"meals,omitempty"`
+	PlannedMeals   []*PlannedMealsRequest `protobuf:"bytes,3,rep,name=planned_meals,json=plannedMeals,proto3" json:"planned_meals,omitempty"`
 	NutritionFacts *NutritionFacts        `protobuf:"bytes,4,opt,name=nutrition_facts,json=nutritionFacts,proto3" json:"nutrition_facts,omitempty"`
 	WaterGoalMl    int32                  `protobuf:"varint,5,opt,name=water_goal_ml,json=waterGoalMl,proto3" json:"water_goal_ml,omitempty"`
 	unknownFields  protoimpl.UnknownFields
@@ -235,7 +287,7 @@ type SaveGeneratedPlanRequest struct {
 
 func (x *SaveGeneratedPlanRequest) Reset() {
 	*x = SaveGeneratedPlanRequest{}
-	mi := &file_nutrition_proto_msgTypes[2]
+	mi := &file_nutrition_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -247,7 +299,7 @@ func (x *SaveGeneratedPlanRequest) String() string {
 func (*SaveGeneratedPlanRequest) ProtoMessage() {}
 
 func (x *SaveGeneratedPlanRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nutrition_proto_msgTypes[2]
+	mi := &file_nutrition_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -260,7 +312,7 @@ func (x *SaveGeneratedPlanRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SaveGeneratedPlanRequest.ProtoReflect.Descriptor instead.
 func (*SaveGeneratedPlanRequest) Descriptor() ([]byte, []int) {
-	return file_nutrition_proto_rawDescGZIP(), []int{2}
+	return file_nutrition_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *SaveGeneratedPlanRequest) GetUserId() string {
@@ -277,9 +329,9 @@ func (x *SaveGeneratedPlanRequest) GetGenerationId() string {
 	return ""
 }
 
-func (x *SaveGeneratedPlanRequest) GetMeals() []*PlannedMeal {
+func (x *SaveGeneratedPlanRequest) GetPlannedMeals() []*PlannedMealsRequest {
 	if x != nil {
-		return x.Meals
+		return x.PlannedMeals
 	}
 	return nil
 }
@@ -308,7 +360,7 @@ type GetDayPlanRequest struct {
 
 func (x *GetDayPlanRequest) Reset() {
 	*x = GetDayPlanRequest{}
-	mi := &file_nutrition_proto_msgTypes[3]
+	mi := &file_nutrition_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -320,7 +372,7 @@ func (x *GetDayPlanRequest) String() string {
 func (*GetDayPlanRequest) ProtoMessage() {}
 
 func (x *GetDayPlanRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nutrition_proto_msgTypes[3]
+	mi := &file_nutrition_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -333,7 +385,7 @@ func (x *GetDayPlanRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDayPlanRequest.ProtoReflect.Descriptor instead.
 func (*GetDayPlanRequest) Descriptor() ([]byte, []int) {
-	return file_nutrition_proto_rawDescGZIP(), []int{3}
+	return file_nutrition_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetDayPlanRequest) GetUserId() string {
@@ -350,32 +402,31 @@ func (x *GetDayPlanRequest) GetDayOfWeek() DaysOfWeek {
 	return DaysOfWeek_DAYS_OF_WEEK_UNSPECIFIED
 }
 
-type DayMeal struct {
+type MealItemsResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Id             int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	MealItems      []string               `protobuf:"bytes,3,rep,name=meal_items,json=mealItems,proto3" json:"meal_items,omitempty"`
+	Recipe         string                 `protobuf:"bytes,3,opt,name=recipe,proto3" json:"recipe,omitempty"`
 	NutritionFacts *NutritionFacts        `protobuf:"bytes,4,opt,name=nutrition_facts,json=nutritionFacts,proto3" json:"nutrition_facts,omitempty"`
-	Completed      bool                   `protobuf:"varint,5,opt,name=completed,proto3" json:"completed,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
 
-func (x *DayMeal) Reset() {
-	*x = DayMeal{}
-	mi := &file_nutrition_proto_msgTypes[4]
+func (x *MealItemsResponse) Reset() {
+	*x = MealItemsResponse{}
+	mi := &file_nutrition_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DayMeal) String() string {
+func (x *MealItemsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DayMeal) ProtoMessage() {}
+func (*MealItemsResponse) ProtoMessage() {}
 
-func (x *DayMeal) ProtoReflect() protoreflect.Message {
-	mi := &file_nutrition_proto_msgTypes[4]
+func (x *MealItemsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_nutrition_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -386,56 +437,51 @@ func (x *DayMeal) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DayMeal.ProtoReflect.Descriptor instead.
-func (*DayMeal) Descriptor() ([]byte, []int) {
-	return file_nutrition_proto_rawDescGZIP(), []int{4}
+// Deprecated: Use MealItemsResponse.ProtoReflect.Descriptor instead.
+func (*MealItemsResponse) Descriptor() ([]byte, []int) {
+	return file_nutrition_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *DayMeal) GetId() int32 {
+func (x *MealItemsResponse) GetId() int32 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *DayMeal) GetName() string {
+func (x *MealItemsResponse) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *DayMeal) GetMealItems() []string {
+func (x *MealItemsResponse) GetRecipe() string {
 	if x != nil {
-		return x.MealItems
+		return x.Recipe
 	}
-	return nil
+	return ""
 }
 
-func (x *DayMeal) GetNutritionFacts() *NutritionFacts {
+func (x *MealItemsResponse) GetNutritionFacts() *NutritionFacts {
 	if x != nil {
 		return x.NutritionFacts
 	}
 	return nil
 }
 
-func (x *DayMeal) GetCompleted() bool {
-	if x != nil {
-		return x.Completed
-	}
-	return false
-}
-
 type GetDayPlanResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Meals         []*DayMeal             `protobuf:"bytes,1,rep,name=meals,proto3" json:"meals,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	MealItems      []*MealItemsResponse   `protobuf:"bytes,1,rep,name=meal_items,json=mealItems,proto3" json:"meal_items,omitempty"`
+	NutritionFacts *NutritionFacts        `protobuf:"bytes,2,opt,name=nutrition_facts,json=nutritionFacts,proto3" json:"nutrition_facts,omitempty"`
+	WaterGoalMl    int32                  `protobuf:"varint,3,opt,name=water_goal_ml,json=waterGoalMl,proto3" json:"water_goal_ml,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *GetDayPlanResponse) Reset() {
 	*x = GetDayPlanResponse{}
-	mi := &file_nutrition_proto_msgTypes[5]
+	mi := &file_nutrition_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -447,7 +493,7 @@ func (x *GetDayPlanResponse) String() string {
 func (*GetDayPlanResponse) ProtoMessage() {}
 
 func (x *GetDayPlanResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_nutrition_proto_msgTypes[5]
+	mi := &file_nutrition_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -460,27 +506,41 @@ func (x *GetDayPlanResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDayPlanResponse.ProtoReflect.Descriptor instead.
 func (*GetDayPlanResponse) Descriptor() ([]byte, []int) {
-	return file_nutrition_proto_rawDescGZIP(), []int{5}
+	return file_nutrition_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *GetDayPlanResponse) GetMeals() []*DayMeal {
+func (x *GetDayPlanResponse) GetMealItems() []*MealItemsResponse {
 	if x != nil {
-		return x.Meals
+		return x.MealItems
 	}
 	return nil
+}
+
+func (x *GetDayPlanResponse) GetNutritionFacts() *NutritionFacts {
+	if x != nil {
+		return x.NutritionFacts
+	}
+	return nil
+}
+
+func (x *GetDayPlanResponse) GetWaterGoalMl() int32 {
+	if x != nil {
+		return x.WaterGoalMl
+	}
+	return 0
 }
 
 type CompleteMealRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	MealId        int32                  `protobuf:"varint,2,opt,name=meal_id,json=mealId,proto3" json:"meal_id,omitempty"`
+	MealItemId    int32                  `protobuf:"varint,2,opt,name=meal_item_id,json=mealItemId,proto3" json:"meal_item_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CompleteMealRequest) Reset() {
 	*x = CompleteMealRequest{}
-	mi := &file_nutrition_proto_msgTypes[6]
+	mi := &file_nutrition_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -492,7 +552,7 @@ func (x *CompleteMealRequest) String() string {
 func (*CompleteMealRequest) ProtoMessage() {}
 
 func (x *CompleteMealRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nutrition_proto_msgTypes[6]
+	mi := &file_nutrition_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -505,7 +565,7 @@ func (x *CompleteMealRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompleteMealRequest.ProtoReflect.Descriptor instead.
 func (*CompleteMealRequest) Descriptor() ([]byte, []int) {
-	return file_nutrition_proto_rawDescGZIP(), []int{6}
+	return file_nutrition_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CompleteMealRequest) GetUserId() string {
@@ -515,9 +575,9 @@ func (x *CompleteMealRequest) GetUserId() string {
 	return ""
 }
 
-func (x *CompleteMealRequest) GetMealId() int32 {
+func (x *CompleteMealRequest) GetMealItemId() int32 {
 	if x != nil {
-		return x.MealId
+		return x.MealItemId
 	}
 	return 0
 }
@@ -532,7 +592,7 @@ type CompleteWaterRequest struct {
 
 func (x *CompleteWaterRequest) Reset() {
 	*x = CompleteWaterRequest{}
-	mi := &file_nutrition_proto_msgTypes[7]
+	mi := &file_nutrition_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -544,7 +604,7 @@ func (x *CompleteWaterRequest) String() string {
 func (*CompleteWaterRequest) ProtoMessage() {}
 
 func (x *CompleteWaterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nutrition_proto_msgTypes[7]
+	mi := &file_nutrition_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -557,7 +617,7 @@ func (x *CompleteWaterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompleteWaterRequest.ProtoReflect.Descriptor instead.
 func (*CompleteWaterRequest) Descriptor() ([]byte, []int) {
-	return file_nutrition_proto_rawDescGZIP(), []int{7}
+	return file_nutrition_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *CompleteWaterRequest) GetUserId() string {
@@ -583,7 +643,7 @@ type GetStatsRequest struct {
 
 func (x *GetStatsRequest) Reset() {
 	*x = GetStatsRequest{}
-	mi := &file_nutrition_proto_msgTypes[8]
+	mi := &file_nutrition_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -595,7 +655,7 @@ func (x *GetStatsRequest) String() string {
 func (*GetStatsRequest) ProtoMessage() {}
 
 func (x *GetStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_nutrition_proto_msgTypes[8]
+	mi := &file_nutrition_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -608,7 +668,7 @@ func (x *GetStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetStatsRequest) Descriptor() ([]byte, []int) {
-	return file_nutrition_proto_rawDescGZIP(), []int{8}
+	return file_nutrition_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetStatsRequest) GetUserId() string {
@@ -629,7 +689,7 @@ type GetStatsResponse struct {
 
 func (x *GetStatsResponse) Reset() {
 	*x = GetStatsResponse{}
-	mi := &file_nutrition_proto_msgTypes[9]
+	mi := &file_nutrition_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -641,7 +701,7 @@ func (x *GetStatsResponse) String() string {
 func (*GetStatsResponse) ProtoMessage() {}
 
 func (x *GetStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_nutrition_proto_msgTypes[9]
+	mi := &file_nutrition_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -654,7 +714,7 @@ func (x *GetStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStatsResponse.ProtoReflect.Descriptor instead.
 func (*GetStatsResponse) Descriptor() ([]byte, []int) {
-	return file_nutrition_proto_rawDescGZIP(), []int{9}
+	return file_nutrition_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetStatsResponse) GetPercentageComplianceNutritionFacts() float64 {
@@ -682,39 +742,44 @@ var File_nutrition_proto protoreflect.FileDescriptor
 
 const file_nutrition_proto_rawDesc = "" +
 	"\n" +
-	"\x0fnutrition.proto\x12\tnutrition\x1a\x1bgoogle/protobuf/empty.proto\"n\n" +
+	"\x0fnutrition.proto\x12\tnutrition\x1a\x1bgoogle/protobuf/empty.proto\"l\n" +
 	"\x0eNutritionFacts\x12\x1a\n" +
 	"\bcalories\x18\x01 \x01(\x01R\bcalories\x12\x18\n" +
 	"\aprotein\x18\x02 \x01(\x01R\aprotein\x12\x10\n" +
-	"\x03fat\x18\x03 \x01(\x01R\x03fat\x12\x14\n" +
-	"\x05carbs\x18\x04 \x01(\x01R\x05carbs\"\xbb\x01\n" +
-	"\vPlannedMeal\x125\n" +
-	"\vday_of_week\x18\x01 \x01(\x0e2\x15.nutrition.DaysOfWeekR\tdayOfWeek\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
+	"\x03fat\x18\x03 \x01(\x01R\x03fat\x12\x12\n" +
+	"\x04carb\x18\x04 \x01(\x01R\x04carb\"\x82\x01\n" +
+	"\x10MealItemsRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
+	"\x06recipe\x18\x02 \x01(\tR\x06recipe\x12B\n" +
+	"\x0fnutrition_facts\x18\x03 \x01(\v2\x19.nutrition.NutritionFactsR\x0enutritionFacts\"\xcc\x01\n" +
+	"\x13PlannedMealsRequest\x125\n" +
+	"\vday_of_week\x18\x01 \x01(\x0e2\x15.nutrition.DaysOfWeekR\tdayOfWeek\x12:\n" +
 	"\n" +
-	"meal_items\x18\x03 \x03(\tR\tmealItems\x12B\n" +
-	"\x0fnutrition_facts\x18\x04 \x01(\v2\x19.nutrition.NutritionFactsR\x0enutritionFacts\"\xee\x01\n" +
+	"meal_items\x18\x02 \x03(\v2\x1b.nutrition.MealItemsRequestR\tmealItems\x12B\n" +
+	"\x0fnutrition_facts\x18\x03 \x01(\v2\x19.nutrition.NutritionFactsR\x0enutritionFacts\"\x85\x02\n" +
 	"\x18SaveGeneratedPlanRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12#\n" +
-	"\rgeneration_id\x18\x02 \x01(\tR\fgenerationId\x12,\n" +
-	"\x05meals\x18\x03 \x03(\v2\x16.nutrition.PlannedMealR\x05meals\x12B\n" +
+	"\rgeneration_id\x18\x02 \x01(\tR\fgenerationId\x12C\n" +
+	"\rplanned_meals\x18\x03 \x03(\v2\x1e.nutrition.PlannedMealsRequestR\fplannedMeals\x12B\n" +
 	"\x0fnutrition_facts\x18\x04 \x01(\v2\x19.nutrition.NutritionFactsR\x0enutritionFacts\x12\"\n" +
 	"\rwater_goal_ml\x18\x05 \x01(\x05R\vwaterGoalMl\"c\n" +
 	"\x11GetDayPlanRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x125\n" +
-	"\vday_of_week\x18\x02 \x01(\x0e2\x15.nutrition.DaysOfWeekR\tdayOfWeek\"\xae\x01\n" +
-	"\aDayMeal\x12\x0e\n" +
+	"\vday_of_week\x18\x02 \x01(\x0e2\x15.nutrition.DaysOfWeekR\tdayOfWeek\"\x93\x01\n" +
+	"\x11MealItemsResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
+	"\x06recipe\x18\x03 \x01(\tR\x06recipe\x12B\n" +
+	"\x0fnutrition_facts\x18\x04 \x01(\v2\x19.nutrition.NutritionFactsR\x0enutritionFacts\"\xb9\x01\n" +
+	"\x12GetDayPlanResponse\x12;\n" +
 	"\n" +
-	"meal_items\x18\x03 \x03(\tR\tmealItems\x12B\n" +
-	"\x0fnutrition_facts\x18\x04 \x01(\v2\x19.nutrition.NutritionFactsR\x0enutritionFacts\x12\x1c\n" +
-	"\tcompleted\x18\x05 \x01(\bR\tcompleted\">\n" +
-	"\x12GetDayPlanResponse\x12(\n" +
-	"\x05meals\x18\x01 \x03(\v2\x12.nutrition.DayMealR\x05meals\"G\n" +
+	"meal_items\x18\x01 \x03(\v2\x1c.nutrition.MealItemsResponseR\tmealItems\x12B\n" +
+	"\x0fnutrition_facts\x18\x02 \x01(\v2\x19.nutrition.NutritionFactsR\x0enutritionFacts\x12\"\n" +
+	"\rwater_goal_ml\x18\x03 \x01(\x05R\vwaterGoalMl\"P\n" +
 	"\x13CompleteMealRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x17\n" +
-	"\ameal_id\x18\x02 \x01(\x05R\x06mealId\"L\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12 \n" +
+	"\fmeal_item_id\x18\x02 \x01(\x05R\n" +
+	"mealItemId\"L\n" +
 	"\x14CompleteWaterRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\tamount_ml\x18\x02 \x01(\x05R\bamountMl\"*\n" +
@@ -755,44 +820,48 @@ func file_nutrition_proto_rawDescGZIP() []byte {
 }
 
 var file_nutrition_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_nutrition_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_nutrition_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_nutrition_proto_goTypes = []any{
 	(DaysOfWeek)(0),                  // 0: nutrition.DaysOfWeek
 	(*NutritionFacts)(nil),           // 1: nutrition.NutritionFacts
-	(*PlannedMeal)(nil),              // 2: nutrition.PlannedMeal
-	(*SaveGeneratedPlanRequest)(nil), // 3: nutrition.SaveGeneratedPlanRequest
-	(*GetDayPlanRequest)(nil),        // 4: nutrition.GetDayPlanRequest
-	(*DayMeal)(nil),                  // 5: nutrition.DayMeal
-	(*GetDayPlanResponse)(nil),       // 6: nutrition.GetDayPlanResponse
-	(*CompleteMealRequest)(nil),      // 7: nutrition.CompleteMealRequest
-	(*CompleteWaterRequest)(nil),     // 8: nutrition.CompleteWaterRequest
-	(*GetStatsRequest)(nil),          // 9: nutrition.GetStatsRequest
-	(*GetStatsResponse)(nil),         // 10: nutrition.GetStatsResponse
-	(*emptypb.Empty)(nil),            // 11: google.protobuf.Empty
+	(*MealItemsRequest)(nil),         // 2: nutrition.MealItemsRequest
+	(*PlannedMealsRequest)(nil),      // 3: nutrition.PlannedMealsRequest
+	(*SaveGeneratedPlanRequest)(nil), // 4: nutrition.SaveGeneratedPlanRequest
+	(*GetDayPlanRequest)(nil),        // 5: nutrition.GetDayPlanRequest
+	(*MealItemsResponse)(nil),        // 6: nutrition.MealItemsResponse
+	(*GetDayPlanResponse)(nil),       // 7: nutrition.GetDayPlanResponse
+	(*CompleteMealRequest)(nil),      // 8: nutrition.CompleteMealRequest
+	(*CompleteWaterRequest)(nil),     // 9: nutrition.CompleteWaterRequest
+	(*GetStatsRequest)(nil),          // 10: nutrition.GetStatsRequest
+	(*GetStatsResponse)(nil),         // 11: nutrition.GetStatsResponse
+	(*emptypb.Empty)(nil),            // 12: google.protobuf.Empty
 }
 var file_nutrition_proto_depIdxs = []int32{
-	0,  // 0: nutrition.PlannedMeal.day_of_week:type_name -> nutrition.DaysOfWeek
-	1,  // 1: nutrition.PlannedMeal.nutrition_facts:type_name -> nutrition.NutritionFacts
-	2,  // 2: nutrition.SaveGeneratedPlanRequest.meals:type_name -> nutrition.PlannedMeal
-	1,  // 3: nutrition.SaveGeneratedPlanRequest.nutrition_facts:type_name -> nutrition.NutritionFacts
-	0,  // 4: nutrition.GetDayPlanRequest.day_of_week:type_name -> nutrition.DaysOfWeek
-	1,  // 5: nutrition.DayMeal.nutrition_facts:type_name -> nutrition.NutritionFacts
-	5,  // 6: nutrition.GetDayPlanResponse.meals:type_name -> nutrition.DayMeal
-	3,  // 7: nutrition.NutritionService.SaveGeneratedPlan:input_type -> nutrition.SaveGeneratedPlanRequest
-	4,  // 8: nutrition.NutritionService.GetDayPlan:input_type -> nutrition.GetDayPlanRequest
-	7,  // 9: nutrition.NutritionService.CompleteMeal:input_type -> nutrition.CompleteMealRequest
-	8,  // 10: nutrition.NutritionService.CompleteWater:input_type -> nutrition.CompleteWaterRequest
-	9,  // 11: nutrition.NutritionService.GetStats:input_type -> nutrition.GetStatsRequest
-	11, // 12: nutrition.NutritionService.SaveGeneratedPlan:output_type -> google.protobuf.Empty
-	6,  // 13: nutrition.NutritionService.GetDayPlan:output_type -> nutrition.GetDayPlanResponse
-	11, // 14: nutrition.NutritionService.CompleteMeal:output_type -> google.protobuf.Empty
-	11, // 15: nutrition.NutritionService.CompleteWater:output_type -> google.protobuf.Empty
-	10, // 16: nutrition.NutritionService.GetStats:output_type -> nutrition.GetStatsResponse
-	12, // [12:17] is the sub-list for method output_type
-	7,  // [7:12] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	1,  // 0: nutrition.MealItemsRequest.nutrition_facts:type_name -> nutrition.NutritionFacts
+	0,  // 1: nutrition.PlannedMealsRequest.day_of_week:type_name -> nutrition.DaysOfWeek
+	2,  // 2: nutrition.PlannedMealsRequest.meal_items:type_name -> nutrition.MealItemsRequest
+	1,  // 3: nutrition.PlannedMealsRequest.nutrition_facts:type_name -> nutrition.NutritionFacts
+	3,  // 4: nutrition.SaveGeneratedPlanRequest.planned_meals:type_name -> nutrition.PlannedMealsRequest
+	1,  // 5: nutrition.SaveGeneratedPlanRequest.nutrition_facts:type_name -> nutrition.NutritionFacts
+	0,  // 6: nutrition.GetDayPlanRequest.day_of_week:type_name -> nutrition.DaysOfWeek
+	1,  // 7: nutrition.MealItemsResponse.nutrition_facts:type_name -> nutrition.NutritionFacts
+	6,  // 8: nutrition.GetDayPlanResponse.meal_items:type_name -> nutrition.MealItemsResponse
+	1,  // 9: nutrition.GetDayPlanResponse.nutrition_facts:type_name -> nutrition.NutritionFacts
+	4,  // 10: nutrition.NutritionService.SaveGeneratedPlan:input_type -> nutrition.SaveGeneratedPlanRequest
+	5,  // 11: nutrition.NutritionService.GetDayPlan:input_type -> nutrition.GetDayPlanRequest
+	8,  // 12: nutrition.NutritionService.CompleteMeal:input_type -> nutrition.CompleteMealRequest
+	9,  // 13: nutrition.NutritionService.CompleteWater:input_type -> nutrition.CompleteWaterRequest
+	10, // 14: nutrition.NutritionService.GetStats:input_type -> nutrition.GetStatsRequest
+	12, // 15: nutrition.NutritionService.SaveGeneratedPlan:output_type -> google.protobuf.Empty
+	7,  // 16: nutrition.NutritionService.GetDayPlan:output_type -> nutrition.GetDayPlanResponse
+	12, // 17: nutrition.NutritionService.CompleteMeal:output_type -> google.protobuf.Empty
+	12, // 18: nutrition.NutritionService.CompleteWater:output_type -> google.protobuf.Empty
+	11, // 19: nutrition.NutritionService.GetStats:output_type -> nutrition.GetStatsResponse
+	15, // [15:20] is the sub-list for method output_type
+	10, // [10:15] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_nutrition_proto_init() }
@@ -806,7 +875,7 @@ func file_nutrition_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_nutrition_proto_rawDesc), len(file_nutrition_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   10,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

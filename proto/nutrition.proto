@@ -6,14 +6,6 @@ option go_package = "github.com/noirbyss/worktrition-app/gen/nutrition-service;n
 
 import "google/protobuf/empty.proto";
 
-service NutritionService {
-    rpc SaveGeneratedPlan(SaveGeneratedPlanRequest) returns (google.protobuf.Empty);
-    rpc GetDayPlan(GetDayPlanRequest) returns (GetDayPlanResponse);
-    rpc CompleteMeal(CompleteMealRequest) returns (google.protobuf.Empty);
-    rpc CompleteWater(CompleteWaterRequest) returns (google.protobuf.Empty);
-    rpc GetStats(GetStatsRequest) returns (GetStatsResponse);
-}
-
 enum DaysOfWeek {
     DAYS_OF_WEEK_UNSPECIFIED = 0;
     DAYS_OF_WEEK_MONDAY = 1;
@@ -29,20 +21,33 @@ message NutritionFacts {
     double calories = 1;
     double protein = 2;
     double fat = 3;
-    double carbs = 4;
+    double carb = 4;
 }
 
-message PlannedMeal {
+service NutritionService {
+    rpc SaveGeneratedPlan(SaveGeneratedPlanRequest) returns (google.protobuf.Empty);
+    rpc GetDayPlan(GetDayPlanRequest) returns (GetDayPlanResponse);
+    rpc CompleteMeal(CompleteMealRequest) returns (google.protobuf.Empty);
+    rpc CompleteWater(CompleteWaterRequest) returns (google.protobuf.Empty);
+    rpc GetStats(GetStatsRequest) returns (GetStatsResponse);
+}
+
+message MealItemsRequest {
+    string name = 1;
+    string recipe = 2;
+    NutritionFacts nutrition_facts = 3;
+}
+
+message PlannedMealsRequest {
     DaysOfWeek day_of_week = 1;
-    string name = 2;
-    repeated string meal_items = 3;
-    NutritionFacts nutrition_facts = 4;
+    repeated MealItemsRequest meal_items = 2;
+    NutritionFacts nutrition_facts = 3;
 }
 
 message SaveGeneratedPlanRequest {
     string user_id = 1;
     string generation_id = 2;
-    repeated PlannedMeal meals = 3;
+    repeated PlannedMealsRequest planned_meals = 3;
     NutritionFacts nutrition_facts = 4;
     int32 water_goal_ml = 5;
 }
@@ -52,21 +57,22 @@ message GetDayPlanRequest {
     DaysOfWeek day_of_week = 2;
 }
 
-message DayMeal {
+message MealItemsResponse {
     int32 id = 1;
     string name = 2;
-    repeated string meal_items = 3;
+    string recipe = 3;
     NutritionFacts nutrition_facts = 4;
-    bool completed = 5;
 }
 
 message GetDayPlanResponse {
-    repeated DayMeal meals = 1;
+    repeated MealItemsResponse meal_items = 1;
+    NutritionFacts nutrition_facts = 2;
+    int32 water_goal_ml = 3;
 }
 
 message CompleteMealRequest {
     string user_id = 1;
-    int32 meal_id = 2;
+    int32 meal_item_id = 2;
 }
 
 message CompleteWaterRequest {

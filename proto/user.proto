@@ -40,6 +40,12 @@ enum FitnessGoal {
   FITNESS_GOAL_GAIN_MUSCLE = 3;
 }
 
+enum TrainingLocation {
+  TRAINING_LOCATION_UNSPECIFIED = 0;
+  TRAINING_LOCATION_HOME = 1;
+  TRAINING_LOCATION_GYM = 2;
+}
+
 message CreateUserRequest {
   string name = 1;
   string email = 2;
@@ -73,6 +79,9 @@ message SaveProfileRequest {
   repeated string allergies = 9;
   repeated string excluded_foods = 10;
   repeated string food_preferences = 11;
+  TrainingLocation training_location = 12;
+  int32 training_days_per_week = 13;
+  repeated string equipment = 14;
 }
 
 message NutritionTargets {
@@ -117,7 +126,9 @@ message GetProfileResponse {
   repeated string allergies = 9;
   repeated string excluded_foods = 10;
   repeated string food_preferences = 11;
-  double bmi = 12;
-  NutritionTargets nutrition_targets = 13;
-  int32 water_goal_ml = 14;
+  TrainingLocation training_location = 12;
+  int32 training_days_per_week = 13;
+  string equipment = 14;
+  int32 age = 15;
 }
+

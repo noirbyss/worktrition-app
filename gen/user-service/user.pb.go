@@ -229,6 +229,55 @@ func (FitnessGoal) EnumDescriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{3}
 }
 
+type TrainingLocation int32
+
+const (
+	TrainingLocation_TRAINING_LOCATION_UNSPECIFIED TrainingLocation = 0
+	TrainingLocation_TRAINING_LOCATION_HOME        TrainingLocation = 1
+	TrainingLocation_TRAINING_LOCATION_GYM         TrainingLocation = 2
+)
+
+// Enum value maps for TrainingLocation.
+var (
+	TrainingLocation_name = map[int32]string{
+		0: "TRAINING_LOCATION_UNSPECIFIED",
+		1: "TRAINING_LOCATION_HOME",
+		2: "TRAINING_LOCATION_GYM",
+	}
+	TrainingLocation_value = map[string]int32{
+		"TRAINING_LOCATION_UNSPECIFIED": 0,
+		"TRAINING_LOCATION_HOME":        1,
+		"TRAINING_LOCATION_GYM":         2,
+	}
+)
+
+func (x TrainingLocation) Enum() *TrainingLocation {
+	p := new(TrainingLocation)
+	*p = x
+	return p
+}
+
+func (x TrainingLocation) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TrainingLocation) Descriptor() protoreflect.EnumDescriptor {
+	return file_user_proto_enumTypes[4].Descriptor()
+}
+
+func (TrainingLocation) Type() protoreflect.EnumType {
+	return &file_user_proto_enumTypes[4]
+}
+
+func (x TrainingLocation) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TrainingLocation.Descriptor instead.
+func (TrainingLocation) EnumDescriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{4}
+}
+
 type CreateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -446,20 +495,23 @@ func (x *VerifyCredentialsResponse) GetProfileCompleted() bool {
 }
 
 type SaveProfileRequest struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	UserId          string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Gender          Gender                 `protobuf:"varint,2,opt,name=gender,proto3,enum=user.Gender" json:"gender,omitempty"`
-	HeightCm        int32                  `protobuf:"varint,3,opt,name=height_cm,json=heightCm,proto3" json:"height_cm,omitempty"`
-	WeightKg        float64                `protobuf:"fixed64,4,opt,name=weight_kg,json=weightKg,proto3" json:"weight_kg,omitempty"`
-	TrainingLevel   TrainingLevel          `protobuf:"varint,5,opt,name=training_level,json=trainingLevel,proto3,enum=user.TrainingLevel" json:"training_level,omitempty"`
-	ActivityLevel   ActivityLevel          `protobuf:"varint,6,opt,name=activity_level,json=activityLevel,proto3,enum=user.ActivityLevel" json:"activity_level,omitempty"`
-	Goal            FitnessGoal            `protobuf:"varint,7,opt,name=goal,proto3,enum=user.FitnessGoal" json:"goal,omitempty"`
-	TargetWeightKg  *float64               `protobuf:"fixed64,8,opt,name=target_weight_kg,json=targetWeightKg,proto3,oneof" json:"target_weight_kg,omitempty"`
-	Allergies       []string               `protobuf:"bytes,9,rep,name=allergies,proto3" json:"allergies,omitempty"`
-	ExcludedFoods   []string               `protobuf:"bytes,10,rep,name=excluded_foods,json=excludedFoods,proto3" json:"excluded_foods,omitempty"`
-	FoodPreferences []string               `protobuf:"bytes,11,rep,name=food_preferences,json=foodPreferences,proto3" json:"food_preferences,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	UserId              string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Gender              Gender                 `protobuf:"varint,2,opt,name=gender,proto3,enum=user.Gender" json:"gender,omitempty"`
+	HeightCm            int32                  `protobuf:"varint,3,opt,name=height_cm,json=heightCm,proto3" json:"height_cm,omitempty"`
+	WeightKg            float64                `protobuf:"fixed64,4,opt,name=weight_kg,json=weightKg,proto3" json:"weight_kg,omitempty"`
+	TrainingLevel       TrainingLevel          `protobuf:"varint,5,opt,name=training_level,json=trainingLevel,proto3,enum=user.TrainingLevel" json:"training_level,omitempty"`
+	ActivityLevel       ActivityLevel          `protobuf:"varint,6,opt,name=activity_level,json=activityLevel,proto3,enum=user.ActivityLevel" json:"activity_level,omitempty"`
+	Goal                FitnessGoal            `protobuf:"varint,7,opt,name=goal,proto3,enum=user.FitnessGoal" json:"goal,omitempty"`
+	TargetWeightKg      *float64               `protobuf:"fixed64,8,opt,name=target_weight_kg,json=targetWeightKg,proto3,oneof" json:"target_weight_kg,omitempty"`
+	Allergies           []string               `protobuf:"bytes,9,rep,name=allergies,proto3" json:"allergies,omitempty"`
+	ExcludedFoods       []string               `protobuf:"bytes,10,rep,name=excluded_foods,json=excludedFoods,proto3" json:"excluded_foods,omitempty"`
+	FoodPreferences     []string               `protobuf:"bytes,11,rep,name=food_preferences,json=foodPreferences,proto3" json:"food_preferences,omitempty"`
+	TrainingLocation    TrainingLocation       `protobuf:"varint,12,opt,name=training_location,json=trainingLocation,proto3,enum=user.TrainingLocation" json:"training_location,omitempty"`
+	TrainingDaysPerWeek int32                  `protobuf:"varint,13,opt,name=training_days_per_week,json=trainingDaysPerWeek,proto3" json:"training_days_per_week,omitempty"`
+	Equipment           []string               `protobuf:"bytes,14,rep,name=equipment,proto3" json:"equipment,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *SaveProfileRequest) Reset() {
@@ -565,6 +617,27 @@ func (x *SaveProfileRequest) GetExcludedFoods() []string {
 func (x *SaveProfileRequest) GetFoodPreferences() []string {
 	if x != nil {
 		return x.FoodPreferences
+	}
+	return nil
+}
+
+func (x *SaveProfileRequest) GetTrainingLocation() TrainingLocation {
+	if x != nil {
+		return x.TrainingLocation
+	}
+	return TrainingLocation_TRAINING_LOCATION_UNSPECIFIED
+}
+
+func (x *SaveProfileRequest) GetTrainingDaysPerWeek() int32 {
+	if x != nil {
+		return x.TrainingDaysPerWeek
+	}
+	return 0
+}
+
+func (x *SaveProfileRequest) GetEquipment() []string {
+	if x != nil {
+		return x.Equipment
 	}
 	return nil
 }
@@ -870,23 +943,24 @@ func (x *GetProfileRequest) GetUserId() string {
 }
 
 type GetProfileResponse struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	UserId           string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Gender           Gender                 `protobuf:"varint,2,opt,name=gender,proto3,enum=user.Gender" json:"gender,omitempty"`
-	HeightCm         int32                  `protobuf:"varint,3,opt,name=height_cm,json=heightCm,proto3" json:"height_cm,omitempty"`
-	WeightKg         float64                `protobuf:"fixed64,4,opt,name=weight_kg,json=weightKg,proto3" json:"weight_kg,omitempty"`
-	TrainingLevel    TrainingLevel          `protobuf:"varint,5,opt,name=training_level,json=trainingLevel,proto3,enum=user.TrainingLevel" json:"training_level,omitempty"`
-	ActivityLevel    ActivityLevel          `protobuf:"varint,6,opt,name=activity_level,json=activityLevel,proto3,enum=user.ActivityLevel" json:"activity_level,omitempty"`
-	Goal             FitnessGoal            `protobuf:"varint,7,opt,name=goal,proto3,enum=user.FitnessGoal" json:"goal,omitempty"`
-	TargetWeightKg   *float64               `protobuf:"fixed64,8,opt,name=target_weight_kg,json=targetWeightKg,proto3,oneof" json:"target_weight_kg,omitempty"`
-	Allergies        []string               `protobuf:"bytes,9,rep,name=allergies,proto3" json:"allergies,omitempty"`
-	ExcludedFoods    []string               `protobuf:"bytes,10,rep,name=excluded_foods,json=excludedFoods,proto3" json:"excluded_foods,omitempty"`
-	FoodPreferences  []string               `protobuf:"bytes,11,rep,name=food_preferences,json=foodPreferences,proto3" json:"food_preferences,omitempty"`
-	Bmi              float64                `protobuf:"fixed64,12,opt,name=bmi,proto3" json:"bmi,omitempty"`
-	NutritionTargets *NutritionTargets      `protobuf:"bytes,13,opt,name=nutrition_targets,json=nutritionTargets,proto3" json:"nutrition_targets,omitempty"`
-	WaterGoalMl      int32                  `protobuf:"varint,14,opt,name=water_goal_ml,json=waterGoalMl,proto3" json:"water_goal_ml,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	UserId              string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Gender              Gender                 `protobuf:"varint,2,opt,name=gender,proto3,enum=user.Gender" json:"gender,omitempty"`
+	HeightCm            int32                  `protobuf:"varint,3,opt,name=height_cm,json=heightCm,proto3" json:"height_cm,omitempty"`
+	WeightKg            float64                `protobuf:"fixed64,4,opt,name=weight_kg,json=weightKg,proto3" json:"weight_kg,omitempty"`
+	TrainingLevel       TrainingLevel          `protobuf:"varint,5,opt,name=training_level,json=trainingLevel,proto3,enum=user.TrainingLevel" json:"training_level,omitempty"`
+	ActivityLevel       ActivityLevel          `protobuf:"varint,6,opt,name=activity_level,json=activityLevel,proto3,enum=user.ActivityLevel" json:"activity_level,omitempty"`
+	Goal                FitnessGoal            `protobuf:"varint,7,opt,name=goal,proto3,enum=user.FitnessGoal" json:"goal,omitempty"`
+	TargetWeightKg      *float64               `protobuf:"fixed64,8,opt,name=target_weight_kg,json=targetWeightKg,proto3,oneof" json:"target_weight_kg,omitempty"`
+	Allergies           []string               `protobuf:"bytes,9,rep,name=allergies,proto3" json:"allergies,omitempty"`
+	ExcludedFoods       []string               `protobuf:"bytes,10,rep,name=excluded_foods,json=excludedFoods,proto3" json:"excluded_foods,omitempty"`
+	FoodPreferences     []string               `protobuf:"bytes,11,rep,name=food_preferences,json=foodPreferences,proto3" json:"food_preferences,omitempty"`
+	TrainingLocation    TrainingLocation       `protobuf:"varint,12,opt,name=training_location,json=trainingLocation,proto3,enum=user.TrainingLocation" json:"training_location,omitempty"`
+	TrainingDaysPerWeek int32                  `protobuf:"varint,13,opt,name=training_days_per_week,json=trainingDaysPerWeek,proto3" json:"training_days_per_week,omitempty"`
+	Equipment           string                 `protobuf:"bytes,14,opt,name=equipment,proto3" json:"equipment,omitempty"`
+	Age                 int32                  `protobuf:"varint,15,opt,name=age,proto3" json:"age,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *GetProfileResponse) Reset() {
@@ -996,23 +1070,30 @@ func (x *GetProfileResponse) GetFoodPreferences() []string {
 	return nil
 }
 
-func (x *GetProfileResponse) GetBmi() float64 {
+func (x *GetProfileResponse) GetTrainingLocation() TrainingLocation {
 	if x != nil {
-		return x.Bmi
+		return x.TrainingLocation
+	}
+	return TrainingLocation_TRAINING_LOCATION_UNSPECIFIED
+}
+
+func (x *GetProfileResponse) GetTrainingDaysPerWeek() int32 {
+	if x != nil {
+		return x.TrainingDaysPerWeek
 	}
 	return 0
 }
 
-func (x *GetProfileResponse) GetNutritionTargets() *NutritionTargets {
+func (x *GetProfileResponse) GetEquipment() string {
 	if x != nil {
-		return x.NutritionTargets
+		return x.Equipment
 	}
-	return nil
+	return ""
 }
 
-func (x *GetProfileResponse) GetWaterGoalMl() int32 {
+func (x *GetProfileResponse) GetAge() int32 {
 	if x != nil {
-		return x.WaterGoalMl
+		return x.Age
 	}
 	return 0
 }
@@ -1036,7 +1117,7 @@ const file_user_proto_rawDesc = "" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"a\n" +
 	"\x19VerifyCredentialsResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12+\n" +
-	"\x11profile_completed\x18\x02 \x01(\bR\x10profileCompleted\"\xe0\x03\n" +
+	"\x11profile_completed\x18\x02 \x01(\bR\x10profileCompleted\"\xf8\x04\n" +
 	"\x12SaveProfileRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12$\n" +
 	"\x06gender\x18\x02 \x01(\x0e2\f.user.GenderR\x06gender\x12\x1b\n" +
@@ -1049,7 +1130,10 @@ const file_user_proto_rawDesc = "" +
 	"\tallergies\x18\t \x03(\tR\tallergies\x12%\n" +
 	"\x0eexcluded_foods\x18\n" +
 	" \x03(\tR\rexcludedFoods\x12)\n" +
-	"\x10food_preferences\x18\v \x03(\tR\x0ffoodPreferencesB\x13\n" +
+	"\x10food_preferences\x18\v \x03(\tR\x0ffoodPreferences\x12C\n" +
+	"\x11training_location\x18\f \x01(\x0e2\x16.user.TrainingLocationR\x10trainingLocation\x123\n" +
+	"\x16training_days_per_week\x18\r \x01(\x05R\x13trainingDaysPerWeek\x12\x1c\n" +
+	"\tequipment\x18\x0e \x03(\tR\tequipmentB\x13\n" +
 	"\x11_target_weight_kg\"\x82\x01\n" +
 	"\x10NutritionTargets\x12#\n" +
 	"\rcalories_kcal\x18\x01 \x01(\x01R\fcaloriesKcal\x12\x1b\n" +
@@ -1071,7 +1155,7 @@ const file_user_proto_rawDesc = "" +
 	"birth_date\x18\x04 \x01(\tR\tbirthDate\x12+\n" +
 	"\x11profile_completed\x18\x05 \x01(\bR\x10profileCompleted\",\n" +
 	"\x11GetProfileRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"\xdb\x04\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"\x8a\x05\n" +
 	"\x12GetProfileResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12$\n" +
 	"\x06gender\x18\x02 \x01(\x0e2\f.user.GenderR\x06gender\x12\x1b\n" +
@@ -1084,10 +1168,11 @@ const file_user_proto_rawDesc = "" +
 	"\tallergies\x18\t \x03(\tR\tallergies\x12%\n" +
 	"\x0eexcluded_foods\x18\n" +
 	" \x03(\tR\rexcludedFoods\x12)\n" +
-	"\x10food_preferences\x18\v \x03(\tR\x0ffoodPreferences\x12\x10\n" +
-	"\x03bmi\x18\f \x01(\x01R\x03bmi\x12C\n" +
-	"\x11nutrition_targets\x18\r \x01(\v2\x16.user.NutritionTargetsR\x10nutritionTargets\x12\"\n" +
-	"\rwater_goal_ml\x18\x0e \x01(\x05R\vwaterGoalMlB\x13\n" +
+	"\x10food_preferences\x18\v \x03(\tR\x0ffoodPreferences\x12C\n" +
+	"\x11training_location\x18\f \x01(\x0e2\x16.user.TrainingLocationR\x10trainingLocation\x123\n" +
+	"\x16training_days_per_week\x18\r \x01(\x05R\x13trainingDaysPerWeek\x12\x1c\n" +
+	"\tequipment\x18\x0e \x01(\tR\tequipment\x12\x10\n" +
+	"\x03age\x18\x0f \x01(\x05R\x03ageB\x13\n" +
 	"\x11_target_weight_kg*D\n" +
 	"\x06Gender\x12\x16\n" +
 	"\x12GENDER_UNSPECIFIED\x10\x00\x12\x0f\n" +
@@ -1108,7 +1193,11 @@ const file_user_proto_rawDesc = "" +
 	"\x18FITNESS_GOAL_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18FITNESS_GOAL_LOSE_WEIGHT\x10\x01\x12 \n" +
 	"\x1cFITNESS_GOAL_MAINTAIN_WEIGHT\x10\x02\x12\x1c\n" +
-	"\x18FITNESS_GOAL_GAIN_MUSCLE\x10\x032\xe1\x02\n" +
+	"\x18FITNESS_GOAL_GAIN_MUSCLE\x10\x03*l\n" +
+	"\x10TrainingLocation\x12!\n" +
+	"\x1dTRAINING_LOCATION_UNSPECIFIED\x10\x00\x12\x1a\n" +
+	"\x16TRAINING_LOCATION_HOME\x10\x01\x12\x19\n" +
+	"\x15TRAINING_LOCATION_GYM\x10\x022\xe1\x02\n" +
 	"\vUserService\x12?\n" +
 	"\n" +
 	"CreateUser\x12\x17.user.CreateUserRequest\x1a\x18.user.CreateUserResponse\x12T\n" +
@@ -1130,51 +1219,53 @@ func file_user_proto_rawDescGZIP() []byte {
 	return file_user_proto_rawDescData
 }
 
-var file_user_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_user_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
 var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_user_proto_goTypes = []any{
 	(Gender)(0),                       // 0: user.Gender
 	(TrainingLevel)(0),                // 1: user.TrainingLevel
 	(ActivityLevel)(0),                // 2: user.ActivityLevel
 	(FitnessGoal)(0),                  // 3: user.FitnessGoal
-	(*CreateUserRequest)(nil),         // 4: user.CreateUserRequest
-	(*CreateUserResponse)(nil),        // 5: user.CreateUserResponse
-	(*VerifyCredentialsRequest)(nil),  // 6: user.VerifyCredentialsRequest
-	(*VerifyCredentialsResponse)(nil), // 7: user.VerifyCredentialsResponse
-	(*SaveProfileRequest)(nil),        // 8: user.SaveProfileRequest
-	(*NutritionTargets)(nil),          // 9: user.NutritionTargets
-	(*SaveProfileResponse)(nil),       // 10: user.SaveProfileResponse
-	(*GetUserRequest)(nil),            // 11: user.GetUserRequest
-	(*GetUserResponse)(nil),           // 12: user.GetUserResponse
-	(*GetProfileRequest)(nil),         // 13: user.GetProfileRequest
-	(*GetProfileResponse)(nil),        // 14: user.GetProfileResponse
+	(TrainingLocation)(0),             // 4: user.TrainingLocation
+	(*CreateUserRequest)(nil),         // 5: user.CreateUserRequest
+	(*CreateUserResponse)(nil),        // 6: user.CreateUserResponse
+	(*VerifyCredentialsRequest)(nil),  // 7: user.VerifyCredentialsRequest
+	(*VerifyCredentialsResponse)(nil), // 8: user.VerifyCredentialsResponse
+	(*SaveProfileRequest)(nil),        // 9: user.SaveProfileRequest
+	(*NutritionTargets)(nil),          // 10: user.NutritionTargets
+	(*SaveProfileResponse)(nil),       // 11: user.SaveProfileResponse
+	(*GetUserRequest)(nil),            // 12: user.GetUserRequest
+	(*GetUserResponse)(nil),           // 13: user.GetUserResponse
+	(*GetProfileRequest)(nil),         // 14: user.GetProfileRequest
+	(*GetProfileResponse)(nil),        // 15: user.GetProfileResponse
 }
 var file_user_proto_depIdxs = []int32{
 	0,  // 0: user.SaveProfileRequest.gender:type_name -> user.Gender
 	1,  // 1: user.SaveProfileRequest.training_level:type_name -> user.TrainingLevel
 	2,  // 2: user.SaveProfileRequest.activity_level:type_name -> user.ActivityLevel
 	3,  // 3: user.SaveProfileRequest.goal:type_name -> user.FitnessGoal
-	9,  // 4: user.SaveProfileResponse.nutrition_targets:type_name -> user.NutritionTargets
-	0,  // 5: user.GetProfileResponse.gender:type_name -> user.Gender
-	1,  // 6: user.GetProfileResponse.training_level:type_name -> user.TrainingLevel
-	2,  // 7: user.GetProfileResponse.activity_level:type_name -> user.ActivityLevel
-	3,  // 8: user.GetProfileResponse.goal:type_name -> user.FitnessGoal
-	9,  // 9: user.GetProfileResponse.nutrition_targets:type_name -> user.NutritionTargets
-	4,  // 10: user.UserService.CreateUser:input_type -> user.CreateUserRequest
-	6,  // 11: user.UserService.VerifyCredentials:input_type -> user.VerifyCredentialsRequest
-	8,  // 12: user.UserService.SaveProfile:input_type -> user.SaveProfileRequest
-	11, // 13: user.UserService.GetUser:input_type -> user.GetUserRequest
-	13, // 14: user.UserService.GetProfile:input_type -> user.GetProfileRequest
-	5,  // 15: user.UserService.CreateUser:output_type -> user.CreateUserResponse
-	7,  // 16: user.UserService.VerifyCredentials:output_type -> user.VerifyCredentialsResponse
-	10, // 17: user.UserService.SaveProfile:output_type -> user.SaveProfileResponse
-	12, // 18: user.UserService.GetUser:output_type -> user.GetUserResponse
-	14, // 19: user.UserService.GetProfile:output_type -> user.GetProfileResponse
-	15, // [15:20] is the sub-list for method output_type
-	10, // [10:15] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	4,  // 4: user.SaveProfileRequest.training_location:type_name -> user.TrainingLocation
+	10, // 5: user.SaveProfileResponse.nutrition_targets:type_name -> user.NutritionTargets
+	0,  // 6: user.GetProfileResponse.gender:type_name -> user.Gender
+	1,  // 7: user.GetProfileResponse.training_level:type_name -> user.TrainingLevel
+	2,  // 8: user.GetProfileResponse.activity_level:type_name -> user.ActivityLevel
+	3,  // 9: user.GetProfileResponse.goal:type_name -> user.FitnessGoal
+	4,  // 10: user.GetProfileResponse.training_location:type_name -> user.TrainingLocation
+	5,  // 11: user.UserService.CreateUser:input_type -> user.CreateUserRequest
+	7,  // 12: user.UserService.VerifyCredentials:input_type -> user.VerifyCredentialsRequest
+	9,  // 13: user.UserService.SaveProfile:input_type -> user.SaveProfileRequest
+	12, // 14: user.UserService.GetUser:input_type -> user.GetUserRequest
+	14, // 15: user.UserService.GetProfile:input_type -> user.GetProfileRequest
+	6,  // 16: user.UserService.CreateUser:output_type -> user.CreateUserResponse
+	8,  // 17: user.UserService.VerifyCredentials:output_type -> user.VerifyCredentialsResponse
+	11, // 18: user.UserService.SaveProfile:output_type -> user.SaveProfileResponse
+	13, // 19: user.UserService.GetUser:output_type -> user.GetUserResponse
+	15, // 20: user.UserService.GetProfile:output_type -> user.GetProfileResponse
+	16, // [16:21] is the sub-list for method output_type
+	11, // [11:16] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_user_proto_init() }
@@ -1189,7 +1280,7 @@ func file_user_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_proto_rawDesc), len(file_user_proto_rawDesc)),
-			NumEnums:      4,
+			NumEnums:      5,
 			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,

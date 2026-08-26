@@ -17,11 +17,14 @@ type WorkoutPlanDTO struct {
 }
 
 type Meal struct {
-	MealName 		string	`json:"meal_name"`
-	Description 	string	`json:"description"`
-	Calories 		int 	`json:"calories"`
-	Protein 		int		`json:"protein"` 
-	Fat 			int 	`json:"fat"`
-	Carbohydrates 	int 	`json:"carbohydrates"`
+	MealName 		string			`json:"meal_name"`
+	Recipe 			string			`json:"recipe"`
+	NutritionFacts	NutritionFacts	`json:"nutrition_facts"`  
 }
 
+type NutritionFacts struct {
+	Calories 		float64 	`json:"calories"`
+	Protein 		float64		`json:"protein"` 
+	Fat 			float64 	`json:"fat"`
+	Carbohydrates 	float64 	`json:"carbohydrates"`
+}

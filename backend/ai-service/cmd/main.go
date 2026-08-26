@@ -2,9 +2,11 @@ package main
 
 import (
 	"ai-service/internal/config"
+	"ai-service/internal/grpc"
 	"ai-service/internal/logger"
 	"ai-service/internal/provider"
 	"ai-service/internal/usecase"
+	"compress/gzip"
 	"context"
 
 	"github.com/k0kubun/pp/v3"
@@ -29,6 +31,10 @@ func main () {
 	)
 	us := usecase.NewUseCase(prov,log)
 
+	grpc := grpc.NewServer(us)
+
+	start := 
+	//grpc.StartGeneration(context.Background(),)
 	plan,err := us.StartGeneration(context.Background(),"","")
 
 	pp.Print(plan)

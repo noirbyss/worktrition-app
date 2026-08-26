@@ -57,6 +57,13 @@ func toServiceGetDayPlanRequest(pbr *pb.GetDayPlanRequest) service.GetDayPlanReq
 	}
 }
 
+func toServiceCompleteMealRequest(pbr *pb.CompleteMealRequest) service.CompleteMealRequest {
+	return service.CompleteMealRequest{
+		UserID:     pbr.GetUserId(),
+		MealItemID: pbr.GetMealItemId(),
+	}
+}
+
 func toServiceCompleteWaterRequest(pbr *pb.CompleteWaterRequest) service.CompleteWaterRequest {
 	return service.CompleteWaterRequest{
 		UserID:   pbr.GetUserId(),

@@ -83,3 +83,20 @@ func (pmr PlannedMealsRequest) validate() error {
 
 	return nil
 }
+
+type CompleteMealRequest struct {
+	UserID     string
+	MealItemID int32
+}
+
+func (cmr CompleteMealRequest) validate() error {
+	if cmr.UserID == "" {
+		return ErrEmptyUserID
+	}
+
+	if cmr.MealItemID < 1 {
+		return ErrInvalidMealItemID
+	}
+
+	return nil
+}

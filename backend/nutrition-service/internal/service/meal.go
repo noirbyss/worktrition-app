@@ -1,17 +1,17 @@
 package service
 
 type NutritionFacts struct {
-	Calories float32
-	Protein  float32
-	Fat      float32
-	Carb     float32
+	Calories float64
+	Protein  float64
+	Fat      float64
+	Carb     float64
 }
 
 const (
-	MinimalCalories float32 = 1
-	MinimalProtein  float32 = 1
-	MinimalFat      float32 = 1
-	MinimalCarb     float32 = 1
+	MinimalCalories float64 = 1
+	MinimalProtein  float64 = 1
+	MinimalFat      float64 = 1
+	MinimalCarb     float64 = 1
 )
 
 func (nf NutritionFacts) validate() error {

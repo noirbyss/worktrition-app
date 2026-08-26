@@ -49,3 +49,42 @@ func toServiceSaveGeneratedPlanRequest(pbr *pb.SaveGeneratedPlanRequest) service
 		PlannedMeals: servicePlannedMeals,
 	}
 }
+
+func toServiceGetDayPlanRequest(pbr *pb.GetDayPlanRequest) service.GetDayPlanRequest {
+	return service.GetDayPlanRequest{
+		UserID:    pbr.GetUserId(),
+		DayOfWeek: service.DaysOfWeek(pbr.GetDayOfWeek()),
+	}
+}
+
+func toPBNutritionFacts(sr service.NutritionFacts) *pb.NutritionFacts {
+	return &pb.NutritionFacts{
+		Calories: sr.Calories,
+		Protein:  sr.Protein,
+		Fat:      sr.Fat,
+		Carb:     sr.Carb,
+	}
+}
+
+func toPBMealItemsResponse(sr service.MealItemsResponse) *pb.MealItemsResponse {
+	return &pb.MealItemsResponse{
+		Id:             sr.ID,
+		Name:           sr.Name,
+		Recipe:         sr.Recipe,
+		NutritionFacts: toPBNutritionFacts(sr.NutritionFacts),
+	}
+}
+
+func toPBGetDayPlanResponse(sr service.GetDayPlanResponse) *pb.GetDayPlanResponse {
+	pbMealItems := make([]*pb.MealItemsResponse, 0, len(sr.MealItems))
+
+	for _, item := range sr.MealItems {
+		pbMealItems = append(pbMealItems, toPBMealItemsResponse(item))
+	}
+
+	return &pb.GetDayPlanResponse{
+		MealItems:      pbMealItems,
+		NutritionFacts: toPBNutritionFacts(sr.NutritionFacts),
+		WaterGoalMl:    sr.WaterGoalMl,
+	}
+}

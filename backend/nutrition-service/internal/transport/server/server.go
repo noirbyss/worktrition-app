@@ -30,5 +30,14 @@ func (nss *NutririonServiceServer) SaveGeneratedPlan(ctx context.Context, r *pb.
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return &emptypb.Empty{}, nil
+	return &emptypb.Empty{}, nil // TODO: добавить валидацию
+}
+
+func (nss *NutririonServiceServer) GetDayPlan(ctx context.Context, r *pb.GetDayPlanRequest) (*pb.GetDayPlanResponse, error) {
+	serviceGetDayPlanResponse, err := nss.service.GetDayPlan(ctx, toServiceGetDayPlanRequest(r))
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error()) // TODO: добавить валидацию
+	}
+
+	return toPBGetDayPlanResponse(serviceGetDayPlanResponse), nil
 }

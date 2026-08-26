@@ -56,3 +56,33 @@ func (sgpr SaveGeneratedPlanRequest) validate() error {
 
 	return nil
 }
+
+type GetDayPlanRequest struct {
+	UserID    string
+	DayOfWeek DaysOfWeek
+}
+
+func (gdpr GetDayPlanRequest) validate() error {
+	if gdpr.UserID == "" {
+		return ErrEmptyUserID
+	}
+
+	if !gdpr.DayOfWeek.validate() {
+		return ErrInvalidDayOfWeek
+	}
+
+	return nil
+}
+
+type MealItemsResponse struct {
+	ID     int32
+	Name   string
+	Recipe string
+	NutritionFacts
+}
+
+type GetDayPlanResponse struct {
+	MealItems []MealItemsResponse
+	NutritionFacts
+	WaterGoalMl int32
+}

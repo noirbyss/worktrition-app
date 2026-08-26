@@ -17,3 +17,16 @@ func (s *Service) SavePlan(ctx context.Context, r SaveGeneratedPlanRequest) erro
 
 	return nil
 }
+
+func (s *Service) GetDayPlan(ctx context.Context, r GetDayPlanRequest) (GetDayPlanResponse, error) {
+	if err := r.validate(); err != nil {
+		return GetDayPlanResponse{}, err
+	}
+
+	dayPlan, err := s.repo.GetDayPlan(r)
+	if err != nil {
+		return GetDayPlanResponse{}, err
+	}
+
+	return dayPlan, nil
+}

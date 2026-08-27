@@ -1,0 +1,7 @@
+# Environment files (may contain secrets)
+.env
+.env.*
+
+# Safe templates that document required variables
+!.env.example
+!.env.*.example

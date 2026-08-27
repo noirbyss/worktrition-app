@@ -40,6 +40,12 @@ enum FitnessGoal {
   FITNESS_GOAL_GAIN_MUSCLE = 3;
 }
 
+enum TrainingLocation {
+  TRAINING_LOCATION_UNSPECIFIED = 0;
+  TRAINING_LOCATION_HOME = 1;
+  TRAINING_LOCATION_GYM = 2;
+}
+
 message CreateUserRequest {
   string name = 1;
   string email = 2;
@@ -63,30 +69,25 @@ message VerifyCredentialsResponse {
 
 message SaveProfileRequest {
   string user_id = 1;
-  Gender gender = 2;
-  int32 height_cm = 3;
-  double weight_kg = 4;
-  TrainingLevel training_level = 5;
-  ActivityLevel activity_level = 6;
-  FitnessGoal goal = 7;
-  optional double target_weight_kg = 8;
-  repeated string allergies = 9;
-  repeated string excluded_foods = 10;
-  repeated string food_preferences = 11;
-}
-
-message NutritionTargets {
-  double calories_kcal = 1;
-  double protein_g = 2;
-  double fat_g = 3;
-  double carbs_g = 4;
+  int32 age = 2; // В ходе разработки решу, брать из даты рожд. или из анкеты
+  Gender gender = 3;
+  int32 height_cm = 4;
+  double weight_kg = 5;
+  TrainingLevel training_level = 6;
+  ActivityLevel activity_level = 7;
+  FitnessGoal goal = 8;
+  optional double target_weight_kg = 9;
+  repeated string allergies = 10;
+  repeated string excluded_foods = 11;
+  repeated string food_preferences = 12;
+  TrainingLocation training_location = 13;
+  int32 training_days_per_week = 14;
+  string equipment = 15;
 }
 
 message SaveProfileResponse {
   bool profile_completed = 1;
   double bmi = 2;
-  NutritionTargets nutrition_targets = 3;
-  int32 water_goal_ml = 4;
 }
 
 message GetUserRequest {
@@ -107,17 +108,18 @@ message GetProfileRequest {
 
 message GetProfileResponse {
   string user_id = 1;
-  Gender gender = 2;
-  int32 height_cm = 3;
-  double weight_kg = 4;
-  TrainingLevel training_level = 5;
-  ActivityLevel activity_level = 6;
-  FitnessGoal goal = 7;
-  optional double target_weight_kg = 8;
-  repeated string allergies = 9;
-  repeated string excluded_foods = 10;
-  repeated string food_preferences = 11;
-  double bmi = 12;
-  NutritionTargets nutrition_targets = 13;
-  int32 water_goal_ml = 14;
+  int32 age = 2;
+  Gender gender = 3;
+  int32 height_cm = 4;
+  double weight_kg = 5;
+  TrainingLevel training_level = 6;
+  ActivityLevel activity_level = 7;
+  FitnessGoal goal = 8;
+  optional double target_weight_kg = 9;
+  repeated string allergies = 10;
+  repeated string excluded_foods = 11;
+  repeated string food_preferences = 12;
+  TrainingLocation training_location = 13;
+  int32 training_days_per_week = 14;
+  string equipment = 15;
 }

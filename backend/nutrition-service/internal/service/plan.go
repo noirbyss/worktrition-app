@@ -1,6 +1,6 @@
 package service
 
-const MINIMAL_WATER_GOAL_ML = 0
+const minimalWaterGoalMl = 0
 
 type DaysOfWeek int32
 
@@ -13,7 +13,7 @@ const (
 	Monday
 	Tuesday
 	Wednesday
-	Thurday
+	Thursday
 	Friday
 	Saturday
 	Sunday
@@ -50,7 +50,7 @@ func (sgpr SaveGeneratedPlanRequest) validate() error {
 		return err
 	}
 
-	if sgpr.WaterGoalMl < MINIMAL_WATER_GOAL_ML {
+	if sgpr.WaterGoalMl < minimalWaterGoalMl {
 		return ErrWaterGoalTooLow
 	}
 

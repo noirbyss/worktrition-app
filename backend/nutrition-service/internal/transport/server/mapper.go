@@ -31,8 +31,9 @@ func toServicePlannedMeals(pbr *pb.PlannedMealsRequest) service.PlannedMealsRequ
 	}
 
 	return service.PlannedMealsRequest{
-		DayOfWeek: service.DaysOfWeek(pbr.GetDayOfWeek()),
-		MealItems: serviceMealItems,
+		DayOfWeek:      service.DaysOfWeek(pbr.GetDayOfWeek()),
+		MealItems:      serviceMealItems,
+		NutritionFacts: toServiceNutritionFacts(pbr.GetNutritionFacts()),
 	}
 }
 
@@ -44,9 +45,11 @@ func toServiceSaveGeneratedPlanRequest(pbr *pb.SaveGeneratedPlanRequest) service
 	}
 
 	return service.SaveGeneratedPlanRequest{
-		UserID:       pbr.GetUserId(),
-		GenerationID: pbr.GetGenerationId(),
-		PlannedMeals: servicePlannedMeals,
+		UserID:         pbr.GetUserId(),
+		GenerationID:   pbr.GetGenerationId(),
+		PlannedMeals:   servicePlannedMeals,
+		NutritionFacts: toServiceNutritionFacts(pbr.GetNutritionFacts()),
+		WaterGoalMl:    pbr.GetWaterGoalMl(),
 	}
 }
 
@@ -68,6 +71,20 @@ func toServiceCompleteWaterRequest(pbr *pb.CompleteWaterRequest) service.Complet
 	return service.CompleteWaterRequest{
 		UserID:   pbr.GetUserId(),
 		AmountMl: pbr.GetAmountMl(),
+	}
+}
+
+func toServiceGetStatsRequest(pbr *pb.GetStatsRequest) service.GetStatsRequest {
+	return service.GetStatsRequest{
+		UserID: pbr.GetUserId(),
+	}
+}
+
+func toPBGetStatsResponse(sr service.GetStatsResponse) *pb.GetStatsResponse {
+	return &pb.GetStatsResponse{
+		PercentageComplianceNutritionFacts: sr.PercentageComplianceNutritionFacts,
+		PercentagePlanFulfilled:            sr.PercentagePlanFulfilled,
+		PercentageWaterStandardFulfillment: sr.PercentageWaterStandardFulfillment,
 	}
 }
 

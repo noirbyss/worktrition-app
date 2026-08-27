@@ -67,7 +67,7 @@ func (pmr PlannedMealsRequest) validate() error {
 		return ErrInvalidDayOfWeek
 	}
 
-	if pmr.MealItems == nil {
+	if len(pmr.MealItems) == 0 {
 		return ErrEmptyMealItems
 	}
 

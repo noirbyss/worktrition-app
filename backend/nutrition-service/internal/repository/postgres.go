@@ -2,8 +2,12 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"nutrition-service/internal/service"
 
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -28,7 +32,7 @@ func (db *PostgresDB) SavePlan(ctx context.Context, plan service.SaveGeneratedPl
 
 	var planTemplateID int32
 	if err := tx.QueryRow(ctx, `
-	INSER INTO plan_templates (user_id, generation_id, calories, protein, fat, carb, water_goal, is_active)
+	INSERT INTO plan_templates (user_id, generation_id, calories, protein, fat, carb, water_goal, is_active)
 	VALUES($1, $2, $3, $4, $5, $6, $7, true)
 	RETURNING id;
 	`, plan.UserID,
@@ -38,6 +42,12 @@ func (db *PostgresDB) SavePlan(ctx context.Context, plan service.SaveGeneratedPl
 		plan.Fat,
 		plan.Carb,
 		plan.WaterGoalMl).Scan(&planTemplateID); err != nil {
+		var pgErr *pgconn.PgError
+
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return ErrPlanAlreadyExists
+		}
+
 		return err
 	}
 
@@ -60,7 +70,7 @@ func (db *PostgresDB) SavePlan(ctx context.Context, plan service.SaveGeneratedPl
 			_, err := tx.Exec(ctx, `
 			INSERT INTO meal_items (meal_template_id, name, recipe, calories, protein, fat, carb)
 			VALUES($1, $2, $3, $4, $5, $6, $7)
-			`, mealTemplateID, item.Name, item.Calories, item.Protein, item.Fat, item.Carb)
+			`, mealTemplateID, item.Name, item.Recipe, item.Calories, item.Protein, item.Fat, item.Carb)
 			if err != nil {
 				return err
 			}
@@ -87,6 +97,9 @@ func (db *PostgresDB) GetDayPlan(ctx context.Context, r service.GetDayPlanReques
 	FROM plan_templates
 	WHERE user_id = $1 AND is_active = true;
 	`, r.UserID).Scan(&planTemplateID, &waterGoal); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return service.GetDayPlanResponse{}, ErrPlanNotFound
+		}
 		return service.GetDayPlanResponse{}, err
 	}
 
@@ -98,16 +111,15 @@ func (db *PostgresDB) GetDayPlan(ctx context.Context, r service.GetDayPlanReques
 	if err := tx.QueryRow(ctx, `
 	SELECT id, calories, protein, fat, carb
 	FROM meal_templates
-	WHERE plan_id = $1;
-	`, planTemplateID,
-		nutritionFacts.Calories,
-		nutritionFacts.Protein,
-		nutritionFacts.Fat,
-		nutritionFacts.Carb).Scan(&mealTemplateID,
+	WHERE plan_id = $1 AND day_of_week = $2;
+	`, planTemplateID, r.DayOfWeek).Scan(&mealTemplateID,
 		&nutritionFacts.Calories,
 		&nutritionFacts.Protein,
 		&nutritionFacts.Fat,
 		&nutritionFacts.Carb); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return service.GetDayPlanResponse{}, ErrPlanNotFound
+		}
 		return service.GetDayPlanResponse{}, err
 	}
 
@@ -116,7 +128,7 @@ func (db *PostgresDB) GetDayPlan(ctx context.Context, r service.GetDayPlanReques
 	rows, err := tx.Query(ctx, `
 	SELECT id, name, recipe
 	FROM meal_items
-	WHERE meal_template_id = $1
+	WHERE meal_template_id = $1;
 	`, mealTemplateID)
 	if err != nil {
 		return service.GetDayPlanResponse{}, err
@@ -137,9 +149,47 @@ func (db *PostgresDB) GetDayPlan(ctx context.Context, r service.GetDayPlanReques
 		return service.GetDayPlanResponse{}, err
 	}
 
+	if err := tx.Commit(ctx); err != nil {
+		return service.GetDayPlanResponse{}, err
+	}
+
 	return service.GetDayPlanResponse{
 		MealItems:      meals,
 		NutritionFacts: nutritionFacts,
 		WaterGoalMl:    waterGoal,
 	}, nil
+}
+
+func (db *PostgresDB) CompleteMeal(ctx context.Context, r service.CompleteMealRequest) error {
+	tx, err := db.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	var exists bool
+	if err := tx.QueryRow(ctx, `
+	SELECT EXISTS(
+		SELECT 1
+		FROM meal_items mi
+		JOIN meal_templates mt ON mt.id = mi.meal_template_id
+		JOIN plan_templates pt ON pt.id = mt.plan_id
+		WHERE mi.id = $1 AND pt.user_id = $2 AND pt.is_active = true
+	);
+	`, r.MealItemID, r.UserID).Scan(&exists); err != nil {
+		return err
+	}
+
+	if !exists {
+		return ErrMealItemNotFoun
+	}
+
+	if _, err := tx.Exec(ctx, `
+	INSERT INTO meal_completions (meal_item_id)
+	VALUES($1);
+	`, r.MealItemID); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
 }

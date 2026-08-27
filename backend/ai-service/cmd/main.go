@@ -2,40 +2,62 @@ package main
 
 import (
 	"ai-service/internal/config"
-	"ai-service/internal/grpc"
+	"ai-service/internal/grpcclient"
+	"ai-service/internal/grpcserver"
 	"ai-service/internal/logger"
 	"ai-service/internal/provider"
 	"ai-service/internal/usecase"
-	"compress/gzip"
-	"context"
+	"log"
+	"net"
 
-	"github.com/k0kubun/pp/v3"
+	"github.com/noirbyss/worktrition-app/gen/ai-service"
+	"github.com/noirbyss/worktrition-app/gen/nutrition-service"
+	"github.com/noirbyss/worktrition-app/gen/user-service"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main () {
 	cfg, err := config.Load()
 	if err != nil {
-		panic("failed to load .env")
+		log.Fatalf("failed to load config: %v", err)
 	}
-	log,closelog,err := logger.NewLogger(cfg.LogLevel)
+	zapLog,closelog,err := logger.NewLogger(cfg.LogLevel)
 	if err != nil {
-		panic("failed to create logger")
+		log.Fatalf("failed to create logger: %v", err)
 	}
 	defer closelog()
 	
-	prov := provider.NewOpenRouterProvider(
-			cfg.ApiKey,
-			cfg.AiBaseURL,
-			cfg.AiModel,
-			log,
-	)
-	us := usecase.NewUseCase(prov,log)
+	prov := provider.NewOpenRouterProvider(cfg.ApiKey,cfg.AiBaseURL,cfg.AiModel,zapLog)
 
-	grpc := grpc.NewServer(us)
+	userConn,err := grpc.NewClient("localhost:50053",grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("failed to connect user-service: %v",err)
+	}
+	defer userConn.Close()
+	userClient := grpcclient.NewUserClient(user.NewUserServiceClient(userConn),zapLog)
+	
+	nutrConn, err := grpc.NewClient("localhost:50051",grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("failed to connect nutrition-service: %v",err)
+	}
+	defer nutrConn.Close()
+	nutrClient := grpcclient.NewNutritionClient(nutrition.NewNutritionServiceClient(nutrConn),zapLog)
 
-	start := 
-	//grpc.StartGeneration(context.Background(),)
-	plan,err := us.StartGeneration(context.Background(),"","")
+	
+	
+	us := usecase.NewUseCase(prov,userClient,nutrClient,nil,zapLog)
 
-	pp.Print(plan)
+	lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	
+	grpcSrv := grpc.NewServer()	
+	ai.RegisterAiServiceServer(grpcSrv,grpcserver.NewServer(us,zapLog))
+
+	zapLog.Infof("ai-service listening on :%s", cfg.GRPCPort)
+	if err := grpcSrv.Serve(lis); err != nil {
+		log.Fatalf("failed to serve %v", err)
+	}
 }

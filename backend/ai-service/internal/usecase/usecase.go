@@ -11,20 +11,20 @@ import (
 )
 
 type UseCase struct {
-	Provider 	AIProvider
-	UserClient 	UserClient
-	Nutrition	NutritionClient
-	Workout 	WorkoutClient
-	logger 		*zap.SugaredLogger
+	Provider 			AIProvider
+	UserClient		 	UserClient
+	NutritionClient 	NutritionClient
+	WorkoutClient  		WorkoutClient
+	logger 				*zap.SugaredLogger
 }
 
-func NewUseCase (provider AIProvider, userClient UserClient, nutrition NutritionClient,workout WorkoutClient, logger *zap.SugaredLogger) *UseCase {
+func NewUseCase (provider AIProvider, userClient UserClient, nutritionClient NutritionClient,workoutClient WorkoutClient, logger *zap.SugaredLogger) *UseCase {
 	return &UseCase{
-		Provider: 	provider,
-		UserClient:	userClient,
-		Nutrition: 	nutrition,
-		Workout: 	workout,
-		logger: 	logger,
+		Provider: 			provider,
+		UserClient:			userClient,
+		NutritionClient:	nutritionClient,
+		WorkoutClient: 		workoutClient,
+		logger: 			logger,
 	}
 } 
 
@@ -38,21 +38,36 @@ func (us *UseCase) generatePlan(generationId, userId, planType string) {
 		bgCtx := context.Background()
 		profile,err := us.UserClient.GetProfile(bgCtx, userId)
 		if err != nil {
-			us.logger.Errorf("failed %v", err)
+			us.logger.Errorw(
+				"failed to get user profile",
+				"userId", 		userId, 
+				"generationId", generationId,
+			 	"error",		err,
+			)
 			return 
 		}
 		userPrompt := MapUserProfilePrompt(profile)
 		
 		resp, err := us.Provider.GeneratePlan(bgCtx, provider.SystemPrompt, userPrompt)
 		if err != nil {
-			us.logger.Errorf("failed to generate response %v", err)
+			us.logger.Errorw(
+				"failed to generate response", 
+				"userId", 		userId, 
+				"generationId", generationId,
+			 	"error",		err,
+			)
 			return 
 		}
 		plan := domain.GeneratedPlanDTO{}
 		if err := json.Unmarshal([]byte(resp), &plan); err != nil {
-			us.logger.Errorf("failed to decode json %v", err)
+			us.logger.Errorw(
+				"failed to decode ai response",
+				"userId", 		userId, 
+				"generationId", generationId,
+			 	"error",		err,
+			)
 			return 
 		}
-		us.Nutrition.SaveGeneratedPlan(bgCtx, userId, generationId, plan.Nutrition)
-		us.Workout.SaveGeneratedPlan(bgCtx, userId, generationId, plan.Workouts)
+		us.NutritionClient.SaveGeneratedPlan(bgCtx, userId, generationId, plan.Nutrition, plan.WaterMl)
+		us.WorkoutClient.SaveGeneratedPlan(bgCtx, userId, generationId, plan.Workouts)
 	}

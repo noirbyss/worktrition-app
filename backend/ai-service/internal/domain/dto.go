@@ -2,12 +2,14 @@ package domain
 
 type GeneratedPlanDTO struct {
 	Workouts 	[]WorkoutPlanDTO		`json:"workouts"` 		
-	Nutrition 	[]NutriationPlanDTO		`json:"nutrition"`
+	Nutrition 	[]NutritionPlanDTO		`json:"nutrition"`
+	WaterMl     int 					`json:"water_ml"` 
 }
 
-type NutriationPlanDTO struct {
-	Day 	int 	`json:"day"`
-	Meals 	[]Meal	`json:"meals"`
+type NutritionPlanDTO struct {
+	Day			 	int 			`json:"day"`
+	Meals 			[]Meal			`json:"meals"`
+	NutritionFacts 	NutritionFacts 	`json:"nutrition_facts"`
 } 
 
 type WorkoutPlanDTO struct {
@@ -17,7 +19,7 @@ type WorkoutPlanDTO struct {
 }
 
 type Meal struct {
-	MealName 		string			`json:"meal_name"`
+	Name	 		string			`json:"meal_name"`
 	Recipe 			string			`json:"recipe"`
 	NutritionFacts	NutritionFacts	`json:"nutrition_facts"`  
 }

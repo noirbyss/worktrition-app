@@ -14,7 +14,7 @@ type UserClient interface {
 }
 
 type NutritionClient interface {
-	SaveGeneratedPlan(ctx context.Context, userId string, generationId string, plan []domain.NutriationPlanDTO) error
+	SaveGeneratedPlan(ctx context.Context, userId string, generationId string, plan []domain.NutritionPlanDTO, waterMl int) error
 }
 
 type WorkoutClient interface {

@@ -15,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/noirbyss/worktrition-app/backend/user-service/internal/config"
 	"github.com/noirbyss/worktrition-app/backend/user-service/internal/grpcserver"
+	"github.com/noirbyss/worktrition-app/backend/user-service/internal/migrator"
 	"github.com/noirbyss/worktrition-app/backend/user-service/internal/repository"
 	"github.com/noirbyss/worktrition-app/backend/user-service/internal/service"
 	userpb "github.com/noirbyss/worktrition-app/gen/user-service"
@@ -41,6 +42,10 @@ func Run() error {
 		return err
 	}
 	defer pool.Close()
+
+	if err := migrator.Run(ctx, pool); err != nil {
+		return fmt.Errorf("run migrations: %w", err)
+	}
 
 	listener, err := net.Listen("tcp", cfg.GRPC.Address())
 	if err != nil {

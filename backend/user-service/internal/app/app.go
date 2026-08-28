@@ -14,6 +14,10 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/noirbyss/worktrition-app/backend/user-service/internal/config"
+	"github.com/noirbyss/worktrition-app/backend/user-service/internal/grpcserver"
+	"github.com/noirbyss/worktrition-app/backend/user-service/internal/repository"
+	"github.com/noirbyss/worktrition-app/backend/user-service/internal/service"
+	userpb "github.com/noirbyss/worktrition-app/gen/user-service"
 	"google.golang.org/grpc"
 )
 
@@ -44,7 +48,13 @@ func Run() error {
 	}
 	defer listener.Close()
 
-	return serveGRPC(ctx, cfg, grpc.NewServer(), listener)
+	grpcServer := grpc.NewServer()
+	userRepository := repository.NewPostgresUserRepository(pool)
+	authService := service.NewAuthService(userRepository)
+
+	userpb.RegisterUserServiceServer(grpcServer, grpcserver.New(authService))
+
+	return serveGRPC(ctx, cfg, grpcServer, listener)
 }
 
 func openPostgres(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, error) {

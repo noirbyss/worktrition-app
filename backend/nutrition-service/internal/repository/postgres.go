@@ -278,3 +278,50 @@ func (db *PostgresDB) GetNutritionHistory(ctx context.Context, userID string) ([
 
 	return records, nil
 }
+
+func (db *PostgresDB) GetWaterHistory(ctx context.Context, userID string) ([]service.WaterDayRecord, error) {
+	tx, err := db.pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(ctx, `
+	SELECT pt.water_goal ,
+	SUM(wc.amount_ml)::int AS consumed_amount
+
+	FROM water_completions wc
+
+	JOIN plan_templates pt ON pt.id = wc.plan_id
+
+	WHERE pt.user_id = $1
+
+	GROUP BY wc.completed_at::date, pt.id, pt.water_goal
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	records := make([]service.WaterDayRecord, 0)
+
+	for rows.Next() {
+		var record service.WaterDayRecord
+
+		if err := rows.Scan(&record.GoalMl, &record.ConsumedMl); err != nil {
+			return nil, err
+		}
+
+		records = append(records, record)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+
+	return records, nil
+}

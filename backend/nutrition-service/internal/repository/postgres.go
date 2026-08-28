@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"nutrition-service/internal/service"
+	"time"
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
@@ -324,4 +325,62 @@ func (db *PostgresDB) GetWaterHistory(ctx context.Context, userID string) ([]ser
 	}
 
 	return records, nil
+}
+
+func (db *PostgresDB) GetActivePlanFulfillment(ctx context.Context, userID string) (int, int, error) {
+	tx, err := db.pool.Begin(ctx)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer tx.Rollback(ctx)
+
+	var (
+		planID      int32
+		activatedAt time.Time
+	)
+
+	if err := tx.QueryRow(ctx, `
+		SELECT id, activated_at
+		FROM plan_templates
+		WHERE user_id = $1 AND is_active = true
+	`, userID).Scan(&planID, &activatedAt); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, 0, ErrPlanNotFound
+		}
+
+		return 0, 0, err
+	}
+
+	var weeklyTotal int
+
+	if err := tx.QueryRow(ctx, `
+	SELECT COUNT(*)
+	FROM meal_items mi
+	JOIN meal_templates mt ON mt.id = mi.meal_template_id
+	WHERE mt.plan_id = $1
+	`, planID).Scan(&weeklyTotal); err != nil {
+		return 0, 0, err
+	}
+
+	var completed int
+
+	if err := tx.QueryRow(ctx, `
+	SELECT COUNT(*)
+	FROM meal_completions mc
+	JOIN meal_items mi ON mi.id = mc.meal_item_id
+	JOIN meal_templates mt ON mt.id = mi.meal_template_id
+	WHERE mt.plan_id = $1
+	`, planID).Scan(&completed); err != nil {
+		return 0, 0, err
+	}
+
+	elapsedWeeks := int(time.Since(activatedAt).Hours()/(24*7)) + 1
+
+	total := weeklyTotal * elapsedWeeks
+
+	if err := tx.Commit(ctx); err != nil {
+		return 0, 0, err
+	}
+
+	return completed, total, nil
 }

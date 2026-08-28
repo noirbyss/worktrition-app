@@ -10,5 +10,5 @@ type Repository interface {
 
 	GetNutritionHistory(ctx context.Context, userID string) ([]NutritionDayRecord, error)
 	GetWaterHistory(ctx context.Context, userID string) ([]WaterDayRecord, error)
-	GetActivePlanFulfillment(ctx context.Context, userID string) (completed int, total int, err error)
+	GetActivePlanFulfillment(ctx context.Context, userID string) (int, int, error)
 }

@@ -34,15 +34,15 @@ CREATE TABLE user_profiles (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT user_profiles_age_positive CHECK (age > 0),
-    CONSTRAINT user_profiles_gender_valid CHECK (gender IN (0, 1, 2)),
-    CONSTRAINT user_profiles_height_positive CHECK (height_cm > 0),
-    CONSTRAINT user_profiles_weight_positive CHECK (weight_kg > 0),
-    CONSTRAINT user_profiles_training_level_valid CHECK (training_level IN (0, 1, 2, 3)),
-    CONSTRAINT user_profiles_activity_level_valid CHECK (activity_level IN (0, 1, 2, 3, 4)),
-    CONSTRAINT user_profiles_goal_valid CHECK (goal IN (0, 1, 2, 3)),
-    CONSTRAINT user_profiles_target_weight_positive CHECK (target_weight_kg IS NULL OR target_weight_kg > 0),
-    CONSTRAINT user_profiles_training_location_valid CHECK (training_location IN (0, 1, 2)),
+    CONSTRAINT user_profiles_age_valid CHECK (age BETWEEN 13 AND 120),
+    CONSTRAINT user_profiles_gender_valid CHECK (gender IN (1, 2)),
+    CONSTRAINT user_profiles_height_valid CHECK (height_cm BETWEEN 80 AND 250),
+    CONSTRAINT user_profiles_weight_valid CHECK (weight_kg BETWEEN 25 AND 400),
+    CONSTRAINT user_profiles_training_level_valid CHECK (training_level IN (1, 2, 3)),
+    CONSTRAINT user_profiles_activity_level_valid CHECK (activity_level IN (1, 2, 3, 4)),
+    CONSTRAINT user_profiles_goal_valid CHECK (goal IN (1, 2, 3)),
+    CONSTRAINT user_profiles_target_weight_valid CHECK (target_weight_kg IS NULL OR target_weight_kg BETWEEN 25 AND 400),
+    CONSTRAINT user_profiles_training_location_valid CHECK (training_location IN (1, 2)),
     CONSTRAINT user_profiles_training_days_per_week_valid CHECK (training_days_per_week BETWEEN 0 AND 7)
 );
 

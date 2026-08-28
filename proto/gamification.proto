@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package gamification;
+
+option go_package = "github.com/noirbyss/worktrition-app/gen/gamification-service;gamification";
+
+service GamificationService {
+  rpc GetCharacter(GetCharacterRequest) returns (GetCharacterResponse);
+
+  rpc ApplyWorkoutReward(ApplyWorkoutRewardRequest) returns (ApplyWorkoutRewardResponse);
+  rpc ApplyMealReward(ApplyMealRewardRequest) returns (ApplyMealRewardResponse);
+  rpc ApplyWaterReward(ApplyWaterRewardRequest) returns (ApplyWaterRewardResponse);
+}
+
+message Character {
+  string user_id = 1;
+  int32 level = 2;
+  int32 current_xp = 3;
+  int32 next_level_xp = 4;
+  double hp = 5;
+  int32 strength = 6;
+  int32 endurance = 7;
+  int32 discipline = 8;
+  int32 balance = 9;
+  int32 current_streak = 10;
+}
+
+message GetCharacterRequest {
+  string user_id = 1;
+}
+
+message GetCharacterResponse {
+  Character character = 1;
+}
+
+message ApplyWorkoutRewardRequest {
+  string user_id = 1;
+  bool is_strength = 2; // true - силовая (дает силу), false - кардио (дает выносливость)
+}
+
+message ApplyWorkoutRewardResponse {
+  Character character = 1;
+  int32 gained_xp = 2;
+  bool leveled_up = 3;
+}
+
+message ApplyMealRewardRequest {
+  string user_id = 1;
+}
+
+message ApplyMealRewardResponse {
+  Character character = 1;
+  int32 gained_xp = 2;
+  bool leveled_up = 3;
+}
+
+message ApplyWaterRewardRequest {
+  string user_id = 1;
+}
+
+message ApplyWaterRewardResponse {
+  Character character = 1;
+  int32 gained_xp = 2;
+  bool leveled_up = 3;
+}

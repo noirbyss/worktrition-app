@@ -181,13 +181,44 @@ func (db *PostgresDB) CompleteMeal(ctx context.Context, r service.CompleteMealRe
 	}
 
 	if !exists {
-		return ErrMealItemNotFoun
+		return ErrMealItemNotFound
 	}
 
 	if _, err := tx.Exec(ctx, `
 	INSERT INTO meal_completions (meal_item_id)
 	VALUES($1);
 	`, r.MealItemID); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
+
+func (db *PostgresDB) CompleteWater(ctx context.Context, r service.CompleteWaterRequest) error {
+	tx, err := db.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	var planID int32
+
+	if err := tx.QueryRow(ctx, `
+	SELECT id
+	FROM plan_templates
+	WHERE user_id = $1 AND is_active = true
+	`, r.UserID).Scan(&planID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrPlanNotFound
+		}
+
+		return err
+	}
+
+	if _, err := tx.Exec(ctx, `
+	INSERT INTO water_completions (plan_id, amount_ml)
+	VALUES($1, $2);
+	`, planID, r.AmountMl); err != nil {
 		return err
 	}
 

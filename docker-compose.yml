@@ -1,0 +1,31 @@
+services:
+  user-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${USER_DB_USER}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+      POSTGRES_DB: ${USER_DB_NAME}
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\"" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  user-service:
+    build:
+      context: ./backend/user-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      user-db:
+        condition: service_healthy
+    ports:
+      - "${USER_GRPC_PORT:-50051}:${USER_GRPC_PORT:-50051}"
+    stop_grace_period: 10s
+
+volumes:
+  user-db-data:

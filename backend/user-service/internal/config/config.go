@@ -27,12 +27,13 @@ func (c GRPCConfig) Address() string {
 }
 
 type DatabaseConfig struct {
-	Host     string `env:"USER_DB_HOST" env-required:"true"`
-	Port     int    `env:"USER_DB_PORT" env-default:"5432"`
-	User     string `env:"USER_DB_USER" env-required:"true"`
-	Password string `env:"USER_DB_PASSWORD" env-required:"true"`
-	Name     string `env:"USER_DB_NAME" env-required:"true"`
-	SSLMode  string `env:"USER_DB_SSL_MODE" env-default:"disable"`
+	Host           string        `env:"USER_DB_HOST" env-required:"true"`
+	Port           int           `env:"USER_DB_PORT" env-default:"5432"`
+	User           string        `env:"USER_DB_USER" env-required:"true"`
+	Password       string        `env:"USER_DB_PASSWORD" env-required:"true"`
+	Name           string        `env:"USER_DB_NAME" env-required:"true"`
+	SSLMode        string        `env:"USER_DB_SSL_MODE" env-default:"disable"`
+	ConnectTimeout time.Duration `env:"USER_DB_CONNECT_TIMEOUT" env-default:"5s"`
 }
 
 func (c DatabaseConfig) DSN() string {

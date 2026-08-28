@@ -1,21 +1,15 @@
 package main
 
 import (
-	"log"
+	"log/slog"
+	"os"
 
-	"github.com/noirbyss/worktrition-app/backend/user-service/internal/config"
+	"github.com/noirbyss/worktrition-app/backend/user-service/internal/app"
 )
 
 func main() {
-	cfg, err := config.Load()
-	if err != nil {
-		log.Fatalf("load config: %v", err)
+	if err := app.Run(); err != nil {
+		slog.Error("user-service failed", "error", err)
+		os.Exit(1)
 	}
-
-	log.Printf(
-		"user-service started: environment=%s grpc_address=%s log_level=%s",
-		cfg.Environment,
-		cfg.GRPC.Address(),
-		cfg.Log.Level,
-	)
 }

@@ -224,3 +224,57 @@ func (db *PostgresDB) CompleteWater(ctx context.Context, r service.CompleteWater
 
 	return tx.Commit(ctx)
 }
+
+func (db *PostgresDB) GetNutritionHistory(ctx context.Context, userID string) ([]service.NutritionDayRecord, error) {
+	tx, err := db.pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(ctx, `
+	SELECT mt.calories, mt.protein, mt.fat, mt.carb,
+	SUM(mi.calories) AS consumed_calories,
+	SUM(mi.protein) AS consumed_protein,
+	SUM(mi.fat) AS consumed_fat,
+	SUM(mi.carb) AS consumed_carb
+
+	FROM meal_completions mc
+
+	JOIN meal_items mi ON mi.id = mc.meal_item_id
+	JOIN meal_templates mt ON mt.id = mi.meal_template_id
+	JOIN plan_templates pt ON pt.id = mt.plan_id
+
+	WHERE pt.user_id = $1
+
+	GROUP BY mc.completed_at::date, mt.id, mt.calories, mt.protein, mt.fat, mt.carb;
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	records := make([]service.NutritionDayRecord, 0)
+	for rows.Next() {
+		var record service.NutritionDayRecord
+
+		if err := rows.Scan(
+			&record.Target.Calories, &record.Target.Protein, &record.Target.Fat, &record.Target.Carb,
+			&record.Consumed.Calories, &record.Consumed.Protein, &record.Consumed.Fat, &record.Consumed.Carb,
+		); err != nil {
+			return nil, err
+		}
+
+		records = append(records, record)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+
+	return records, nil
+}

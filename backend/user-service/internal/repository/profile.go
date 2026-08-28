@@ -81,7 +81,7 @@ func (r *PostgresProfileRepository) Save(ctx context.Context, profile *domain.Pr
 		profile.Equipment,
 	).Scan(&profile.CreatedAt, &profile.UpdatedAt)
 	if mappedErr := mapProfileWriteError(err); mappedErr != nil {
-		if mappedErr == domain.ErrUserNotFound {
+		if mappedErr == domain.ErrUserNotFound || domain.IsValidationError(mappedErr) {
 			return mappedErr
 		}
 
@@ -144,6 +144,9 @@ func (r *PostgresProfileRepository) GetByUserID(ctx context.Context, userID stri
 	)
 	if isNoRows(err) {
 		return nil, domain.ErrProfileNotFound
+	}
+	if mappedErr := mapUUIDValidationError(err, "user_id"); mappedErr != nil {
+		return nil, mappedErr
 	}
 	if err != nil {
 		return nil, fmt.Errorf("get profile by user id: %w", err)

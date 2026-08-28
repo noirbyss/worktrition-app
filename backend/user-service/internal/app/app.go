@@ -50,9 +50,11 @@ func Run() error {
 
 	grpcServer := grpc.NewServer()
 	userRepository := repository.NewPostgresUserRepository(pool)
+	profileRepository := repository.NewPostgresProfileRepository(pool)
 	authService := service.NewAuthService(userRepository)
+	profileService := service.NewProfileService(userRepository, profileRepository)
 
-	userpb.RegisterUserServiceServer(grpcServer, grpcserver.New(authService))
+	userpb.RegisterUserServiceServer(grpcServer, grpcserver.New(authService, profileService))
 
 	return serveGRPC(ctx, cfg, grpcServer, listener)
 }

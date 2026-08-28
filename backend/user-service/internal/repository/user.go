@@ -14,6 +14,7 @@ import (
 const (
 	uniqueViolation     = "23505"
 	foreignKeyViolation = "23503"
+	invalidTextFormat   = "22P02"
 )
 
 type PostgresUserRepository struct {
@@ -85,11 +86,35 @@ func (r *PostgresUserRepository) GetByID(ctx context.Context, id string) (*domai
 	if isNoRows(err) {
 		return nil, domain.ErrUserNotFound
 	}
+	if mappedErr := mapUUIDValidationError(err, "user_id"); mappedErr != nil {
+		return nil, mappedErr
+	}
 	if err != nil {
 		return nil, fmt.Errorf("get user by id: %w", err)
 	}
 
 	return user, nil
+}
+
+func (r *PostgresUserRepository) SetProfileCompleted(ctx context.Context, id string, completed bool) error {
+	const query = `
+		UPDATE users
+		SET profile_completed = $2
+		WHERE id = $1
+	`
+
+	commandTag, err := r.pool.Exec(ctx, query, id, completed)
+	if mappedErr := mapUUIDValidationError(err, "user_id"); mappedErr != nil {
+		return mappedErr
+	}
+	if err != nil {
+		return fmt.Errorf("set profile completed: %w", err)
+	}
+	if commandTag.RowsAffected() == 0 {
+		return domain.ErrUserNotFound
+	}
+
+	return nil
 }
 
 func (r *PostgresUserRepository) get(ctx context.Context, query string, args ...any) (*domain.User, error) {
@@ -142,4 +167,15 @@ func mapProfileWriteError(err error) error {
 	}
 
 	return err
+}
+
+func mapUUIDValidationError(err error, field string) error {
+	if err == nil {
+		return nil
+	}
+	if isPgErrorCode(err, invalidTextFormat) {
+		return domain.NewValidationError(field, "must be a valid UUID")
+	}
+
+	return nil
 }

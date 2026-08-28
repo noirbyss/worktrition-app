@@ -6,6 +6,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user *User) (string, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	GetByID(ctx context.Context, id string) (*User, error)
+	SetProfileCompleted(ctx context.Context, id string, completed bool) error
 }
 
 type ProfileRepository interface {

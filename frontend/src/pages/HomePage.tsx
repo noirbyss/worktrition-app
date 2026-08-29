@@ -1,149 +1,170 @@
-import { useEffect, useState } from 'react'
-import type { CurrentUser } from '../api'
-import { useAuth } from '../auth/useAuth'
 import { AppFrame } from '../components/app/AppFrame'
-import { InlineMessage } from '../components/auth/InlineMessage'
-import { AppLink } from '../components/navigation/AppLink'
-import { navigate } from '../router'
-import { formatDate, formatDateTimeFromUnix, toErrorMessage } from '../utils'
+import { NotchBar } from '../components/app/PlaceholderUi'
+
+const sidebarProfile = {
+  badge: '7',
+  meta: '820 / 1000 XP',
+  name: 'Артём Ковалёв',
+}
+
+const characterStats = [
+  { active: 14, label: 'Сила', value: '35', variant: 'strength' as const },
+  { active: 11, label: 'Выносливость', value: '28', variant: 'endurance' as const },
+  { active: 17, label: 'Дисциплина', value: '42', variant: 'discipline' as const },
+  { active: 12, label: 'Баланс', value: '31', variant: 'balance' as const },
+]
+
+const achievements = [
+  { icon: '✓', name: 'Первая тренировка', progress: 'получено', status: 'unlocked' as const },
+  { icon: '✓', name: 'Неделя без пропуска воды', progress: 'получено', status: 'unlocked' as const },
+  { icon: '5/7', name: '7 дней подряд', progress: 'осталось 2 дня', status: 'locked' as const },
+  { icon: '7/10', name: '10 дней питания', progress: 'осталось 3 дня', status: 'locked' as const },
+  { icon: '14/20', name: '20 тренировок', progress: 'осталось 6', status: 'locked' as const },
+]
 
 export function HomePage() {
-  const { getCurrentUser, logout, session } = useAuth()
-  const [isLoading, setIsLoading] = useState(true)
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [user, setUser] = useState<CurrentUser | null>(null)
-
-  useEffect(() => {
-    let isCancelled = false
-
-    const loadUser = async () => {
-      try {
-        setIsLoading(true)
-        setLoadError(null)
-        const nextUser = await getCurrentUser()
-
-        if (!isCancelled) {
-          setUser(nextUser)
-        }
-      } catch (error) {
-        if (!isCancelled) {
-          setLoadError(toErrorMessage(error, 'Не удалось загрузить данные аккаунта.'))
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    void loadUser()
-
-    return () => {
-      isCancelled = true
-    }
-  }, [getCurrentUser])
-
-  const handleLogout = async () => {
-    try {
-      setIsLoggingOut(true)
-      await logout()
-      navigate('/login', { replace: true })
-    } finally {
-      setIsLoggingOut(false)
-    }
-  }
-
   return (
     <AppFrame
-      actions={
-        <div className="button-row">
-          <AppLink className="btn btn--ghost btn--small" href="/profile">
-            Открыть профиль
-          </AppLink>
-          <AppLink className="btn btn--ghost btn--small" href="/nutrition">
-            Питание
-          </AppLink>
-          <AppLink className="btn btn--ghost btn--small" href="/workouts">
-            Тренировки
-          </AppLink>
-          <button
-            className="btn btn--small"
-            disabled={isLoggingOut}
-            onClick={() => {
-              void handleLogout()
-            }}
-            type="button"
-          >
-            {isLoggingOut ? 'ВЫХОД...' : 'ВЫЙТИ'}
-          </button>
-        </div>
-      }
-      description="После обязательной анкеты доступ к защищенным разделам открыт. Здесь можно проверить сессию и перейти в тестовые разделы приложения."
-      title="Аккаунт"
+      description="Тело развивается в реальной жизни — персонаж растёт в приложении."
+      eyebrow="Главная · Экран 01"
+      sidebarProfile={sidebarProfile}
+      title="Персонаж"
     >
-      {loadError ? <InlineMessage>{loadError}</InlineMessage> : null}
-
-      <section className="panel-grid">
-        <article className="panel">
-          <h2 className="panel-title">Состояние авторизации</h2>
-          <p className="panel-copy">
-            {session?.profileCompleted
-              ? 'Анкета сохранена, доступ к профилю, питанию и тренировкам открыт.'
-              : 'Сессия активна, но анкета еще не завершена.'}
-          </p>
-          <div className="badge-row">
-            <span className="badge">{session?.profileCompleted ? 'PROFILE READY' : 'PROFILE PENDING'}</span>
-            <span className="badge badge--muted">USER {session?.userId ?? 'UNKNOWN'}</span>
+      <section className="card frame placeholder-section">
+        <div className="hero">
+          <div className="ring-wrap">
+            <svg viewBox="0 0 118 118">
+              <circle cx="59" cy="59" fill="none" r="50" stroke="rgba(255,255,255,.08)" strokeWidth="8" />
+              <circle
+                cx="59"
+                cy="59"
+                fill="none"
+                r="50"
+                stroke="url(#characterLevelGradient)"
+                strokeDasharray="314.2"
+                strokeDashoffset="56.5"
+                strokeLinecap="round"
+                strokeWidth="8"
+              />
+              <defs>
+                <linearGradient id="characterLevelGradient" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stopColor="#FFD23F" />
+                  <stop offset="1" stopColor="#FF7A1A" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div className="ring-center">
+              <div className="ring-lv">УРОВЕНЬ</div>
+              <div className="ring-num">7</div>
+            </div>
           </div>
-        </article>
 
-        <article className="panel">
-          <h2 className="panel-title">Access token</h2>
-          <dl className="detail-list">
-            <div>
-              <dt>Истекает</dt>
-              <dd>
-                {session
-                  ? formatDateTimeFromUnix(session.accessTokenExpiresAt)
-                  : 'Нет активной сессии'}
-              </dd>
+          <div className="hero-copy">
+            <h2 className="hero-name">Артём Ковалёв</h2>
+            <div className="hero-title">Новичок → Воин · 3 тренировки до повышения класса</div>
+            <div className="bar-row hero-progress-copy">
+              <span className="bar-label">Опыт</span>
+              <span className="bar-value">820 / 1000 XP</span>
             </div>
-            <div>
-              <dt>Обновление</dt>
-              <dd>При `401` клиент делает запрос на `/auth/refresh` автоматически.</dd>
-            </div>
-          </dl>
-        </article>
+            <NotchBar active={28} large total={34} />
+          </div>
+        </div>
       </section>
 
-      <section className="panel">
-        <h2 className="panel-title">Данные пользователя</h2>
-        {isLoading ? (
-          <p className="panel-copy">Загружаем `/users/me` через gateway...</p>
-        ) : user ? (
-          <dl className="detail-list">
-            <div>
-              <dt>Имя</dt>
-              <dd>{user.name}</dd>
+      <section className="grid g-2 placeholder-grid">
+        <div className="card">
+          <div className="card-title">Характеристики</div>
+
+          {characterStats.map((item) => (
+            <div className="stat-row" key={item.label}>
+              <span className="stat-label">
+                <span className={`stat-dot stat-dot--${item.variant}`} />
+                {item.label}
+              </span>
+              <NotchBar active={item.active} total={20} variant={item.variant} />
+              <span className="stat-value">{item.value}</span>
             </div>
-            <div>
-              <dt>Email</dt>
-              <dd>{user.email}</dd>
+          ))}
+
+          <hr className="rule" />
+
+          <div className="legend-list">
+            <div className="legend-row">
+              <span className="k">Сила</span>
+              <span className="v">растёт за силовые тренировки</span>
             </div>
-            <div>
-              <dt>Дата рождения</dt>
-              <dd>{formatDate(user.birthDate)}</dd>
+            <div className="legend-row">
+              <span className="k">Выносл.</span>
+              <span className="v">растёт за кардио и регулярность</span>
             </div>
-            <div>
-              <dt>Статус анкеты</dt>
-              <dd>{user.profileCompleted ? 'Заполнена' : 'Не заполнена'}</dd>
+            <div className="legend-row">
+              <span className="k">Дисципл.</span>
+              <span className="v">растёт за задачи без пропусков</span>
             </div>
-          </dl>
-        ) : (
-          <p className="panel-copy">Пользователь пока не загружен.</p>
-        )}
+            <div className="legend-row">
+              <span className="k">Баланс</span>
+              <span className="v">растёт за питание и воду</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-title">План на сегодня</div>
+
+          <div className="check-item">
+            <span className="checkbox" />
+            <span className="check-label">Тренировка — кардио, дом</span>
+            <span className="pill pending">не выполнена</span>
+          </div>
+          <div className="check-item">
+            <span className="checkbox done" />
+            <span className="check-label">План питания — завтрак и обед</span>
+            <span className="pill done">выполнено</span>
+          </div>
+          <div className="check-item">
+            <span className="checkbox" />
+            <span className="check-label">Вода — 2.5 л</span>
+            <span className="pill pending">1.4 / 2.5 л</span>
+          </div>
+
+          <hr className="rule" />
+
+          <div className="bar-row">
+            <span className="bar-label">Прогресс дня</span>
+            <span className="bar-value">3 из 5 задач</span>
+          </div>
+          <NotchBar active={14} total={24} />
+
+          <div className="qs qs--compact">
+            <QuickStat label="Текущий вес" value="88 кг" />
+            <QuickStat label="Серия дней подряд" value="5" />
+          </div>
+        </div>
       </section>
+
+      <section className="card placeholder-section">
+        <div className="card-title">Достижения</div>
+        <div className="ach-grid">
+          {achievements.map((achievement) => (
+            <div className={`ach ${achievement.status}`} key={achievement.name}>
+              <div className="ach-icon">{achievement.icon}</div>
+              <div className="ach-name">{achievement.name}</div>
+              <div className="ach-progress">{achievement.progress}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="foot">ФОРМА — пример интерфейса для хакатона · экран index</footer>
     </AppFrame>
+  )
+}
+
+function QuickStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="qs-item">
+      <div className="qs-num">{value}</div>
+      <div className="qs-label">{label}</div>
+    </div>
   )
 }

@@ -1,122 +1,97 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect } from 'react'
+import { useAuth } from './auth/useAuth'
+import { HomePage } from './pages/HomePage'
+import { LoginPage } from './pages/LoginPage'
+import { NotFoundPage } from './pages/NotFoundPage'
+import { ProfilePage } from './pages/ProfilePage'
+import { RegisterPage } from './pages/RegisterPage'
+import { navigate, usePathname } from './router'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const pathname = normalizePathname(usePathname())
+  const { isAuthenticated, session, status } = useAuth()
+  const authenticatedPath = session?.profileCompleted ? '/app' : '/profile'
+
+  if (status === 'loading') {
+    return (
+      <FullscreenState
+        title="Подключаем сессию"
+        description="Проверяем access token и refresh cookie перед загрузкой страницы."
+      />
+    )
+  }
+
+  if (pathname === '/') {
+    return <Redirect replace to={isAuthenticated ? authenticatedPath : '/login'} />
+  }
+
+  if (pathname === '/login') {
+    return isAuthenticated ? <Redirect replace to={authenticatedPath} /> : <LoginPage />
+  }
+
+  if (pathname === '/register') {
+    return isAuthenticated ? <Redirect replace to={authenticatedPath} /> : <RegisterPage />
+  }
+
+  if (pathname === '/app') {
+    return isAuthenticated ? <HomePage /> : <Redirect replace to="/login" />
+  }
+
+  if (pathname === '/profile') {
+    return isAuthenticated ? <ProfilePage /> : <Redirect replace to="/login" />
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <NotFoundPage
+      authenticatedPath={authenticatedPath}
+      isAuthenticated={isAuthenticated}
+    />
   )
+}
+
+function Redirect({
+  replace = false,
+  to,
+}: {
+  replace?: boolean
+  to: string
+}) {
+  useEffect(() => {
+    navigate(to, { replace })
+  }, [replace, to])
+
+  return (
+    <FullscreenState
+      title="Переходим дальше"
+      description="Маршрут обновляется, это займет меньше секунды."
+    />
+  )
+}
+
+function FullscreenState({
+  description,
+  title,
+}: {
+  description: string
+  title: string
+}) {
+  return (
+    <div className="auth-page">
+      <section className="auth-card auth-card--state">
+        <p className="app-eyebrow">WORKTRITION</p>
+        <h1 className="auth-title">{title}</h1>
+        <p className="auth-subtitle">{description}</p>
+      </section>
+    </div>
+  )
+}
+
+function normalizePathname(pathname: string) {
+  if (pathname === '/') {
+    return pathname
+  }
+
+  return pathname.replace(/\/+$/, '')
 }
 
 export default App

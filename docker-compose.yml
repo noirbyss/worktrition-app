@@ -27,5 +27,17 @@ services:
       - "${USER_GRPC_PORT:-50051}:${USER_GRPC_PORT:-50051}"
     stop_grace_period: 10s
 
+  api-gateway-service:
+    build:
+      context: .
+      dockerfile: ./backend/api-gateway-service/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - user-service
+    ports:
+      - "${GATEWAY_HTTP_PORT:-8080}:${GATEWAY_HTTP_PORT:-8080}"
+    stop_grace_period: 10s
+
 volumes:
   user-db-data:

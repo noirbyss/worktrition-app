@@ -1,0 +1,90 @@
+package app
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/config"
+	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/gateway"
+	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/userapi"
+	userpb "github.com/noirbyss/worktrition-app/gen/user-service"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+const httpShutdownTimeout = 10 * time.Second
+
+func Run() error {
+	cfg, err := config.Load()
+	if err != nil {
+		return fmt.Errorf("load config: %w", err)
+	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	userServiceConn, err := grpc.NewClient(
+		cfg.UserServiceAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return fmt.Errorf("create user-service gRPC client: %w", err)
+	}
+	defer userServiceConn.Close()
+
+	userHandlers := userapi.New(userpb.NewUserServiceClient(userServiceConn), userapi.Config{
+		RefreshTokenCookieName: cfg.RefreshTokenCookieName,
+		SecureCookies:          cfg.SecureCookies(),
+	})
+
+	httpServer := &http.Server{
+		Addr:              cfg.HTTPAddress(),
+		Handler:           gateway.New(cfg, userHandlers),
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
+	return serveHTTP(ctx, cfg, httpServer)
+}
+
+func serveHTTP(ctx context.Context, cfg *config.Config, httpServer *http.Server) error {
+	serveErr := make(chan error, 1)
+	go func() {
+		serveErr <- httpServer.ListenAndServe()
+	}()
+
+	slog.Info(
+		"api-gateway-service started",
+		"environment", cfg.Environment,
+		"http_address", cfg.HTTPAddress(),
+		"user_service_addr", cfg.UserServiceAddr,
+	)
+
+	select {
+	case err := <-serveErr:
+		return wrapServeError(err)
+	case <-ctx.Done():
+		slog.Info("stopping api-gateway-service")
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), httpShutdownTimeout)
+		defer cancel()
+
+		if err := httpServer.Shutdown(shutdownCtx); err != nil {
+			return fmt.Errorf("shutdown HTTP server: %w", err)
+		}
+
+		return wrapServeError(<-serveErr)
+	}
+}
+
+func wrapServeError(err error) error {
+	if err == nil || errors.Is(err, http.ErrServerClosed) {
+		return nil
+	}
+
+	return fmt.Errorf("serve HTTP: %w", err)
+}

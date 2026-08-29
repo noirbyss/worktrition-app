@@ -1,0 +1,30 @@
+# Binaries
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Idea / VS Code
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+
+# Frontend
+frontend/node_modules
+frontend/logs
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+
+frontend/dist
+frontend/dist-ssr
+frontend/*.local

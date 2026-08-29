@@ -23,6 +23,7 @@ services:
     depends_on:
       user-db:
         condition: service_healthy
+    restart: unless-stopped
     ports:
       - "${USER_GRPC_PORT:-50051}:${USER_GRPC_PORT:-50051}"
     stop_grace_period: 10s
@@ -34,9 +35,25 @@ services:
     env_file:
       - .env
     depends_on:
-      - user-service
+      user-service:
+        condition: service_started
+    restart: unless-stopped
     ports:
       - "${GATEWAY_HTTP_PORT:-8080}:${GATEWAY_HTTP_PORT:-8080}"
+    stop_grace_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    depends_on:
+      api-gateway-service:
+        condition: service_started
+    environment:
+      VITE_API_BASE_URL: http://localhost:${GATEWAY_HTTP_PORT:-8080}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    restart: unless-stopped
     stop_grace_period: 10s
 
 volumes:

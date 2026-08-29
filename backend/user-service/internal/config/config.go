@@ -56,8 +56,9 @@ type LogConfig struct {
 }
 
 type JWTConfig struct {
-	Secret string        `env:"USER_JWT_SECRET" env-required:"true"`
-	TTL    time.Duration `env:"USER_JWT_TTL" env-default:"24h"`
+	Secret          string        `env:"USER_JWT_SECRET" env-required:"true"`
+	AccessTokenTTL  time.Duration `env:"USER_ACCESS_TOKEN_TTL" env-default:"15m"`
+	RefreshTokenTTL time.Duration `env:"USER_REFRESH_TOKEN_TTL" env-default:"720h"`
 }
 
 func Load() (*Config, error) {

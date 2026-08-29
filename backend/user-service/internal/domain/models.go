@@ -72,3 +72,20 @@ type Profile struct {
 	CreatedAt           time.Time        `db:"created_at"`
 	UpdatedAt           time.Time        `db:"updated_at"`
 }
+
+type RefreshToken struct {
+	ID        string     `db:"id"`
+	UserID    string     `db:"user_id"`
+	TokenHash string     `db:"token_hash"`
+	ExpiresAt time.Time  `db:"expires_at"`
+	RevokedAt *time.Time `db:"revoked_at"`
+	CreatedAt time.Time  `db:"created_at"`
+}
+
+type AuthSession struct {
+	User                  *User
+	AccessToken           string
+	RefreshToken          string
+	AccessTokenExpiresAt  time.Time
+	RefreshTokenExpiresAt time.Time
+}

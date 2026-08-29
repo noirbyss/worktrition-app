@@ -18,6 +18,7 @@ import (
 	"github.com/noirbyss/worktrition-app/backend/user-service/internal/migrator"
 	"github.com/noirbyss/worktrition-app/backend/user-service/internal/repository"
 	"github.com/noirbyss/worktrition-app/backend/user-service/internal/service"
+	"github.com/noirbyss/worktrition-app/backend/user-service/internal/token"
 	userpb "github.com/noirbyss/worktrition-app/gen/user-service"
 	"google.golang.org/grpc"
 )
@@ -56,7 +57,17 @@ func Run() error {
 	grpcServer := grpc.NewServer()
 	userRepository := repository.NewPostgresUserRepository(pool)
 	profileRepository := repository.NewPostgresProfileRepository(pool)
-	authService := service.NewAuthService(userRepository)
+	refreshTokenRepository := repository.NewPostgresRefreshTokenRepository(pool)
+	tokenService, err := token.NewService(
+		cfg.JWT.Secret,
+		cfg.JWT.AccessTokenTTL,
+		cfg.JWT.RefreshTokenTTL,
+	)
+	if err != nil {
+		return fmt.Errorf("create token service: %w", err)
+	}
+
+	authService := service.NewAuthService(userRepository, refreshTokenRepository, tokenService)
 	profileService := service.NewProfileService(userRepository, profileRepository)
 
 	userpb.RegisterUserServiceServer(grpcServer, grpcserver.New(authService, profileService))

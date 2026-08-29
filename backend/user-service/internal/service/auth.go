@@ -5,23 +5,35 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/noirbyss/worktrition-app/backend/user-service/internal/domain"
 	"github.com/noirbyss/worktrition-app/backend/user-service/internal/password"
+	"github.com/noirbyss/worktrition-app/backend/user-service/internal/token"
 )
 
 type AuthService struct {
-	users domain.UserRepository
+	users         domain.UserRepository
+	refreshTokens domain.RefreshTokenRepository
+	tokens        *token.Service
 }
 
-func NewAuthService(users domain.UserRepository) *AuthService {
-	return &AuthService{users: users}
+func NewAuthService(
+	users domain.UserRepository,
+	refreshTokens domain.RefreshTokenRepository,
+	tokens *token.Service,
+) *AuthService {
+	return &AuthService{
+		users:         users,
+		refreshTokens: refreshTokens,
+		tokens:        tokens,
+	}
 }
 
-func (s *AuthService) CreateUser(
+func (s *AuthService) Register(
 	ctx context.Context,
 	name, email, plainPassword, birthDate string,
-) (*domain.User, error) {
+) (*domain.AuthSession, error) {
 	if err := domain.ValidateCreateUser(name, email, plainPassword, birthDate); err != nil {
 		return nil, err
 	}
@@ -47,13 +59,13 @@ func (s *AuthService) CreateUser(
 		return nil, err
 	}
 
-	return user, nil
+	return s.issueSession(ctx, user)
 }
 
-func (s *AuthService) VerifyCredentials(
+func (s *AuthService) Login(
 	ctx context.Context,
 	email, plainPassword string,
-) (*domain.User, error) {
+) (*domain.AuthSession, error) {
 	email = strings.TrimSpace(email)
 
 	if err := domain.ValidateCredentials(email, plainPassword); err != nil {
@@ -73,5 +85,81 @@ func (s *AuthService) VerifyCredentials(
 		return nil, domain.ErrInvalidCredentials
 	}
 
-	return user, nil
+	return s.issueSession(ctx, user)
+}
+
+func (s *AuthService) RefreshToken(ctx context.Context, rawRefreshToken string) (*domain.AuthSession, error) {
+	rawRefreshToken = strings.TrimSpace(rawRefreshToken)
+	if rawRefreshToken == "" {
+		return nil, domain.NewValidationError("refresh_token", "is required")
+	}
+
+	tokenHash := s.tokens.HashRefreshToken(rawRefreshToken)
+	storedToken, err := s.refreshTokens.GetByHash(ctx, tokenHash)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+	if storedToken.RevokedAt != nil {
+		return nil, domain.ErrTokenRevoked
+	}
+	if !storedToken.ExpiresAt.After(now) {
+		return nil, domain.ErrTokenExpired
+	}
+
+	user, err := s.users.GetByID(ctx, storedToken.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.refreshTokens.RevokeByHash(ctx, tokenHash); err != nil {
+		return nil, err
+	}
+
+	return s.issueSession(ctx, user)
+}
+
+func (s *AuthService) Logout(ctx context.Context, rawRefreshToken string) error {
+	rawRefreshToken = strings.TrimSpace(rawRefreshToken)
+	if rawRefreshToken == "" {
+		return domain.NewValidationError("refresh_token", "is required")
+	}
+
+	return s.refreshTokens.RevokeByHash(ctx, s.tokens.HashRefreshToken(rawRefreshToken))
+}
+
+func (s *AuthService) issueSession(ctx context.Context, user *domain.User) (*domain.AuthSession, error) {
+	if user == nil {
+		return nil, domain.NewValidationError("user", "is required")
+	}
+
+	now := time.Now()
+
+	accessToken, err := s.tokens.NewAccessToken(user.ID, now)
+	if err != nil {
+		return nil, fmt.Errorf("create access token: %w", err)
+	}
+
+	refreshToken, err := s.tokens.NewRefreshToken(now)
+	if err != nil {
+		return nil, err
+	}
+
+	storedToken := &domain.RefreshToken{
+		UserID:    user.ID,
+		TokenHash: refreshToken.Hash,
+		ExpiresAt: refreshToken.ExpiresAt,
+	}
+	if err := s.refreshTokens.Create(ctx, storedToken); err != nil {
+		return nil, err
+	}
+
+	return &domain.AuthSession{
+		User:                  user,
+		AccessToken:           accessToken.Value,
+		RefreshToken:          refreshToken.Value,
+		AccessTokenExpiresAt:  accessToken.ExpiresAt,
+		RefreshTokenExpiresAt: refreshToken.ExpiresAt,
+	}, nil
 }

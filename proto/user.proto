@@ -5,8 +5,10 @@ package user;
 option go_package = "github.com/noirbyss/worktrition-app/gen/user-service;user";
 
 service UserService {
-  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
-  rpc VerifyCredentials(VerifyCredentialsRequest) returns (VerifyCredentialsResponse);
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
   rpc SaveProfile(SaveProfileRequest) returns (SaveProfileResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
@@ -46,25 +48,55 @@ enum TrainingLocation {
   TRAINING_LOCATION_GYM = 2;
 }
 
-message CreateUserRequest {
+message RegisterRequest {
   string name = 1;
   string email = 2;
   string password = 3;
   string birth_date = 4;
 }
 
-message CreateUserResponse {
+message RegisterResponse {
   string user_id = 1;
+  bool profile_completed = 2;
+  string access_token = 3;
+  string refresh_token = 4;
+  int64 access_token_expires_at = 5;
+  int64 refresh_token_expires_at = 6;
 }
 
-message VerifyCredentialsRequest {
+message LoginRequest {
   string email = 1;
   string password = 2;
 }
 
-message VerifyCredentialsResponse {
+message LoginResponse {
   string user_id = 1;
   bool profile_completed = 2;
+  string access_token = 3;
+  string refresh_token = 4;
+  int64 access_token_expires_at = 5;
+  int64 refresh_token_expires_at = 6;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  string user_id = 1;
+  bool profile_completed = 2;
+  string access_token = 3;
+  string refresh_token = 4;
+  int64 access_token_expires_at = 5;
+  int64 refresh_token_expires_at = 6;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
 }
 
 message SaveProfileRequest {

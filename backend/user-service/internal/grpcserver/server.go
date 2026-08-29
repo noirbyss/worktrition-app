@@ -12,8 +12,10 @@ import (
 )
 
 type AuthUseCase interface {
-	CreateUser(ctx context.Context, name, email, plainPassword, birthDate string) (*domain.User, error)
-	VerifyCredentials(ctx context.Context, email, plainPassword string) (*domain.User, error)
+	Register(ctx context.Context, name, email, plainPassword, birthDate string) (*domain.AuthSession, error)
+	Login(ctx context.Context, email, plainPassword string) (*domain.AuthSession, error)
+	RefreshToken(ctx context.Context, refreshToken string) (*domain.AuthSession, error)
+	Logout(ctx context.Context, refreshToken string) error
 }
 
 type ProfileUseCase interface {
@@ -36,40 +38,68 @@ func New(auth AuthUseCase, profile ProfileUseCase) *Server {
 	}
 }
 
-func (s *Server) CreateUser(
+func (s *Server) Register(
 	ctx context.Context,
-	req *userpb.CreateUserRequest,
-) (*userpb.CreateUserResponse, error) {
+	req *userpb.RegisterRequest,
+) (*userpb.RegisterResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "request is required")
 	}
 
-	createdUser, err := s.auth.CreateUser(ctx, req.GetName(), req.GetEmail(), req.GetPassword(), req.GetBirthDate())
+	session, err := s.auth.Register(ctx, req.GetName(), req.GetEmail(), req.GetPassword(), req.GetBirthDate())
 	if err != nil {
 		return nil, toStatusError(err)
 	}
 
-	return &userpb.CreateUserResponse{
-		UserId: createdUser.ID,
-	}, nil
+	return authSessionToRegisterProto(session), nil
 }
 
-func (s *Server) VerifyCredentials(
+func (s *Server) Login(
 	ctx context.Context,
-	req *userpb.VerifyCredentialsRequest,
-) (*userpb.VerifyCredentialsResponse, error) {
+	req *userpb.LoginRequest,
+) (*userpb.LoginResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "request is required")
 	}
 
-	foundUser, err := s.auth.VerifyCredentials(ctx, req.GetEmail(), req.GetPassword())
+	session, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
 		return nil, toStatusError(err)
 	}
 
-	return &userpb.VerifyCredentialsResponse{
-		UserId:           foundUser.ID,
-		ProfileCompleted: foundUser.ProfileCompleted,
+	return authSessionToLoginProto(session), nil
+}
+
+func (s *Server) RefreshToken(
+	ctx context.Context,
+	req *userpb.RefreshTokenRequest,
+) (*userpb.RefreshTokenResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "request is required")
+	}
+
+	session, err := s.auth.RefreshToken(ctx, req.GetRefreshToken())
+	if err != nil {
+		return nil, toStatusError(err)
+	}
+
+	return authSessionToRefreshTokenProto(session), nil
+}
+
+func (s *Server) Logout(
+	ctx context.Context,
+	req *userpb.LogoutRequest,
+) (*userpb.LogoutResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "request is required")
+	}
+
+	if err := s.auth.Logout(ctx, req.GetRefreshToken()); err != nil {
+		return nil, toStatusError(err)
+	}
+
+	return &userpb.LogoutResponse{
+		Success: true,
 	}, nil
 }
 
@@ -149,6 +179,51 @@ func profileFromProto(req *userpb.SaveProfileRequest) *domain.Profile {
 	}
 }
 
+func authSessionToRegisterProto(session *domain.AuthSession) *userpb.RegisterResponse {
+	if session == nil || session.User == nil {
+		return &userpb.RegisterResponse{}
+	}
+
+	return &userpb.RegisterResponse{
+		UserId:                session.User.ID,
+		ProfileCompleted:      session.User.ProfileCompleted,
+		AccessToken:           session.AccessToken,
+		RefreshToken:          session.RefreshToken,
+		AccessTokenExpiresAt:  session.AccessTokenExpiresAt.Unix(),
+		RefreshTokenExpiresAt: session.RefreshTokenExpiresAt.Unix(),
+	}
+}
+
+func authSessionToLoginProto(session *domain.AuthSession) *userpb.LoginResponse {
+	if session == nil || session.User == nil {
+		return &userpb.LoginResponse{}
+	}
+
+	return &userpb.LoginResponse{
+		UserId:                session.User.ID,
+		ProfileCompleted:      session.User.ProfileCompleted,
+		AccessToken:           session.AccessToken,
+		RefreshToken:          session.RefreshToken,
+		AccessTokenExpiresAt:  session.AccessTokenExpiresAt.Unix(),
+		RefreshTokenExpiresAt: session.RefreshTokenExpiresAt.Unix(),
+	}
+}
+
+func authSessionToRefreshTokenProto(session *domain.AuthSession) *userpb.RefreshTokenResponse {
+	if session == nil || session.User == nil {
+		return &userpb.RefreshTokenResponse{}
+	}
+
+	return &userpb.RefreshTokenResponse{
+		UserId:                session.User.ID,
+		ProfileCompleted:      session.User.ProfileCompleted,
+		AccessToken:           session.AccessToken,
+		RefreshToken:          session.RefreshToken,
+		AccessTokenExpiresAt:  session.AccessTokenExpiresAt.Unix(),
+		RefreshTokenExpiresAt: session.RefreshTokenExpiresAt.Unix(),
+	}
+}
+
 func userToProto(user *domain.User) *userpb.GetUserResponse {
 	return &userpb.GetUserResponse{
 		UserId:           user.ID,
@@ -210,6 +285,10 @@ func toStatusError(err error) error {
 	case errors.Is(err, domain.ErrUserAlreadyExists):
 		return status.Error(codes.AlreadyExists, err.Error())
 	case errors.Is(err, domain.ErrInvalidCredentials):
+		return status.Error(codes.Unauthenticated, err.Error())
+	case errors.Is(err, domain.ErrInvalidToken),
+		errors.Is(err, domain.ErrTokenExpired),
+		errors.Is(err, domain.ErrTokenRevoked):
 		return status.Error(codes.Unauthenticated, err.Error())
 	case errors.Is(err, domain.ErrUserNotFound), errors.Is(err, domain.ErrProfileNotFound):
 		return status.Error(codes.NotFound, err.Error())

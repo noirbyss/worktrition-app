@@ -13,3 +13,10 @@ type ProfileRepository interface {
 	Save(ctx context.Context, profile *Profile) error
 	GetByUserID(ctx context.Context, userID string) (*Profile, error)
 }
+
+type RefreshTokenRepository interface {
+	Create(ctx context.Context, token *RefreshToken) error
+	GetByHash(ctx context.Context, tokenHash string) (*RefreshToken, error)
+	RevokeByHash(ctx context.Context, tokenHash string) error
+	RevokeAllByUserID(ctx context.Context, userID string) error
+}

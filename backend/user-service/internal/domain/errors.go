@@ -7,6 +7,9 @@ var (
 	ErrUserNotFound       = errors.New("user not found")
 	ErrProfileNotFound    = errors.New("profile not found")
 	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrInvalidToken       = errors.New("invalid token")
+	ErrTokenExpired       = errors.New("token expired")
+	ErrTokenRevoked       = errors.New("token revoked")
 )
 
 type ValidationError struct {

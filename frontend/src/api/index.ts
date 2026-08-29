@@ -1,6 +1,6 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080').replace(/\/+$/, '')
 
-type HttpMethod = 'GET' | 'POST'
+type HttpMethod = 'GET' | 'POST' | 'PUT'
 
 interface RequestOptions {
   accessToken?: string
@@ -41,6 +41,11 @@ interface ProfileDto {
   weight_kg: number
 }
 
+interface SaveProfileResponseDto {
+  bmi: number
+  profile_completed: boolean
+}
+
 export interface LoginPayload {
   email: string
   password: string
@@ -56,6 +61,22 @@ export interface AuthSession {
   accessTokenExpiresAt: number
   profileCompleted: boolean
   userId: string
+}
+
+export interface SaveProfilePayload {
+  activity_level: number
+  allergies: string[]
+  equipment: string
+  excluded_foods: string[]
+  food_preferences: string[]
+  gender: number
+  goal: number
+  height_cm: number
+  target_weight_kg?: number
+  training_days_per_week: number
+  training_level: number
+  training_location: number
+  weight_kg: number
 }
 
 export interface CurrentUser {
@@ -82,6 +103,11 @@ export interface Profile {
   trainingLocation: number
   userId: string
   weightKg: number
+}
+
+export interface SaveProfileResult {
+  bmi: number
+  profileCompleted: boolean
 }
 
 export class ApiError extends Error {
@@ -166,6 +192,19 @@ export async function getProfile(accessToken: string) {
     userId: response.user_id,
     weightKg: response.weight_kg,
   } satisfies Profile
+}
+
+export async function saveProfile(accessToken: string, payload: SaveProfilePayload) {
+  const response = await request<SaveProfileResponseDto>('/profile', {
+    accessToken,
+    body: payload,
+    method: 'PUT',
+  })
+
+  return {
+    bmi: response.bmi,
+    profileCompleted: response.profile_completed,
+  } satisfies SaveProfileResult
 }
 
 async function request<T>(path: string, options: RequestOptions) {

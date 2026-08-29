@@ -14,12 +14,15 @@ import {
   type LoginPayload,
   type Profile,
   type RegisterPayload,
+  type SaveProfilePayload,
+  type SaveProfileResult,
   getCurrentUser as fetchCurrentUser,
   getProfile as fetchProfile,
   login as loginRequest,
   logout as logoutRequest,
   refresh as refreshRequest,
   register as registerRequest,
+  saveProfile as saveProfileRequest,
 } from '../api'
 import { loadAuthSession, persistAuthSession } from './auth-storage'
 
@@ -33,6 +36,7 @@ interface AuthContextValue {
   logout: () => Promise<void>
   refreshSession: () => Promise<AuthSession>
   register: (payload: RegisterPayload) => Promise<AuthSession>
+  saveProfile: (payload: SaveProfilePayload) => Promise<SaveProfileResult>
   session: AuthSession | null
   status: AuthStatus
 }
@@ -62,6 +66,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(nextSession)
     setStatus('authenticated')
   }, [])
+
+  const markProfileCompleted = useCallback(() => {
+    const currentSession = sessionRef.current
+    if (!currentSession || currentSession.profileCompleted) {
+      return
+    }
+
+    applySession({
+      ...currentSession,
+      profileCompleted: true,
+    })
+  }, [applySession])
 
   const refreshSession = useCallback(async () => {
     if (refreshPromiseRef.current) {
@@ -168,6 +184,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [withAuthorizedSession],
   )
 
+  const saveProfile = useCallback(
+    async (payload: SaveProfilePayload) => {
+      const response = await withAuthorizedSession((activeSession) =>
+        saveProfileRequest(activeSession.accessToken, payload),
+      )
+
+      if (response.profileCompleted) {
+        markProfileCompleted()
+      }
+
+      return response
+    },
+    [markProfileCompleted, withAuthorizedSession],
+  )
+
   const value = useMemo<AuthContextValue>(
     () => ({
       getCurrentUser,
@@ -177,10 +208,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       refreshSession,
       register,
+      saveProfile,
       session,
       status,
     }),
-    [getCurrentUser, getProfile, login, logout, refreshSession, register, session, status],
+    [getCurrentUser, getProfile, login, logout, refreshSession, register, saveProfile, session, status],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

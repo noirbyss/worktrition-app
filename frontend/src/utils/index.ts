@@ -68,13 +68,36 @@ function translateBackendError(message: string) {
   const normalizedMessage = message.trim()
 
   const fieldTranslations: Record<string, string> = {
+    'activity_level: must be specified': 'activity_level: Выберите уровень активности.',
+    'allergies: items cannot be empty': 'allergies: Удалите пустые элементы из списка аллергий.',
+    'allergies: items must contain no more than 80 characters':
+      'allergies: Каждый пункт списка аллергий должен быть короче 80 символов.',
+    'allergies: must contain no more than 50 items':
+      'allergies: Список аллергий не должен содержать больше 50 элементов.',
+    'age: must be between 13 and 120': 'age: Возраст должен быть от 13 до 120 лет.',
     'birth_date: age must be between 13 and 120': 'birth_date: Возраст должен быть от 13 до 120 лет.',
     'birth_date: cannot be in the future': 'birth_date: Дата рождения не может быть в будущем.',
     'birth_date: is required': 'birth_date: Укажите дату рождения.',
     'birth_date: must use YYYY-MM-DD format': 'birth_date: Дата должна быть в формате YYYY-MM-DD.',
+    'equipment: is too long': 'equipment: Описание инвентаря слишком длинное.',
     'email: is not a valid email address': 'email: Укажите корректный email.',
     'email: is required': 'email: Введите email.',
     'email: is too long': 'email: Email слишком длинный.',
+    'excluded_foods: items cannot be empty':
+      'excluded_foods: Удалите пустые элементы из списка исключенных продуктов.',
+    'excluded_foods: items must contain no more than 80 characters':
+      'excluded_foods: Каждый исключенный продукт должен быть короче 80 символов.',
+    'excluded_foods: must contain no more than 50 items':
+      'excluded_foods: Список исключенных продуктов не должен содержать больше 50 элементов.',
+    'food_preferences: items cannot be empty':
+      'food_preferences: Удалите пустые элементы из списка пищевых предпочтений.',
+    'food_preferences: items must contain no more than 80 characters':
+      'food_preferences: Каждый пункт списка предпочтений должен быть короче 80 символов.',
+    'food_preferences: must contain no more than 50 items':
+      'food_preferences: Список предпочтений не должен содержать больше 50 элементов.',
+    'gender: must be specified': 'gender: Выберите пол.',
+    'goal: must be specified': 'goal: Выберите цель.',
+    'height_cm: must be between 80 and 250': 'height_cm: Рост должен быть в диапазоне от 80 до 250 см.',
     'name: is required': 'name: Введите имя.',
     'name: is too long': 'name: Имя слишком длинное.',
     'name: must be at least 2 characters long': 'name: Имя должно содержать минимум 2 символа.',
@@ -83,6 +106,13 @@ function translateBackendError(message: string) {
     'password: must be at least 8 characters long': 'password: Пароль должен содержать минимум 8 символов.',
     'password: must contain at least one letter and one digit':
       'password: Пароль должен содержать хотя бы одну букву и одну цифру.',
+    'target_weight_kg: must be between 25 and 400':
+      'target_weight_kg: Целевой вес должен быть в диапазоне от 25 до 400 кг.',
+    'training_days_per_week: must be between 0 and 7':
+      'training_days_per_week: Количество тренировок должно быть от 0 до 7.',
+    'training_level: must be specified': 'training_level: Выберите уровень тренировок.',
+    'training_location: must be specified': 'training_location: Выберите место тренировок.',
+    'weight_kg: must be between 25 and 400': 'weight_kg: Вес должен быть в диапазоне от 25 до 400 кг.',
   }
 
   const commonTranslations: Record<string, string> = {

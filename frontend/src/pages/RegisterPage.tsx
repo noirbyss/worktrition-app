@@ -50,7 +50,7 @@ export function RegisterPage() {
         password,
       })
 
-      navigate(session.profileCompleted ? '/app' : '/profile', { replace: true })
+      navigate(session.profileCompleted ? '/app' : '/questionnaire', { replace: true })
     } catch (error) {
       const mappedErrors = mapErrorToFieldErrors(error, fieldMap)
       setFieldErrors(mappedErrors.fieldErrors)

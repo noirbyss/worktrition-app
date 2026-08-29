@@ -61,6 +61,12 @@ export function HomePage() {
           <AppLink className="btn btn--ghost btn--small" href="/profile">
             Открыть профиль
           </AppLink>
+          <AppLink className="btn btn--ghost btn--small" href="/nutrition">
+            Питание
+          </AppLink>
+          <AppLink className="btn btn--ghost btn--small" href="/workouts">
+            Тренировки
+          </AppLink>
           <button
             className="btn btn--small"
             disabled={isLoggingOut}
@@ -73,7 +79,7 @@ export function HomePage() {
           </button>
         </div>
       }
-      description="Здесь уже используется access token из React-состояния и автоматический refresh через HttpOnly cookie."
+      description="После обязательной анкеты доступ к защищенным разделам открыт. Здесь можно проверить сессию и перейти в тестовые разделы приложения."
       title="Аккаунт"
     >
       {loadError ? <InlineMessage>{loadError}</InlineMessage> : null}
@@ -83,8 +89,8 @@ export function HomePage() {
           <h2 className="panel-title">Состояние авторизации</h2>
           <p className="panel-copy">
             {session?.profileCompleted
-              ? 'Профиль заполнен, доступ к защищенным маршрутам открыт.'
-              : 'Сессия активна, но профиль еще не заполнен.'}
+              ? 'Анкета сохранена, доступ к профилю, питанию и тренировкам открыт.'
+              : 'Сессия активна, но анкета еще не завершена.'}
           </p>
           <div className="badge-row">
             <span className="badge">{session?.profileCompleted ? 'PROFILE READY' : 'PROFILE PENDING'}</span>

@@ -92,12 +92,18 @@ export function ProfilePage() {
       actions={
         <div className="button-row">
           <AppLink className="btn btn--ghost btn--small" href="/app">
-            Назад в аккаунт
+            Аккаунт
+          </AppLink>
+          <AppLink className="btn btn--ghost btn--small" href="/nutrition">
+            Питание
+          </AppLink>
+          <AppLink className="btn btn--ghost btn--small" href="/workouts">
+            Тренировки
           </AppLink>
         </div>
       }
-      description="Страница читает `/profile` и показывает понятное состояние, если анкета еще не создана."
-      title="Профиль"
+      description="Временный тестовый профиль. Страница читает `/users/me` и `/profile` через gateway и показывает, что анкета действительно сохранилась."
+      title="Тестовый профиль"
     >
       {loadError ? <InlineMessage>{loadError}</InlineMessage> : null}
 
@@ -209,8 +215,8 @@ export function ProfilePage() {
         <section className="panel">
           <h2 className="panel-title">Профиль еще не создан</h2>
           <p className="panel-copy">
-            Пользователь уже авторизован, но gateway вернул `404 profile not found`.
-            Это ожидаемое состояние после регистрации, пока анкета не заполнена.
+            Gateway вернул `404 profile not found`. Для уже завершенной анкеты это нештатное
+            состояние и его стоит проверить отдельно.
           </p>
         </section>
       ) : null}

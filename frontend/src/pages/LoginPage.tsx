@@ -51,7 +51,6 @@ export function LoginPage() {
 
   return (
     <AuthLayout
-      subtitle="Форма отправляет данные в API gateway и покажет ошибку сервера прямо на экране."
       switchHref="/register"
       switchLabel="Зарегистрироваться"
       switchText="Нет аккаунта?"

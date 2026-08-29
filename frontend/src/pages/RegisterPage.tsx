@@ -62,7 +62,6 @@ export function RegisterPage() {
 
   return (
     <AuthLayout
-      subtitle="Регистрация отправляется в API gateway, а refresh token сохраняется в HttpOnly cookie."
       switchHref="/login"
       switchLabel="Войти"
       switchText="Уже есть аккаунт?"

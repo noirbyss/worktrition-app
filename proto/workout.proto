@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package workout;
+
+option go_package = "github.com/noirbyss/worktrition-app/gen/workout-service;workout";
+
+import "google/protobuf/empty.proto";
+
+enum DaysOfWeek {
+    DAYS_OF_WEEK_UNSPECIFIED = 0;
+    DAYS_OF_WEEK_MONDAY = 1;
+    DAYS_OF_WEEK_TUESDAY = 2;
+    DAYS_OF_WEEK_WEDNESDAY = 3;
+    DAYS_OF_WEEK_THURSDAY = 4;
+    DAYS_OF_WEEK_FRIDAY = 5;
+    DAYS_OF_WEEK_SATURDAY = 6;
+    DAYS_OF_WEEK_SUNDAY = 7;
+}
+
+service WorkoutService {
+    rpc SaveGeneratedPlan(SaveGeneratedPlanRequest) returns (google.protobuf.Empty);
+    rpc GetDayPlan(GetDayPlanRequest) returns (GetDayPlanResponse);
+    rpc CompleteTraining(CompleteTrainingRequest) returns (google.protobuf.Empty);
+    rpc GetStats(GetStatsRequest) returns (GetStatsResponse);
+}
+
+message ExerciseTemplateRequest {
+    string name = 1;
+    string description = 2;
+}
+
+message TrainingTemplateRequest {
+    DaysOfWeek day_of_week = 1;
+    repeated ExerciseTemplateRequest exercises = 2;
+}
+
+message SaveGeneratedPlanRequest {
+    string user_id = 1;
+    string generation_id = 2;
+    repeated TrainingTemplateRequest trainings = 3;
+}
+
+message GetDayPlanRequest {
+    string user_id = 1;
+    DaysOfWeek day_of_week = 2;
+}
+
+message ExerciseTemplateResponse {
+    int32 id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message GetDayPlanResponse {
+    repeated ExerciseTemplateResponse exercises = 1;
+}
+
+message CompleteTrainingRequest {
+    string user_id = 1;
+    int32 exercise_template_id = 2;
+    int32 time_duration = 3;
+}
+
+message GetStatsRequest {
+    string user_id = 1;
+}
+
+message GetStatsResponse {
+    double percentage_plan_fulfilled = 1;
+    int32 current_streak_days = 2;
+    int32 total_training_time_seconds = 3;
+}

@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"nutrition-service/internal/service"
+	"nutrition-service/internal/transport/client"
 
 	pb "github.com/noirbyss/worktrition-app/gen/nutrition-service"
 	"google.golang.org/grpc/codes"
@@ -12,15 +13,20 @@ import (
 
 type NutritionServiceServer struct {
 	pb.UnimplementedNutritionServiceServer
-	service *service.Service
+	service                   *service.Service
+	gamificationServiceClient GamificationClient
 }
 
-func NewServer(service *service.Service) (*NutritionServiceServer, error) {
+func New(service *service.Service, client *client.NutritionServiceClient) (*NutritionServiceServer, error) {
 	if service == nil {
 		return nil, ErrNilPointerService
 	}
 
-	return &NutritionServiceServer{service: service}, nil
+	if client == nil {
+		return nil, ErrNilPointerClient
+	}
+
+	return &NutritionServiceServer{service: service, gamificationServiceClient: client}, nil
 }
 
 func (nss *NutritionServiceServer) SaveGeneratedPlan(ctx context.Context, r *pb.SaveGeneratedPlanRequest) (*emptypb.Empty, error) {

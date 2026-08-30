@@ -848,7 +848,7 @@ select {
 
 .stat-row {
   display: grid;
-  grid-template-columns: 126px minmax(0, 1fr) 56px;
+  grid-template-columns: 126px minmax(0, 1fr) minmax(56px, max-content);
   align-items: center;
   gap: 14px;
   margin-bottom: 18px;
@@ -898,6 +898,7 @@ select {
   font-size: 13.5px;
   text-align: right;
   color: var(--text-soft);
+  justify-self: end;
 }
 
 .check-item {

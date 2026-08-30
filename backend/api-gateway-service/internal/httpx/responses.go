@@ -31,13 +31,13 @@ func WriteGRPCError(w http.ResponseWriter, err error) {
 	case codes.AlreadyExists:
 		WriteError(w, http.StatusConflict, message)
 	case codes.DeadlineExceeded:
-		WriteError(w, http.StatusGatewayTimeout, "user-service request timed out")
+		WriteError(w, http.StatusGatewayTimeout, "upstream service request timed out")
 	case codes.Unavailable:
-		WriteError(w, http.StatusServiceUnavailable, "user-service is unavailable")
+		WriteError(w, http.StatusServiceUnavailable, "upstream service is unavailable")
 	case codes.Internal, codes.Unknown:
 		WriteError(w, http.StatusInternalServerError, message)
 	default:
-		WriteError(w, http.StatusInternalServerError, fmt.Sprintf("user-service error: %s", message))
+		WriteError(w, http.StatusInternalServerError, fmt.Sprintf("upstream service error: %s", message))
 	}
 }
 

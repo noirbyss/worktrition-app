@@ -37,6 +37,8 @@ services:
     depends_on:
       user-service:
         condition: service_started
+      nutrition-service:
+        condition: service_started
     restart: unless-stopped
     ports:
       - "${GATEWAY_HTTP_PORT:-8080}:${GATEWAY_HTTP_PORT:-8080}"

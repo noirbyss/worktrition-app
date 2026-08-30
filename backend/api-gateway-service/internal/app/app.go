@@ -12,11 +12,13 @@ import (
 
 	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/aiapi"
 	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/config"
+	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/gamificationapi"
 	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/gateway"
 	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/nutritionapi"
 	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/userapi"
 	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/workoutapi"
 	aipb "github.com/noirbyss/worktrition-app/gen/ai-service"
+	gamificationpb "github.com/noirbyss/worktrition-app/gen/gamification-service"
 	nutritionpb "github.com/noirbyss/worktrition-app/gen/nutrition-service"
 	userpb "github.com/noirbyss/worktrition-app/gen/user-service"
 	workoutpb "github.com/noirbyss/worktrition-app/gen/workout-service"
@@ -62,6 +64,15 @@ func Run() error {
 	}
 	defer workoutServiceConn.Close()
 
+	gamificationServiceConn, err := grpc.NewClient(
+		cfg.GamificationServiceAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return fmt.Errorf("create gamification-service gRPC client: %w", err)
+	}
+	defer gamificationServiceConn.Close()
+
 	aiServiceConn, err := grpc.NewClient(
 		cfg.AIServiceAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -82,13 +93,16 @@ func Run() error {
 	workoutHandlers := workoutapi.New(workoutpb.NewWorkoutServiceClient(workoutServiceConn), workoutapi.Config{
 		RequestTimeout: cfg.UpstreamRequestTimeout,
 	})
+	gamificationHandlers := gamificationapi.New(gamificationpb.NewGamificationServiceClient(gamificationServiceConn), gamificationapi.Config{
+		RequestTimeout: cfg.UpstreamRequestTimeout,
+	})
 	aiHandlers := aiapi.New(aipb.NewAiServiceClient(aiServiceConn), aiapi.Config{
 		RequestTimeout: cfg.UpstreamRequestTimeout,
 	})
 
 	httpServer := &http.Server{
 		Addr:              cfg.HTTPAddress(),
-		Handler:           gateway.New(cfg, userHandlers, nutritionHandlers, workoutHandlers, aiHandlers),
+		Handler:           gateway.New(cfg, userHandlers, nutritionHandlers, workoutHandlers, gamificationHandlers, aiHandlers),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
@@ -109,6 +123,7 @@ func serveHTTP(ctx context.Context, cfg *config.Config, httpServer *http.Server)
 		"user_service_addr", cfg.UserServiceAddr,
 		"nutrition_service_addr", cfg.NutritionServiceAddr,
 		"workout_service_addr", cfg.WorkoutServiceAddr,
+		"gamification_service_addr", cfg.GamificationServiceAddr,
 		"ai_service_addr", cfg.AIServiceAddr,
 	)
 

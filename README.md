@@ -27,6 +27,13 @@ AI через gateway:
 - `POST /ai/generations` c JSON `{ "plan_type": "all" | "workout" | "nutrition" }`
 - `GET /ai/generations/{generation_id}`
 
+Gamification через gateway:
+
+- `GET /gamification/character`
+- `POST /gamification/rewards/workout` c JSON `{ "is_strength": true | false }`
+- `POST /gamification/rewards/meal`
+- `POST /gamification/rewards/water`
+
 Для остановки:
 
 ```powershell

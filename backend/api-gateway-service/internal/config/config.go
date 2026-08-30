@@ -10,28 +10,30 @@ import (
 )
 
 const (
-	defaultEnvironment            = "local"
-	defaultHTTPPort               = 8080
-	defaultAllowedOrigin          = "http://localhost:5173"
-	defaultUpstreamRequestTimeout = 15 * time.Second
-	defaultUserServiceAddr        = "localhost:50051"
-	defaultNutritionServiceAddr   = "localhost:50052"
-	defaultWorkoutServiceAddr     = "localhost:50054"
-	defaultAIServiceAddr          = "localhost:50056"
-	defaultRefreshTokenCookieName = "refresh_token"
+	defaultEnvironment             = "local"
+	defaultHTTPPort                = 8080
+	defaultAllowedOrigin           = "http://localhost:5173"
+	defaultUpstreamRequestTimeout  = 15 * time.Second
+	defaultUserServiceAddr         = "localhost:50051"
+	defaultNutritionServiceAddr    = "localhost:50052"
+	defaultWorkoutServiceAddr      = "localhost:50054"
+	defaultGamificationServiceAddr = "localhost:50055"
+	defaultAIServiceAddr           = "localhost:50056"
+	defaultRefreshTokenCookieName  = "refresh_token"
 )
 
 type Config struct {
-	Environment            string
-	HTTPPort               int
-	AllowedOrigin          string
-	UpstreamRequestTimeout time.Duration
-	UserServiceAddr        string
-	NutritionServiceAddr   string
-	WorkoutServiceAddr     string
-	AIServiceAddr          string
-	UserJWTSecret          string
-	RefreshTokenCookieName string
+	Environment             string
+	HTTPPort                int
+	AllowedOrigin           string
+	UpstreamRequestTimeout  time.Duration
+	UserServiceAddr         string
+	NutritionServiceAddr    string
+	WorkoutServiceAddr      string
+	GamificationServiceAddr string
+	AIServiceAddr           string
+	UserJWTSecret           string
+	RefreshTokenCookieName  string
 }
 
 func Load() (*Config, error) {
@@ -51,16 +53,17 @@ func Load() (*Config, error) {
 	}
 
 	return &Config{
-		Environment:            getString("ENV", defaultEnvironment),
-		HTTPPort:               httpPort,
-		AllowedOrigin:          getString("ALLOWED_ORIGIN", defaultAllowedOrigin),
-		UpstreamRequestTimeout: upstreamRequestTimeout,
-		UserServiceAddr:        getString("USER_SERVICE_ADDR", defaultUserServiceAddr),
-		NutritionServiceAddr:   getString("NUTRITION_SERVICE_ADDR", defaultNutritionServiceAddr),
-		WorkoutServiceAddr:     getString("WORKOUT_SERVICE_ADDR", defaultWorkoutServiceAddr),
-		AIServiceAddr:          getString("AI_SERVICE_ADDR", defaultAIServiceAddr),
-		UserJWTSecret:          userJWTSecret,
-		RefreshTokenCookieName: getString("REFRESH_TOKEN_COOKIE_NAME", defaultRefreshTokenCookieName),
+		Environment:             getString("ENV", defaultEnvironment),
+		HTTPPort:                httpPort,
+		AllowedOrigin:           getString("ALLOWED_ORIGIN", defaultAllowedOrigin),
+		UpstreamRequestTimeout:  upstreamRequestTimeout,
+		UserServiceAddr:         getString("USER_SERVICE_ADDR", defaultUserServiceAddr),
+		NutritionServiceAddr:    getString("NUTRITION_SERVICE_ADDR", defaultNutritionServiceAddr),
+		WorkoutServiceAddr:      getString("WORKOUT_SERVICE_ADDR", defaultWorkoutServiceAddr),
+		GamificationServiceAddr: getString("GAMIFICATION_SERVICE_ADDR", defaultGamificationServiceAddr),
+		AIServiceAddr:           getString("AI_SERVICE_ADDR", defaultAIServiceAddr),
+		UserJWTSecret:           userJWTSecret,
+		RefreshTokenCookieName:  getString("REFRESH_TOKEN_COOKIE_NAME", defaultRefreshTokenCookieName),
 	}, nil
 }
 

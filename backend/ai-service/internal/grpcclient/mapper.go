@@ -23,17 +23,6 @@ func mapProtoToUserProfile(resp *user.GetProfileResponse) *domain.UserProfile {
 		TrainingDaysPerWeek: resp.TrainingDaysPerWeek,
 		Equipment:           resp.Equipment,
 		Age:                 resp.Age,
-		Bmi:                 resp.Bmi,
-		WaterGoalMl:         resp.WaterGoalMl,
-	}
-
-	if resp.NutritionTargets != nil {
-		profile.NutritionTargets = &domain.NutritionTargets{
-			Calories: resp.NutritionTargets.CaloriesKcal,
-			Protein:  resp.NutritionTargets.ProteinG,
-			Fat:      resp.NutritionTargets.FatG,
-			Carbs:    resp.NutritionTargets.CarbsG,
-		}
 	}
 
 	return profile

@@ -19,7 +19,13 @@ docker compose up --build
 - user-service gRPC: `localhost:50051`
 - nutrition-service gRPC: `localhost:50052`
 - workout-service gRPC: `localhost:50054`
+- ai-service gRPC: `localhost:50056`
 - gamification-service gRPC: `localhost:50055`
+
+AI через gateway:
+
+- `POST /ai/generations` c JSON `{ "plan_type": "all" | "workout" | "nutrition" }`
+- `GET /ai/generations/{generation_id}`
 
 Для остановки:
 

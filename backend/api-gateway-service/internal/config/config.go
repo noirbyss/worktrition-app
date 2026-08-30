@@ -17,6 +17,7 @@ const (
 	defaultUserServiceAddr        = "localhost:50051"
 	defaultNutritionServiceAddr   = "localhost:50052"
 	defaultWorkoutServiceAddr     = "localhost:50054"
+	defaultAIServiceAddr          = "localhost:50056"
 	defaultRefreshTokenCookieName = "refresh_token"
 )
 
@@ -28,6 +29,7 @@ type Config struct {
 	UserServiceAddr        string
 	NutritionServiceAddr   string
 	WorkoutServiceAddr     string
+	AIServiceAddr          string
 	UserJWTSecret          string
 	RefreshTokenCookieName string
 }
@@ -56,6 +58,7 @@ func Load() (*Config, error) {
 		UserServiceAddr:        getString("USER_SERVICE_ADDR", defaultUserServiceAddr),
 		NutritionServiceAddr:   getString("NUTRITION_SERVICE_ADDR", defaultNutritionServiceAddr),
 		WorkoutServiceAddr:     getString("WORKOUT_SERVICE_ADDR", defaultWorkoutServiceAddr),
+		AIServiceAddr:          getString("AI_SERVICE_ADDR", defaultAIServiceAddr),
 		UserJWTSecret:          userJWTSecret,
 		RefreshTokenCookieName: getString("REFRESH_TOKEN_COOKIE_NAME", defaultRefreshTokenCookieName),
 	}, nil

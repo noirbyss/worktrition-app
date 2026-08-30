@@ -31,11 +31,11 @@ func Load() (*Config, error) {
 		ApiKey:               apiKey,
 		AiBaseURL:            getEnv("OPENAI_BASE_URL", "https://openrouter.ai/api/v1"),
 		AiModel:              getEnv("OPENAI_MODEL", "openai/gpt-4o-mini"),
-		GRPCPort:             getEnv("GRPC_PORT", "50052"),
-		LogLevel:             getEnv("LOG_LEVEL", "WARN"),
+		GRPCPort:             getEnvAny([]string{"AI_GRPC_PORT", "GRPC_PORT"}, "50056"),
+		LogLevel:             getEnvAny([]string{"AI_LOG_LEVEL", "LOG_LEVEL"}, "WARN"),
 		DatabaseURL:          os.Getenv("DATABASE_URL"),
-		UserServiceAddr:      getEnv("USER_SERVICE_ADDR", "localhost:50053"),
-		NutritionServiceAddr: getEnv("NUTRITION_SERVICE_ADDR", "localhost:50051"),
+		UserServiceAddr:      getEnv("USER_SERVICE_ADDR", "localhost:50051"),
+		NutritionServiceAddr: getEnv("NUTRITION_SERVICE_ADDR", "localhost:50052"),
 		WorkoutServiceAddr:   getEnv("WORKOUT_SERVICE_ADDR", "localhost:50054"),
 	}, nil
 }
@@ -44,5 +44,15 @@ func getEnv(key, fallback string) string {
 	if val := os.Getenv(key); val != "" {
 		return val
 	}
+	return fallback
+}
+
+func getEnvAny(keys []string, fallback string) string {
+	for _, key := range keys {
+		if val := os.Getenv(key); val != "" {
+			return val
+		}
+	}
+
 	return fallback
 }

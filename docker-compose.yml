@@ -1,14 +1,15 @@
 services:
   user-db:
     image: postgres:17-alpine
+    container_name: worktrition-user-db
     environment:
-      POSTGRES_USER: ${USER_DB_USER}
-      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
-      POSTGRES_DB: ${USER_DB_NAME}
+      POSTGRES_USER: ${USER_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD:-password}
+      POSTGRES_DB: ${USER_DB_NAME:-user_db}
     volumes:
       - user-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\"" ]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -18,6 +19,7 @@ services:
     build:
       context: .
       dockerfile: ./backend/user-service/Dockerfile
+    container_name: worktrition-user-service
     env_file:
       - .env
     depends_on:
@@ -28,34 +30,33 @@ services:
       - "${USER_GRPC_PORT:-50051}:${USER_GRPC_PORT:-50051}"
     stop_grace_period: 10s
 
-  api-gateway-service:
-    build:
-      context: .
-      dockerfile: ./backend/api-gateway-service/Dockerfile
-    env_file:
-      - .env
-    depends_on:
-      user-service:
-        condition: service_started
-      nutrition-service:
-        condition: service_started
-      workout-service:
-        condition: service_started
-    restart: unless-stopped
-    ports:
-      - "${GATEWAY_HTTP_PORT:-8080}:${GATEWAY_HTTP_PORT:-8080}"
-    stop_grace_period: 10s
+  ai-db:
+    image: postgres:17-alpine
+    container_name: worktrition-ai-db
+    environment:
+      POSTGRES_USER: ${AI_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${AI_DB_PASSWORD:-password}
+      POSTGRES_DB: ${AI_DB_NAME:-ai_db}
+    volumes:
+      - ai-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
   nutrition-db:
     image: postgres:17-alpine
+    container_name: worktrition-nutrition-db
     environment:
-      POSTGRES_USER: ${NUTRITION_DB_USER}
-      POSTGRES_PASSWORD: ${NUTRITION_DB_PASSWORD}
-      POSTGRES_DB: ${NUTRITION_DB_NAME}
+      POSTGRES_USER: ${NUTRITION_DB_USER:-nutrition}
+      POSTGRES_PASSWORD: ${NUTRITION_DB_PASSWORD:-nutrition}
+      POSTGRES_DB: ${NUTRITION_DB_NAME:-nutrition}
     volumes:
       - nutrition-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\"" ]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -63,6 +64,7 @@ services:
 
   nutrition-migrate:
     image: migrate/migrate
+    container_name: worktrition-nutrition-migrate
     depends_on:
       nutrition-db:
         condition: service_healthy
@@ -70,7 +72,7 @@ services:
       - ./backend/nutrition-service/migrations:/migrations
     command:
       - "-path=/migrations"
-      - "-database=postgres://${NUTRITION_DB_USER}:${NUTRITION_DB_PASSWORD}@${NUTRITION_DB_HOST}:${NUTRITION_DB_PORT}/${NUTRITION_DB_NAME}?sslmode=${NUTRITION_DB_SSL_MODE}"
+      - "-database=postgres://${NUTRITION_DB_USER:-nutrition}:${NUTRITION_DB_PASSWORD:-nutrition}@nutrition-db:${NUTRITION_DB_PORT:-5432}/${NUTRITION_DB_NAME:-nutrition}?sslmode=${NUTRITION_DB_SSL_MODE:-disable}"
       - "up"
     restart: on-failure
 
@@ -78,12 +80,13 @@ services:
     build:
       context: ./backend/nutrition-service
       dockerfile: Dockerfile
+    container_name: worktrition-nutrition-service
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgres://${NUTRITION_DB_USER}:${NUTRITION_DB_PASSWORD}@${NUTRITION_DB_HOST}:${NUTRITION_DB_PORT}/${NUTRITION_DB_NAME}?sslmode=${NUTRITION_DB_SSL_MODE}
+      DATABASE_URL: postgres://${NUTRITION_DB_USER:-nutrition}:${NUTRITION_DB_PASSWORD:-nutrition}@nutrition-db:${NUTRITION_DB_PORT:-5432}/${NUTRITION_DB_NAME:-nutrition}?sslmode=${NUTRITION_DB_SSL_MODE:-disable}
       GRPC_PORT: ${NUTRITION_GRPC_PORT:-50052}
-      GAMIFICATION_SERVICE_ADDR: ${NUTRITION_GAMIFICATION_SERVICE_ADDR}
+      GAMIFICATION_SERVICE_ADDR: gamification-service:${GAMIFICATION_GRPC_PORT:-50055}
     depends_on:
       nutrition-db:
         condition: service_healthy
@@ -93,19 +96,20 @@ services:
         condition: service_started
     restart: unless-stopped
     ports:
-      - "${NUTRITION_GRPC_PORT:-50052}:${NUTRITION_GRPC_PORT:-50052}"
+      - "${NUTRITION_HOST_GRPC_PORT:-50053}:${NUTRITION_GRPC_PORT:-50052}"
     stop_grace_period: 10s
 
   workout-db:
     image: postgres:17-alpine
+    container_name: worktrition-workout-db
     environment:
-      POSTGRES_USER: ${WORKOUT_DB_USER}
-      POSTGRES_PASSWORD: ${WORKOUT_DB_PASSWORD}
-      POSTGRES_DB: ${WORKOUT_DB_NAME}
+      POSTGRES_USER: ${WORKOUT_DB_USER:-workout}
+      POSTGRES_PASSWORD: ${WORKOUT_DB_PASSWORD:-workout}
+      POSTGRES_DB: ${WORKOUT_DB_NAME:-workout}
     volumes:
       - workout-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\"" ]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -113,6 +117,7 @@ services:
 
   workout-migrate:
     image: migrate/migrate
+    container_name: worktrition-workout-migrate
     depends_on:
       workout-db:
         condition: service_healthy
@@ -120,7 +125,7 @@ services:
       - ./backend/workout-service/migrations:/migrations
     command:
       - "-path=/migrations"
-      - "-database=postgres://${WORKOUT_DB_USER}:${WORKOUT_DB_PASSWORD}@${WORKOUT_DB_HOST}:${WORKOUT_DB_PORT}/${WORKOUT_DB_NAME}?sslmode=${WORKOUT_DB_SSL_MODE}"
+      - "-database=postgres://${WORKOUT_DB_USER:-workout}:${WORKOUT_DB_PASSWORD:-workout}@workout-db:${WORKOUT_DB_PORT:-5432}/${WORKOUT_DB_NAME:-workout}?sslmode=${WORKOUT_DB_SSL_MODE:-disable}"
       - "up"
     restart: on-failure
 
@@ -128,12 +133,13 @@ services:
     build:
       context: .
       dockerfile: ./backend/workout-service/Dockerfile
+    container_name: worktrition-workout-service
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgres://${WORKOUT_DB_USER}:${WORKOUT_DB_PASSWORD}@${WORKOUT_DB_HOST}:${WORKOUT_DB_PORT}/${WORKOUT_DB_NAME}?sslmode=${WORKOUT_DB_SSL_MODE}
+      DATABASE_URL: postgres://${WORKOUT_DB_USER:-workout}:${WORKOUT_DB_PASSWORD:-workout}@workout-db:${WORKOUT_DB_PORT:-5432}/${WORKOUT_DB_NAME:-workout}?sslmode=${WORKOUT_DB_SSL_MODE:-disable}
       GRPC_PORT: ${WORKOUT_GRPC_PORT:-50054}
-      GAMIFICATION_SERVICE_ADDR: ${WORKOUT_GAMIFICATION_SERVICE_ADDR}
+      GAMIFICATION_SERVICE_ADDR: gamification-service:${GAMIFICATION_GRPC_PORT:-50055}
     depends_on:
       workout-db:
         condition: service_healthy
@@ -148,14 +154,15 @@ services:
 
   gamification-db:
     image: postgres:17-alpine
+    container_name: worktrition-gamification-db
     environment:
-      POSTGRES_USER: ${GAMIFICATION_DB_USER}
-      POSTGRES_PASSWORD: ${GAMIFICATION_DB_PASSWORD}
-      POSTGRES_DB: ${GAMIFICATION_DB_NAME}
+      POSTGRES_USER: ${GAMIFICATION_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${GAMIFICATION_DB_PASSWORD:-password}
+      POSTGRES_DB: ${GAMIFICATION_DB_NAME:-gamification_db}
     volumes:
       - gamification-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\"" ]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -165,10 +172,11 @@ services:
     build:
       context: .
       dockerfile: ./backend/gamification-service/Dockerfile
+    container_name: worktrition-gamification-service
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgres://${GAMIFICATION_DB_USER}:${GAMIFICATION_DB_PASSWORD}@${GAMIFICATION_DB_HOST}:${GAMIFICATION_DB_PORT}/${GAMIFICATION_DB_NAME}?sslmode=${GAMIFICATION_DB_SSL_MODE}
+      DATABASE_URL: postgres://${GAMIFICATION_DB_USER:-postgres}:${GAMIFICATION_DB_PASSWORD:-password}@gamification-db:${GAMIFICATION_DB_PORT:-5432}/${GAMIFICATION_DB_NAME:-gamification_db}?sslmode=${GAMIFICATION_DB_SSL_MODE:-disable}
       GRPC_PORT: ${GAMIFICATION_GRPC_PORT:-50055}
     depends_on:
       gamification-db:
@@ -178,10 +186,69 @@ services:
       - "${GAMIFICATION_GRPC_PORT:-50055}:${GAMIFICATION_GRPC_PORT:-50055}"
     stop_grace_period: 10s
 
+  ai-service:
+    build:
+      context: .
+      dockerfile: ./backend/ai-service/Dockerfile
+    container_name: worktrition-ai-service
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${AI_DB_USER:-postgres}:${AI_DB_PASSWORD:-password}@ai-db:${AI_DB_PORT:-5432}/${AI_DB_NAME:-ai_db}?sslmode=${AI_DB_SSL_MODE:-disable}
+      AI_GRPC_PORT: ${AI_GRPC_PORT:-50056}
+      AI_LOG_LEVEL: ${AI_LOG_LEVEL:-INFO}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-openai/gpt-4o-mini}
+      USER_SERVICE_ADDR: user-service:${USER_GRPC_PORT:-50051}
+      NUTRITION_SERVICE_ADDR: nutrition-service:${NUTRITION_GRPC_PORT:-50052}
+      WORKOUT_SERVICE_ADDR: workout-service:${WORKOUT_GRPC_PORT:-50054}
+    depends_on:
+      ai-db:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      nutrition-service:
+        condition: service_started
+      workout-service:
+        condition: service_started
+    restart: unless-stopped
+    ports:
+      - "${AI_HOST_GRPC_PORT:-50056}:${AI_GRPC_PORT:-50056}"
+    stop_grace_period: 10s
+
+  api-gateway-service:
+    build:
+      context: .
+      dockerfile: ./backend/api-gateway-service/Dockerfile
+    container_name: worktrition-api-gateway
+    env_file:
+      - .env
+    environment:
+      USER_SERVICE_ADDR: user-service:${USER_GRPC_PORT:-50051}
+      NUTRITION_SERVICE_ADDR: nutrition-service:${NUTRITION_GRPC_PORT:-50052}
+      WORKOUT_SERVICE_ADDR: workout-service:${WORKOUT_GRPC_PORT:-50054}
+      AI_SERVICE_ADDR: ai-service:${AI_GRPC_PORT:-50056}
+      USER_JWT_SECRET: ${USER_JWT_SECRET}
+    depends_on:
+      user-service:
+        condition: service_started
+      nutrition-service:
+        condition: service_started
+      workout-service:
+        condition: service_started
+      ai-service:
+        condition: service_started
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_HTTP_PORT:-8080}:${GATEWAY_HTTP_PORT:-8080}"
+    stop_grace_period: 10s
+
   frontend:
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
+    container_name: worktrition-frontend
     depends_on:
       api-gateway-service:
         condition: service_started
@@ -194,6 +261,7 @@ services:
 
 volumes:
   user-db-data:
+  ai-db-data:
   nutrition-db-data:
   workout-db-data:
   gamification-db-data:

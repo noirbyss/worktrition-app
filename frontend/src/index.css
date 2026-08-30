@@ -2959,6 +2959,97 @@ select {
   min-height: 100%;
 }
 
+.gamification-main-column {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.weight-check-card {
+  padding: 24px;
+  background:
+    radial-gradient(440px 180px at 0% 0%, rgba(255, 210, 63, 0.08), transparent 68%),
+    linear-gradient(135deg, rgba(255, 122, 26, 0.06), rgba(27, 30, 44, 0.76));
+}
+
+.weight-check-card__hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.weight-check-card__value {
+  font-family: var(--font-display-alt);
+  font-size: 46px;
+  line-height: 0.95;
+  color: #ffd9a6;
+}
+
+.weight-check-card__meta {
+  margin-top: 8px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.weight-check-card__target {
+  min-width: 124px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.weight-check-card__target-label {
+  display: block;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.weight-check-card__target-value {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.weight-check-form {
+  display: grid;
+  gap: 10px;
+}
+
+.weight-check-form__label {
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.weight-check-form__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.weight-check-form__button {
+  min-width: 180px;
+  justify-content: center;
+}
+
+.weight-check-form__success {
+  margin: 0;
+  color: #9be7c3;
+  font-size: 12px;
+}
+
 .gamification-section-copy {
   margin-bottom: 20px;
 }
@@ -3097,6 +3188,12 @@ select {
   .gamification-attribute__description {
     padding-left: 0;
   }
+
+  .weight-check-card__hero,
+  .weight-check-form__row {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
 }
 
 @media (max-width: 620px) {
@@ -3124,6 +3221,10 @@ select {
 
   .gamification-hero__aside-value {
     font-size: 44px;
+  }
+
+  .weight-check-card__value {
+    font-size: 38px;
   }
 
   .gamification-quest__top {

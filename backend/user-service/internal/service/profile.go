@@ -84,6 +84,48 @@ func (s *ProfileService) GetProfile(ctx context.Context, userID string) (*domain
 	return profile, nil
 }
 
+func (s *ProfileService) SaveWeightMeasurement(
+	ctx context.Context,
+	userID string,
+	weightKG float64,
+) (*domain.WeightMeasurement, error) {
+	userID = strings.TrimSpace(userID)
+	if userID == "" {
+		return nil, domain.NewValidationError("user_id", "is required")
+	}
+	if err := domain.ValidateWeightMeasurement(weightKG); err != nil {
+		return nil, err
+	}
+	if _, err := s.users.GetByID(ctx, userID); err != nil {
+		return nil, err
+	}
+
+	return s.profiles.SaveWeightMeasurement(ctx, userID, weightKG, s.now())
+}
+
+func (s *ProfileService) GetWeightHistory(
+	ctx context.Context,
+	userID string,
+	limit int,
+) ([]domain.WeightMeasurement, error) {
+	userID = strings.TrimSpace(userID)
+	if userID == "" {
+		return nil, domain.NewValidationError("user_id", "is required")
+	}
+
+	if limit <= 0 {
+		limit = domain.DefaultWeightHistoryLimit
+	}
+	if err := domain.ValidateWeightHistoryLimit(limit); err != nil {
+		return nil, err
+	}
+	if _, err := s.users.GetByID(ctx, userID); err != nil {
+		return nil, err
+	}
+
+	return s.profiles.ListWeightMeasurements(ctx, userID, limit)
+}
+
 func normalizeProfile(profile *domain.Profile) *domain.Profile {
 	if profile == nil {
 		return nil

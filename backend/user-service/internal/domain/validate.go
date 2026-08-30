@@ -25,6 +25,9 @@ const (
 	MinWeightKG = 25
 	MaxWeightKG = 400
 
+	DefaultWeightHistoryLimit = 14
+	MaxWeightHistoryLimit     = 90
+
 	MaxStringListItems      = 50
 	MaxStringListItemLength = 80
 	MaxEquipmentLength      = 500
@@ -46,6 +49,7 @@ const (
 	trainingLocationField    = "training_location"
 	trainingDaysPerWeekField = "training_days_per_week"
 	equipmentField           = "equipment"
+	limitField               = "limit"
 
 	msgRequired = "is required"
 	msgTooLong  = "is too long"
@@ -223,6 +227,18 @@ func AgeFromBirthDate(birthDate, now time.Time) int {
 	}
 
 	return age
+}
+
+func ValidateWeightMeasurement(weightKG float64) error {
+	return validateFloatRange(weightField, weightKG, MinWeightKG, MaxWeightKG)
+}
+
+func ValidateWeightHistoryLimit(limit int) error {
+	if limit < 1 || limit > MaxWeightHistoryLimit {
+		return NewValidationError(limitField, fmt.Sprintf("must be between 1 and %d", MaxWeightHistoryLimit))
+	}
+
+	return nil
 }
 
 func hasLetterAndDigit(value string) bool {

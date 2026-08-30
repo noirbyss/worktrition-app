@@ -46,6 +46,20 @@ interface SaveProfileResponseDto {
   profile_completed: boolean
 }
 
+interface WeightMeasurementDto {
+  measured_on: string
+  user_id: string
+  weight_kg: number
+}
+
+interface SaveWeightMeasurementResponseDto {
+  measurement?: WeightMeasurementDto | null
+}
+
+interface WeightHistoryResponseDto {
+  measurements?: WeightMeasurementDto[]
+}
+
 interface GenerationResponseDto {
   error_message?: string
   generation_id: string
@@ -174,6 +188,12 @@ export interface Profile {
 export interface SaveProfileResult {
   bmi: number
   profileCompleted: boolean
+}
+
+export interface WeightMeasurement {
+  measuredOn: string
+  userId: string
+  weightKg: number
 }
 
 export type PlanType = 'all' | 'nutrition' | 'workout'
@@ -334,6 +354,34 @@ export async function saveProfile(accessToken: string, payload: SaveProfilePaylo
     bmi: response.bmi,
     profileCompleted: response.profile_completed,
   } satisfies SaveProfileResult
+}
+
+export async function saveWeightMeasurement(accessToken: string, weightKg: number) {
+  const response = await request<SaveWeightMeasurementResponseDto>('/profile/weight', {
+    accessToken,
+    body: {
+      weight_kg: weightKg,
+    },
+    method: 'POST',
+  })
+
+  if (!response.measurement) {
+    throw new Error('Weight measurement payload is missing.')
+  }
+
+  return mapWeightMeasurement(response.measurement)
+}
+
+export async function getWeightHistory(accessToken: string, limit = 14) {
+  const response = await request<WeightHistoryResponseDto>(
+    `/profile/weight-history?limit=${encodeURIComponent(String(limit))}`,
+    {
+      accessToken,
+      method: 'GET',
+    },
+  )
+
+  return (response.measurements ?? []).map(mapWeightMeasurement)
 }
 
 export async function startGeneration(accessToken: string, planType: PlanType) {
@@ -542,6 +590,14 @@ function mapGamificationCharacter(response: GamificationCharacterDto) {
     strength: normalizeGamificationNumber(response.strength),
     userId: response.user_id ?? response.userId ?? '',
   } satisfies GamificationCharacter
+}
+
+function mapWeightMeasurement(response: WeightMeasurementDto) {
+  return {
+    measuredOn: response.measured_on,
+    userId: response.user_id,
+    weightKg: response.weight_kg,
+  } satisfies WeightMeasurement
 }
 
 function normalizeGamificationNumber(value: number | undefined, fallback = 0) {

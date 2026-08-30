@@ -21,8 +21,10 @@ import {
   type RegisterPayload,
   type SaveProfilePayload,
   type SaveProfileResult,
+  type WeightMeasurement,
   type WorkoutDayPlan,
   type WorkoutStats,
+  getWeightHistory as getWeightHistoryRequest,
   completeNutritionMeal as completeNutritionMealRequest,
   completeNutritionWater as completeNutritionWaterRequest,
   completeWorkoutTraining as completeWorkoutTrainingRequest,
@@ -39,6 +41,7 @@ import {
   refresh as refreshRequest,
   register as registerRequest,
   saveProfile as saveProfileRequest,
+  saveWeightMeasurement as saveWeightMeasurementRequest,
   startGeneration as startGenerationRequest,
 } from '../api'
 import { loadAuthSession, persistAuthSession } from './auth-storage'
@@ -55,6 +58,7 @@ interface AuthContextValue {
   getNutritionDayPlan: (dayOfWeek: number | string) => Promise<NutritionDayPlan>
   getNutritionStats: () => Promise<NutritionStats>
   getProfile: () => Promise<Profile>
+  getWeightHistory: (limit?: number) => Promise<WeightMeasurement[]>
   getWorkoutDayPlan: (dayOfWeek: number | string) => Promise<WorkoutDayPlan>
   getWorkoutStats: () => Promise<WorkoutStats>
   isAuthenticated: boolean
@@ -63,6 +67,7 @@ interface AuthContextValue {
   refreshSession: () => Promise<AuthSession>
   register: (payload: RegisterPayload) => Promise<AuthSession>
   saveProfile: (payload: SaveProfilePayload) => Promise<SaveProfileResult>
+  saveWeightMeasurement: (weightKg: number) => Promise<WeightMeasurement>
   session: AuthSession | null
   startGeneration: (planType: PlanType) => Promise<GenerationResult>
   status: AuthStatus
@@ -233,6 +238,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [withAuthorizedSession],
   )
 
+  const getWeightHistory = useCallback(
+    (limit = 14) =>
+      withAuthorizedSession((activeSession) =>
+        getWeightHistoryRequest(activeSession.accessToken, limit),
+      ),
+    [withAuthorizedSession],
+  )
+
   const startGeneration = useCallback(
     (planType: PlanType) =>
       withAuthorizedSession((activeSession) =>
@@ -317,6 +330,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [markProfileCompleted, withAuthorizedSession],
   )
 
+  const saveWeightMeasurement = useCallback(
+    (weightKg: number) =>
+      withAuthorizedSession((activeSession) =>
+        saveWeightMeasurementRequest(activeSession.accessToken, weightKg),
+      ),
+    [withAuthorizedSession],
+  )
+
   const value = useMemo<AuthContextValue>(
     () => ({
       completeNutritionMeal,
@@ -328,6 +349,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       getNutritionDayPlan,
       getNutritionStats,
       getProfile,
+      getWeightHistory,
       getWorkoutDayPlan,
       getWorkoutStats,
       isAuthenticated: status === 'authenticated',
@@ -336,6 +358,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshSession,
       register,
       saveProfile,
+      saveWeightMeasurement,
       session,
       startGeneration,
       status,
@@ -350,6 +373,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       getNutritionDayPlan,
       getNutritionStats,
       getProfile,
+      getWeightHistory,
       getWorkoutDayPlan,
       getWorkoutStats,
       login,
@@ -357,6 +381,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshSession,
       register,
       saveProfile,
+      saveWeightMeasurement,
       session,
       startGeneration,
       status,

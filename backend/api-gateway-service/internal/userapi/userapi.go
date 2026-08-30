@@ -44,6 +44,8 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, authMiddleware func(http.Ha
 	mux.HandleFunc("/auth/logout", h.HandleLogout)
 	mux.Handle("/users/me", authMiddleware(http.HandlerFunc(h.HandleGetCurrentUser)))
 	mux.Handle("/profile", authMiddleware(http.HandlerFunc(h.HandleProfile)))
+	mux.Handle("/profile/weight", authMiddleware(http.HandlerFunc(h.HandleWeightMeasurement)))
+	mux.Handle("/profile/weight-history", authMiddleware(http.HandlerFunc(h.HandleWeightHistory)))
 }
 
 func (h *Handler) grpcContext(r *http.Request) (context.Context, context.CancelFunc) {

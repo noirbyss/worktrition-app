@@ -4,6 +4,7 @@ import {
   type GamificationCharacter,
   type NutritionDayPlan,
   type NutritionStats,
+  type Profile,
   type WorkoutDayPlan,
   type WorkoutStats,
 } from '../api'
@@ -12,7 +13,7 @@ import { AppFrame } from '../components/app/AppFrame'
 import { NotchBar } from '../components/app/PlaceholderUi'
 import { InlineMessage } from '../components/auth/InlineMessage'
 import { useCurrentUserData } from '../hooks'
-import { toErrorMessage } from '../utils'
+import { mapErrorToFieldErrors, toErrorMessage } from '../utils'
 
 const statDefinitions = [
   {
@@ -45,6 +46,7 @@ type DashboardState = {
   character: GamificationCharacter | null
   nutritionPlan: NutritionDayPlan | null
   nutritionStats: NutritionStats | null
+  profile: Profile | null
   workoutPlan: WorkoutDayPlan | null
   workoutStats: WorkoutStats | null
 }
@@ -53,17 +55,34 @@ const initialDashboardState: DashboardState = {
   character: null,
   nutritionPlan: null,
   nutritionStats: null,
+  profile: null,
   workoutPlan: null,
   workoutStats: null,
 }
 
+const weightFieldMap = {
+  weight_kg: 'weightKg',
+} as const
+
 export function HomePage() {
-  const { getGamificationCharacter, getNutritionDayPlan, getNutritionStats, getWorkoutDayPlan, getWorkoutStats } =
-    useAuth()
+  const {
+    getGamificationCharacter,
+    getNutritionDayPlan,
+    getNutritionStats,
+    getProfile,
+    getWorkoutDayPlan,
+    getWorkoutStats,
+    saveWeightMeasurement,
+  } = useAuth()
   const { isLoading: isLoadingUser, loadError: userLoadError, user } = useCurrentUserData()
   const [dashboard, setDashboard] = useState<DashboardState>(initialDashboardState)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSavingWeight, setIsSavingWeight] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [savedWeightMessage, setSavedWeightMessage] = useState<string | null>(null)
+  const [weightInput, setWeightInput] = useState('')
+  const [weightInputError, setWeightInputError] = useState<string | null>(null)
+  const [weightSaveError, setWeightSaveError] = useState<string | null>(null)
 
   useEffect(() => {
     let isCancelled = false
@@ -75,13 +94,21 @@ export function HomePage() {
         setIsLoading(true)
         setLoadError(null)
 
-        const [characterResult, workoutStatsResult, nutritionStatsResult, workoutPlanResult, nutritionPlanResult] =
+        const [
+          characterResult,
+          workoutStatsResult,
+          nutritionStatsResult,
+          workoutPlanResult,
+          nutritionPlanResult,
+          profileResult,
+        ] =
           await Promise.allSettled([
             getGamificationCharacter(),
             getWorkoutStats(),
             getNutritionStats(),
             getWorkoutDayPlan(today),
             getNutritionDayPlan(today),
+            getProfile(),
           ])
 
         if (isCancelled) {
@@ -96,6 +123,9 @@ export function HomePage() {
             allowNotFound: true,
           }),
           nutritionStats: getSettledValue(nutritionStatsResult, errors, 'Не удалось загрузить статистику питания.', {
+            allowNotFound: true,
+          }),
+          profile: getSettledValue(profileResult, errors, 'Не удалось загрузить профиль пользователя.', {
             allowNotFound: true,
           }),
           workoutPlan: getSettledValue(workoutPlanResult, errors, 'Не удалось загрузить тренировку на сегодня.', {
@@ -120,9 +150,14 @@ export function HomePage() {
     return () => {
       isCancelled = true
     }
-  }, [getGamificationCharacter, getNutritionDayPlan, getNutritionStats, getWorkoutDayPlan, getWorkoutStats])
+  }, [getGamificationCharacter, getNutritionDayPlan, getNutritionStats, getProfile, getWorkoutDayPlan, getWorkoutStats])
 
-  const { character, nutritionPlan, nutritionStats, workoutPlan, workoutStats } = dashboard
+  useEffect(() => {
+    setWeightInput(dashboard.profile ? formatWeightInput(dashboard.profile.weightKg) : '')
+    setWeightInputError(null)
+  }, [dashboard.profile?.weightKg])
+
+  const { character, nutritionPlan, nutritionStats, profile, workoutPlan, workoutStats } = dashboard
   const sidebarProfile = character
     ? {
         badge: String(character.level),
@@ -137,6 +172,56 @@ export function HomePage() {
     nutritionPlan?.meals.length ? nutritionPlan.meals.every((meal) => meal.isCompleted) : false
   const hasWorkoutAssigned = Boolean(workoutPlan && workoutPlan.exercises.length > 0)
   const isWorkoutCompleted = Boolean(workoutPlan?.isCompleted)
+  const currentWeightLabel = profile ? `${formatWeight(profile.weightKg)} кг` : 'Нет данных'
+  const targetWeightLabel = profile?.targetWeightKg ? `${formatWeight(profile.targetWeightKg)} кг` : 'Не указан'
+
+  const handleWeightSave = async () => {
+    if (!profile) {
+      setWeightSaveError('Сначала заполните профиль, чтобы сохранять ежедневный вес.')
+      return
+    }
+
+    const normalizedWeight = weightInput.replace(',', '.').trim()
+    const parsedWeight = Number(normalizedWeight)
+
+    setWeightSaveError(null)
+    setWeightInputError(null)
+    setSavedWeightMessage(null)
+
+    if (normalizedWeight === '' || Number.isNaN(parsedWeight) || parsedWeight < 25 || parsedWeight > 400) {
+      setWeightInputError('Вес должен быть в диапазоне от 25 до 400 кг.')
+      return
+    }
+
+    try {
+      setIsSavingWeight(true)
+
+      const measurement = await saveWeightMeasurement(parsedWeight)
+
+      setDashboard((current) => ({
+        ...current,
+        profile: current.profile
+          ? {
+              ...current.profile,
+              weightKg: parsedWeight,
+            }
+          : current.profile,
+      }))
+      setWeightInput(formatWeightInput(parsedWeight))
+      setSavedWeightMessage(
+        `Замер за ${formatMeasurementDate(measurement.measuredOn)} сохранён. Статистика покажет его в графике веса.`,
+      )
+    } catch (error) {
+      const mappedErrors = mapErrorToFieldErrors(error, weightFieldMap)
+      setWeightInputError(mappedErrors.fieldErrors.weightKg ?? null)
+      setWeightSaveError(
+        mappedErrors.formError ??
+          (mappedErrors.fieldErrors.weightKg ? null : toErrorMessage(error, 'Не удалось сохранить вес.')),
+      )
+    } finally {
+      setIsSavingWeight(false)
+    }
+  }
 
   return (
     <AppFrame
@@ -240,21 +325,86 @@ export function HomePage() {
           </section>
 
           <section className="grid g-2 placeholder-section">
-            <div className="card">
-              <div className="card-title">Характеристики персонажа</div>
-              <p className="panel-copy gamification-section-copy">
-                Каждая характеристика растет от реальных действий в приложении. Чем выше показатель, тем ярче профиль персонажа.
-              </p>
+            <div className="gamification-main-column">
+              <div className="card">
+                <div className="card-title">Характеристики персонажа</div>
+                <p className="panel-copy gamification-section-copy">
+                  Каждая характеристика растет от реальных действий в приложении. Чем выше показатель, тем ярче профиль персонажа.
+                </p>
 
-              {statDefinitions.map((item) => (
-                <AttributeRow
-                  description={item.description}
-                  key={item.key}
-                  label={item.label}
-                  value={character[item.key]}
-                  variant={item.variant}
-                />
-              ))}
+                {statDefinitions.map((item) => (
+                  <AttributeRow
+                    description={item.description}
+                    key={item.key}
+                    label={item.label}
+                    value={character[item.key]}
+                    variant={item.variant}
+                  />
+                ))}
+              </div>
+
+              <div className="card frame weight-check-card">
+                <div className="card-title">Ежедневный вес</div>
+                <div className="weight-check-card__hero">
+                  <div>
+                    <div className="weight-check-card__value">{currentWeightLabel}</div>
+                    <div className="weight-check-card__meta">Текущий сохранённый вес</div>
+                  </div>
+                  <div className="weight-check-card__target">
+                    <span className="weight-check-card__target-label">Цель</span>
+                    <strong className="weight-check-card__target-value">{targetWeightLabel}</strong>
+                  </div>
+                </div>
+
+                <p className="panel-copy gamification-section-copy">
+                  Вес лучше измерять каждый день утром, до еды и в одинаковых условиях.
+                </p>
+
+                {weightSaveError ? <InlineMessage>{weightSaveError}</InlineMessage> : null}
+
+                {profile ? (
+                  <div className="weight-check-form">
+                    <label className="weight-check-form__label" htmlFor="dailyWeight">
+                      Новый вес, кг
+                    </label>
+                    <div className="weight-check-form__row">
+                      <input
+                        className={weightInputError ? 'wizard-input wizard-input--error' : 'wizard-input'}
+                        id="dailyWeight"
+                        inputMode="decimal"
+                        max={400}
+                        min={25}
+                        onChange={(event) => {
+                          setWeightInput(event.target.value)
+                          setWeightInputError(null)
+                          setWeightSaveError(null)
+                          setSavedWeightMessage(null)
+                        }}
+                        placeholder="Например, 74.8"
+                        step="0.1"
+                        type="number"
+                        value={weightInput}
+                      />
+                      <button
+                        className="btn btn-secondary weight-check-form__button"
+                        disabled={isSavingWeight}
+                        onClick={() => {
+                          void handleWeightSave()
+                        }}
+                        type="button"
+                      >
+                        {isSavingWeight ? 'СОХРАНЯЕМ...' : 'СОХРАНИТЬ ВЕС'}
+                      </button>
+                    </div>
+                    {weightInputError ? <p className="field-error">{weightInputError}</p> : null}
+                    {savedWeightMessage ? <p className="weight-check-form__success">{savedWeightMessage}</p> : null}
+                  </div>
+                ) : (
+                  <p className="panel-copy">
+                    После заполнения профиля здесь можно будет вносить ежедневный вес.
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="card frame">
@@ -586,4 +736,21 @@ function formatWaterGoal(value: number) {
   }
 
   return `${value} мл`
+}
+
+function formatWeight(value: number) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1)
+}
+
+function formatWeightInput(value: number) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1)
+}
+
+function formatMeasurementDate(value: string) {
+  const parsedDate = new Date(`${value}T00:00:00`)
+  if (Number.isNaN(parsedDate.getTime())) {
+    return value
+  }
+
+  return new Intl.DateTimeFormat('ru-RU').format(parsedDate)
 }

@@ -1,0 +1,3 @@
+DROP TRIGGER IF EXISTS user_weight_measurements_set_updated_at ON user_weight_measurements;
+DROP INDEX IF EXISTS user_weight_measurements_measured_on_idx;
+DROP TABLE IF EXISTS user_weight_measurements;

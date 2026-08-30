@@ -73,6 +73,14 @@ type Profile struct {
 	UpdatedAt           time.Time        `db:"updated_at"`
 }
 
+type WeightMeasurement struct {
+	UserID     string    `db:"user_id"`
+	MeasuredOn time.Time `db:"measured_on"`
+	WeightKG   float64   `db:"weight_kg"`
+	CreatedAt  time.Time `db:"created_at"`
+	UpdatedAt  time.Time `db:"updated_at"`
+}
+
 type RefreshToken struct {
 	ID        string     `db:"id"`
 	UserID    string     `db:"user_id"`

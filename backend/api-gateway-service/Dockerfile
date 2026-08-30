@@ -1,4 +1,7 @@
-FROM golang:1.25.3-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25.3-alpine AS builder
+
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /app
 
@@ -12,7 +15,7 @@ RUN go mod download
 COPY backend/api-gateway-service/cmd ./cmd
 COPY backend/api-gateway-service/internal ./internal
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/api-gateway-service ./cmd/api-gateway-service
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build -o /bin/api-gateway-service ./cmd/api-gateway-service
 
 FROM alpine:3.22
 

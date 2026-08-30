@@ -4,6 +4,7 @@ import {
   type GamificationCharacter,
   type NutritionStats,
   type Profile,
+  type WeightMeasurement,
   type WorkoutStats,
 } from '../api'
 import { useAuth } from '../auth/useAuth'
@@ -17,6 +18,7 @@ type StatsState = {
   character: GamificationCharacter | null
   nutritionStats: NutritionStats | null
   profile: Profile | null
+  weightHistory: WeightMeasurement[]
   workoutStats: WorkoutStats | null
 }
 
@@ -24,6 +26,7 @@ const initialStatsState: StatsState = {
   character: null,
   nutritionStats: null,
   profile: null,
+  weightHistory: [],
   workoutStats: null,
 }
 
@@ -39,8 +42,10 @@ const trainingLevelLabels: Record<number, string> = {
   3: 'Продвинутый',
 }
 
+const weightHistoryLimit = 7
+
 export function StatsPage() {
-  const { getGamificationCharacter, getNutritionStats, getProfile, getWorkoutStats } = useAuth()
+  const { getGamificationCharacter, getNutritionStats, getProfile, getWeightHistory, getWorkoutStats } = useAuth()
   const { isLoading: isLoadingUser, loadError: userLoadError, user } = useCurrentUserData()
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -54,12 +59,13 @@ export function StatsPage() {
         setIsLoading(true)
         setLoadError(null)
 
-        const [profileResult, workoutStatsResult, nutritionStatsResult, characterResult] =
+        const [profileResult, workoutStatsResult, nutritionStatsResult, characterResult, weightHistoryResult] =
           await Promise.allSettled([
             getProfile(),
             getWorkoutStats(),
             getNutritionStats(),
             getGamificationCharacter(),
+            getWeightHistory(weightHistoryLimit),
           ])
 
         if (isCancelled) {
@@ -81,6 +87,12 @@ export function StatsPage() {
           profile: getSettledValue(profileResult, errors, 'Не удалось загрузить данные профиля.', {
             allowNotFound: true,
           }),
+          weightHistory: getSettledValue(
+            weightHistoryResult,
+            errors,
+            'Не удалось загрузить историю замеров веса.',
+            { fallbackValue: [] },
+          ) ?? [],
           workoutStats: getSettledValue(
             workoutStatsResult,
             errors,
@@ -101,9 +113,9 @@ export function StatsPage() {
     return () => {
       isCancelled = true
     }
-  }, [getGamificationCharacter, getNutritionStats, getProfile, getWorkoutStats])
+  }, [getGamificationCharacter, getNutritionStats, getProfile, getWeightHistory, getWorkoutStats])
 
-  const { character, nutritionStats, profile, workoutStats } = stats
+  const { character, nutritionStats, profile, weightHistory, workoutStats } = stats
   const sidebarProfile = character
     ? {
         badge: String(character.level),
@@ -112,8 +124,8 @@ export function StatsPage() {
       }
     : undefined
   const bmi = profile ? calculateBmi(profile.heightCm, profile.weightKg) : null
-  const weightGoalChart = buildWeightGoalChart(profile)
-  const hasAnyStats = Boolean(profile || workoutStats || nutritionStats)
+  const weightChart = buildWeightHistoryChart(weightHistory, profile)
+  const hasAnyStats = Boolean(profile || workoutStats || nutritionStats || weightHistory.length > 0)
 
   return (
     <AppFrame
@@ -130,7 +142,7 @@ export function StatsPage() {
       {isLoading && !hasAnyStats ? (
         <section className="card empty-state">
           <div className="card-title">Загрузка статистики</div>
-          <p className="panel-copy">Подтягиваем профиль, тренировки и питание из backend.</p>
+          <p className="panel-copy">Подтягиваем профиль, тренировки, питание и историю веса из backend.</p>
         </section>
       ) : null}
 
@@ -139,7 +151,7 @@ export function StatsPage() {
           <div className="card-title">Статистика пока недоступна</div>
           <p className="panel-copy">
             Для этой страницы пока не нашлось данных. Обычно они появляются после заполнения
-            профиля и генерации планов.
+            профиля, генерации планов и первых ежедневных замеров веса.
           </p>
         </section>
       ) : null}
@@ -148,11 +160,9 @@ export function StatsPage() {
         <>
           <section className="grid g-2 placeholder-grid">
             <div className="card">
-              <div className="card-title">Вес и цель</div>
-              <WeightGoalChart chart={weightGoalChart} />
-              <p className="panel-copy">
-                {weightGoalChart.note}
-              </p>
+              <div className="card-title">История веса</div>
+              <WeightHistoryChart chart={weightChart} />
+              <p className="panel-copy">{weightChart.note}</p>
             </div>
 
             <div className="card">
@@ -259,14 +269,14 @@ export function StatsPage() {
   )
 }
 
-function WeightGoalChart({
+function WeightHistoryChart({
   chart,
 }: {
   chart: {
-    labelPoints: Array<{ label: string; value?: number; x: number; y: number }>
+    axisLabels: Array<{ label: string; x: number }>
+    labelPoints: Array<{ key: string; value: number; x: number; y: number }>
     note: string
     polylinePoints: string
-    tickLabels: Array<{ label: string; x: number }>
   }
 }) {
   return (
@@ -289,14 +299,14 @@ function WeightGoalChart({
 
       <g fill="#FF7A1A">
         {chart.labelPoints.map((point) => (
-          <circle cx={point.x} cy={point.y} key={`${point.label}-${point.value}`} r="4" />
+          <circle cx={point.x} cy={point.y} key={point.key} r="4" />
         ))}
       </g>
 
       <g fill="#9195A8" fontFamily="IBM Plex Mono, monospace" fontSize="11">
         {chart.labelPoints.map((point) => (
-          <text key={`${point.label}-value`} x={point.x - 16} y={point.y - 10}>
-            {typeof point.value === 'number' ? `${formatWeight(point.value)} кг` : '—'}
+          <text key={`${point.key}-value`} x={point.x - 16} y={point.y - 10}>
+            {formatWeight(point.value)} кг
           </text>
         ))}
       </g>
@@ -304,7 +314,7 @@ function WeightGoalChart({
       <line stroke="rgba(255,255,255,.1)" strokeWidth="1" x1="0" x2="460" y1="145" y2="145" />
 
       <g fill="#565A70" fontFamily="IBM Plex Mono, monospace" fontSize="10">
-        {chart.tickLabels.map((item) => (
+        {chart.axisLabels.map((item) => (
           <text key={item.label} x={item.x} y="158">
             {item.label}
           </text>
@@ -348,74 +358,94 @@ function getSettledValue<T>(
   result: PromiseSettledResult<T>,
   errors: string[],
   fallbackMessage: string,
-  options?: { allowNotFound?: boolean },
+  options?: { allowNotFound?: boolean; fallbackValue?: T },
 ) {
   if (result.status === 'fulfilled') {
     return result.value
   }
 
   if (options?.allowNotFound && result.reason instanceof ApiError && result.reason.status === 404) {
-    return null
+    return options.fallbackValue ?? null
   }
 
   errors.push(toErrorMessage(result.reason, fallbackMessage))
-  return null
+  return options?.fallbackValue ?? null
 }
 
-function buildWeightGoalChart(profile: Profile | null) {
-  if (!profile) {
+function buildWeightHistoryChart(history: WeightMeasurement[], profile: Profile | null) {
+  if (history.length === 0) {
+    const currentWeight = profile?.weightKg
     return {
-      labelPoints: [
-        { label: 'сейчас', x: 40, y: 84 },
-        { label: 'цель', x: 420, y: 84 },
-      ],
-      note: 'Профиль ещё не загружен, поэтому график веса пока недоступен.',
-      polylinePoints: '40,84 420,84',
-      tickLabels: [
-        { label: 'сейчас', x: 24 },
-        { label: 'цель', x: 404 },
-      ],
+      axisLabels: [{ label: 'нет замеров', x: 170 }],
+      labelPoints:
+        typeof currentWeight === 'number'
+          ? [{ key: 'current-weight', value: currentWeight, x: 230, y: 84 }]
+          : [],
+      note:
+        typeof currentWeight === 'number'
+          ? 'Текущий вес уже сохранён в профиле. Чтобы увидеть нормальную динамику, добавляйте ежедневный утренний замер.'
+          : 'История веса ещё не заполнена. После первого утреннего замера график начнёт собираться.',
+      polylinePoints:
+        typeof currentWeight === 'number' ? '230,84' : '40,84 420,84',
     }
   }
 
-  const current = profile.weightKg
-  if (typeof profile.targetWeightKg !== 'number') {
-    return {
-      labelPoints: [{ label: 'сейчас', value: current, x: 40, y: 84 }],
-      note: 'В backend пока есть только текущий вес. После сохранения целевого веса график покажет направление к цели.',
-      polylinePoints: '40,84 420,84',
-      tickLabels: [
-        { label: 'сейчас', x: 24 },
-        { label: 'цель не задана', x: 338 },
-      ],
-    }
-  }
-
-  const target = profile.targetWeightKg
-  const midpoint = (current + target) / 2
-  const values = [current, midpoint, target]
+  const values = history.map((item) => item.weightKg)
   const min = Math.min(...values)
   const max = Math.max(...values)
   const range = Math.max(max - min, 1)
-  const xPositions = [40, 230, 420]
-  const yPositions = values.map((value) => {
-    const normalized = (value - min) / range
-    return 118 - normalized * 68
+  const spacing = history.length === 1 ? 0 : 380 / (history.length - 1)
+  const points = history.map((item, index) => {
+    const normalized = (item.weightKg - min) / range
+    return {
+      date: item.measuredOn,
+      key: `${item.measuredOn}-${index}`,
+      value: item.weightKg,
+      x: 40 + spacing * index,
+      y: 118 - normalized * 68,
+    }
   })
 
   return {
-    labelPoints: [
-      { label: 'сейчас', value: current, x: xPositions[0], y: yPositions[0] },
-      { label: 'цель', value: target, x: xPositions[2], y: yPositions[2] },
-    ],
-    note: 'Показываем текущий и целевой вес из профиля. История замеров пока не приходит отдельным endpoint.',
-    polylinePoints: xPositions.map((x, index) => `${x},${yPositions[index]}`).join(' '),
-    tickLabels: [
-      { label: 'сейчас', x: 24 },
-      { label: 'середина', x: 206 },
-      { label: 'цель', x: 394 },
-    ],
+    axisLabels: buildAxisLabels(points),
+    labelPoints: selectLabelPoints(points),
+    note: buildHistoryNote(history, profile?.targetWeightKg),
+    polylinePoints: points.map((point) => `${point.x},${point.y}`).join(' '),
   }
+}
+
+function buildAxisLabels(points: Array<{ date: string; x: number }>) {
+  if (points.length === 1) {
+    return [{ label: formatAxisDate(points[0].date), x: Math.max(points[0].x - 20, 0) }]
+  }
+
+  const middlePoint = points[Math.floor(points.length / 2)]
+  const lastPoint = points[points.length - 1]
+
+  return [
+    { label: formatAxisDate(points[0].date), x: Math.max(points[0].x - 20, 0) },
+    { label: formatAxisDate(middlePoint.date), x: Math.max(middlePoint.x - 20, 0) },
+    { label: formatAxisDate(lastPoint.date), x: Math.max(lastPoint.x - 20, 0) },
+  ]
+}
+
+function selectLabelPoints(points: Array<{ key: string; value: number; x: number; y: number }>) {
+  if (points.length <= 2) {
+    return points
+  }
+
+  const middlePoint = points[Math.floor(points.length / 2)]
+  const lastPoint = points[points.length - 1]
+
+  return [points[0], middlePoint, lastPoint]
+}
+
+function buildHistoryNote(history: WeightMeasurement[], targetWeightKg?: number) {
+  const lastMeasurement = history[history.length - 1]
+  const targetNote =
+    typeof targetWeightKg === 'number' ? ` Цель профиля: ${formatWeight(targetWeightKg)} кг.` : ''
+
+  return `Последний замер: ${formatMeasurementDate(lastMeasurement.measuredOn)}.${targetNote}`
 }
 
 function calculateBmi(heightCm: number, weightKg: number) {
@@ -553,4 +583,25 @@ function formatWeightDelta(currentWeightKg: number, targetWeightKg?: number) {
 
 function formatWeight(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(1)
+}
+
+function formatAxisDate(value: string) {
+  const parsedDate = new Date(`${value}T00:00:00`)
+  if (Number.isNaN(parsedDate.getTime())) {
+    return value
+  }
+
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+  }).format(parsedDate)
+}
+
+function formatMeasurementDate(value: string) {
+  const parsedDate = new Date(`${value}T00:00:00`)
+  if (Number.isNaN(parsedDate.getTime())) {
+    return value
+  }
+
+  return new Intl.DateTimeFormat('ru-RU').format(parsedDate)
 }

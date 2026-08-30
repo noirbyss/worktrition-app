@@ -12,6 +12,8 @@ service UserService {
   rpc SaveProfile(SaveProfileRequest) returns (SaveProfileResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  rpc SaveWeightMeasurement(SaveWeightMeasurementRequest) returns (SaveWeightMeasurementResponse);
+  rpc GetWeightHistory(GetWeightHistoryRequest) returns (GetWeightHistoryResponse);
 }
 
 enum Gender {
@@ -154,4 +156,28 @@ message GetProfileResponse {
   TrainingLocation training_location = 13;
   int32 training_days_per_week = 14;
   string equipment = 15;
+}
+
+message WeightMeasurement {
+  string user_id = 1;
+  string measured_on = 2;
+  double weight_kg = 3;
+}
+
+message SaveWeightMeasurementRequest {
+  string user_id = 1;
+  double weight_kg = 2;
+}
+
+message SaveWeightMeasurementResponse {
+  WeightMeasurement measurement = 1;
+}
+
+message GetWeightHistoryRequest {
+  string user_id = 1;
+  int32 limit = 2;
+}
+
+message GetWeightHistoryResponse {
+  repeated WeightMeasurement measurements = 1;
 }

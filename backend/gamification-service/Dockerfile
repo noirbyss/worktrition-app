@@ -1,4 +1,7 @@
-FROM golang:1.25.3-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25.3-alpine AS builder
+
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /app
 
@@ -13,7 +16,7 @@ COPY backend/gamification-service/cmd ./cmd
 COPY backend/gamification-service/internal ./internal
 COPY backend/gamification-service/migrations ./migrations
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/gamification-service ./cmd
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build -o /bin/gamification-service ./cmd
 
 FROM alpine:3.22
 

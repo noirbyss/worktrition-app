@@ -1,4 +1,7 @@
-FROM golang:1.25.3-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25.3-alpine AS builder
+
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /app
 
@@ -13,7 +16,7 @@ COPY backend/user-service/cmd ./cmd
 COPY backend/user-service/internal ./internal
 COPY backend/user-service/migrations ./migrations
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/user-service ./cmd/user-service
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build -o /bin/user-service ./cmd/user-service
 
 FROM alpine:3.22
 

@@ -124,6 +124,7 @@ function translateBackendError(message: string) {
     'invalid credentials': 'Неправильный логин или пароль.',
     'invalid JSON body': 'Некорректные данные формы.',
     'internal error': 'Внутренняя ошибка сервера. Попробуйте еще раз.',
+    'limit must be a positive integer': 'Лимит истории веса должен быть положительным целым числом.',
     'meal item not found': 'Приём пищи не найден в активном плане.',
     'plan for user not found': 'План питания для пользователя пока не найден.',
     'profile not found': 'Профиль пока не заполнен.',
@@ -132,6 +133,7 @@ function translateBackendError(message: string) {
     'token revoked': 'Сессия завершена. Войдите снова.',
     'user already exists': 'Пользователь с таким email уже существует.',
     'user not found': 'Пользователь не найден.',
+    'limit: must be between 1 and 90': 'limit: Лимит истории веса должен быть от 1 до 90.',
   }
 
   return fieldTranslations[normalizedMessage] ?? commonTranslations[normalizedMessage] ?? normalizedMessage

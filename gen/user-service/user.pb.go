@@ -1310,6 +1310,258 @@ func (x *GetProfileResponse) GetEquipment() string {
 	return ""
 }
 
+type WeightMeasurement struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	MeasuredOn    string                 `protobuf:"bytes,2,opt,name=measured_on,json=measuredOn,proto3" json:"measured_on,omitempty"`
+	WeightKg      float64                `protobuf:"fixed64,3,opt,name=weight_kg,json=weightKg,proto3" json:"weight_kg,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WeightMeasurement) Reset() {
+	*x = WeightMeasurement{}
+	mi := &file_user_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WeightMeasurement) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WeightMeasurement) ProtoMessage() {}
+
+func (x *WeightMeasurement) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WeightMeasurement.ProtoReflect.Descriptor instead.
+func (*WeightMeasurement) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *WeightMeasurement) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *WeightMeasurement) GetMeasuredOn() string {
+	if x != nil {
+		return x.MeasuredOn
+	}
+	return ""
+}
+
+func (x *WeightMeasurement) GetWeightKg() float64 {
+	if x != nil {
+		return x.WeightKg
+	}
+	return 0
+}
+
+type SaveWeightMeasurementRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	WeightKg      float64                `protobuf:"fixed64,2,opt,name=weight_kg,json=weightKg,proto3" json:"weight_kg,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveWeightMeasurementRequest) Reset() {
+	*x = SaveWeightMeasurementRequest{}
+	mi := &file_user_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveWeightMeasurementRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveWeightMeasurementRequest) ProtoMessage() {}
+
+func (x *SaveWeightMeasurementRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveWeightMeasurementRequest.ProtoReflect.Descriptor instead.
+func (*SaveWeightMeasurementRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *SaveWeightMeasurementRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *SaveWeightMeasurementRequest) GetWeightKg() float64 {
+	if x != nil {
+		return x.WeightKg
+	}
+	return 0
+}
+
+type SaveWeightMeasurementResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Measurement   *WeightMeasurement     `protobuf:"bytes,1,opt,name=measurement,proto3" json:"measurement,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveWeightMeasurementResponse) Reset() {
+	*x = SaveWeightMeasurementResponse{}
+	mi := &file_user_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveWeightMeasurementResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveWeightMeasurementResponse) ProtoMessage() {}
+
+func (x *SaveWeightMeasurementResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveWeightMeasurementResponse.ProtoReflect.Descriptor instead.
+func (*SaveWeightMeasurementResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *SaveWeightMeasurementResponse) GetMeasurement() *WeightMeasurement {
+	if x != nil {
+		return x.Measurement
+	}
+	return nil
+}
+
+type GetWeightHistoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetWeightHistoryRequest) Reset() {
+	*x = GetWeightHistoryRequest{}
+	mi := &file_user_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetWeightHistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWeightHistoryRequest) ProtoMessage() {}
+
+func (x *GetWeightHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWeightHistoryRequest.ProtoReflect.Descriptor instead.
+func (*GetWeightHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetWeightHistoryRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetWeightHistoryRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type GetWeightHistoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Measurements  []*WeightMeasurement   `protobuf:"bytes,1,rep,name=measurements,proto3" json:"measurements,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetWeightHistoryResponse) Reset() {
+	*x = GetWeightHistoryResponse{}
+	mi := &file_user_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetWeightHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWeightHistoryResponse) ProtoMessage() {}
+
+func (x *GetWeightHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWeightHistoryResponse.ProtoReflect.Descriptor instead.
+func (*GetWeightHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GetWeightHistoryResponse) GetMeasurements() []*WeightMeasurement {
+	if x != nil {
+		return x.Measurements
+	}
+	return nil
+}
+
 var File_user_proto protoreflect.FileDescriptor
 
 const file_user_proto_rawDesc = "" +
@@ -1401,7 +1653,22 @@ const file_user_proto_rawDesc = "" +
 	"\x11training_location\x18\r \x01(\x0e2\x16.user.TrainingLocationR\x10trainingLocation\x123\n" +
 	"\x16training_days_per_week\x18\x0e \x01(\x05R\x13trainingDaysPerWeek\x12\x1c\n" +
 	"\tequipment\x18\x0f \x01(\tR\tequipmentB\x13\n" +
-	"\x11_target_weight_kg*D\n" +
+	"\x11_target_weight_kg\"j\n" +
+	"\x11WeightMeasurement\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n" +
+	"\vmeasured_on\x18\x02 \x01(\tR\n" +
+	"measuredOn\x12\x1b\n" +
+	"\tweight_kg\x18\x03 \x01(\x01R\bweightKg\"T\n" +
+	"\x1cSaveWeightMeasurementRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tweight_kg\x18\x02 \x01(\x01R\bweightKg\"Z\n" +
+	"\x1dSaveWeightMeasurementResponse\x129\n" +
+	"\vmeasurement\x18\x01 \x01(\v2\x17.user.WeightMeasurementR\vmeasurement\"H\n" +
+	"\x17GetWeightHistoryRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"W\n" +
+	"\x18GetWeightHistoryResponse\x12;\n" +
+	"\fmeasurements\x18\x01 \x03(\v2\x17.user.WeightMeasurementR\fmeasurements*D\n" +
 	"\x06Gender\x12\x16\n" +
 	"\x12GENDER_UNSPECIFIED\x10\x00\x12\x0f\n" +
 	"\vGENDER_MALE\x10\x01\x12\x11\n" +
@@ -1425,7 +1692,7 @@ const file_user_proto_rawDesc = "" +
 	"\x10TrainingLocation\x12!\n" +
 	"\x1dTRAINING_LOCATION_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16TRAINING_LOCATION_HOME\x10\x01\x12\x19\n" +
-	"\x15TRAINING_LOCATION_GYM\x10\x022\xb3\x03\n" +
+	"\x15TRAINING_LOCATION_GYM\x10\x022\xe8\x04\n" +
 	"\vUserService\x129\n" +
 	"\bRegister\x12\x15.user.RegisterRequest\x1a\x16.user.RegisterResponse\x120\n" +
 	"\x05Login\x12\x12.user.LoginRequest\x1a\x13.user.LoginResponse\x12E\n" +
@@ -1434,7 +1701,9 @@ const file_user_proto_rawDesc = "" +
 	"\vSaveProfile\x12\x18.user.SaveProfileRequest\x1a\x19.user.SaveProfileResponse\x126\n" +
 	"\aGetUser\x12\x14.user.GetUserRequest\x1a\x15.user.GetUserResponse\x12?\n" +
 	"\n" +
-	"GetProfile\x12\x17.user.GetProfileRequest\x1a\x18.user.GetProfileResponseB;Z9github.com/noirbyss/worktrition-app/gen/user-service;userb\x06proto3"
+	"GetProfile\x12\x17.user.GetProfileRequest\x1a\x18.user.GetProfileResponse\x12`\n" +
+	"\x15SaveWeightMeasurement\x12\".user.SaveWeightMeasurementRequest\x1a#.user.SaveWeightMeasurementResponse\x12Q\n" +
+	"\x10GetWeightHistory\x12\x1d.user.GetWeightHistoryRequest\x1a\x1e.user.GetWeightHistoryResponseB;Z9github.com/noirbyss/worktrition-app/gen/user-service;userb\x06proto3"
 
 var (
 	file_user_proto_rawDescOnce sync.Once
@@ -1449,27 +1718,32 @@ func file_user_proto_rawDescGZIP() []byte {
 }
 
 var file_user_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_user_proto_goTypes = []any{
-	(Gender)(0),                  // 0: user.Gender
-	(TrainingLevel)(0),           // 1: user.TrainingLevel
-	(ActivityLevel)(0),           // 2: user.ActivityLevel
-	(FitnessGoal)(0),             // 3: user.FitnessGoal
-	(TrainingLocation)(0),        // 4: user.TrainingLocation
-	(*RegisterRequest)(nil),      // 5: user.RegisterRequest
-	(*RegisterResponse)(nil),     // 6: user.RegisterResponse
-	(*LoginRequest)(nil),         // 7: user.LoginRequest
-	(*LoginResponse)(nil),        // 8: user.LoginResponse
-	(*RefreshTokenRequest)(nil),  // 9: user.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil), // 10: user.RefreshTokenResponse
-	(*LogoutRequest)(nil),        // 11: user.LogoutRequest
-	(*LogoutResponse)(nil),       // 12: user.LogoutResponse
-	(*SaveProfileRequest)(nil),   // 13: user.SaveProfileRequest
-	(*SaveProfileResponse)(nil),  // 14: user.SaveProfileResponse
-	(*GetUserRequest)(nil),       // 15: user.GetUserRequest
-	(*GetUserResponse)(nil),      // 16: user.GetUserResponse
-	(*GetProfileRequest)(nil),    // 17: user.GetProfileRequest
-	(*GetProfileResponse)(nil),   // 18: user.GetProfileResponse
+	(Gender)(0),                           // 0: user.Gender
+	(TrainingLevel)(0),                    // 1: user.TrainingLevel
+	(ActivityLevel)(0),                    // 2: user.ActivityLevel
+	(FitnessGoal)(0),                      // 3: user.FitnessGoal
+	(TrainingLocation)(0),                 // 4: user.TrainingLocation
+	(*RegisterRequest)(nil),               // 5: user.RegisterRequest
+	(*RegisterResponse)(nil),              // 6: user.RegisterResponse
+	(*LoginRequest)(nil),                  // 7: user.LoginRequest
+	(*LoginResponse)(nil),                 // 8: user.LoginResponse
+	(*RefreshTokenRequest)(nil),           // 9: user.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),          // 10: user.RefreshTokenResponse
+	(*LogoutRequest)(nil),                 // 11: user.LogoutRequest
+	(*LogoutResponse)(nil),                // 12: user.LogoutResponse
+	(*SaveProfileRequest)(nil),            // 13: user.SaveProfileRequest
+	(*SaveProfileResponse)(nil),           // 14: user.SaveProfileResponse
+	(*GetUserRequest)(nil),                // 15: user.GetUserRequest
+	(*GetUserResponse)(nil),               // 16: user.GetUserResponse
+	(*GetProfileRequest)(nil),             // 17: user.GetProfileRequest
+	(*GetProfileResponse)(nil),            // 18: user.GetProfileResponse
+	(*WeightMeasurement)(nil),             // 19: user.WeightMeasurement
+	(*SaveWeightMeasurementRequest)(nil),  // 20: user.SaveWeightMeasurementRequest
+	(*SaveWeightMeasurementResponse)(nil), // 21: user.SaveWeightMeasurementResponse
+	(*GetWeightHistoryRequest)(nil),       // 22: user.GetWeightHistoryRequest
+	(*GetWeightHistoryResponse)(nil),      // 23: user.GetWeightHistoryResponse
 }
 var file_user_proto_depIdxs = []int32{
 	0,  // 0: user.SaveProfileRequest.gender:type_name -> user.Gender
@@ -1482,25 +1756,31 @@ var file_user_proto_depIdxs = []int32{
 	2,  // 7: user.GetProfileResponse.activity_level:type_name -> user.ActivityLevel
 	3,  // 8: user.GetProfileResponse.goal:type_name -> user.FitnessGoal
 	4,  // 9: user.GetProfileResponse.training_location:type_name -> user.TrainingLocation
-	5,  // 10: user.UserService.Register:input_type -> user.RegisterRequest
-	7,  // 11: user.UserService.Login:input_type -> user.LoginRequest
-	9,  // 12: user.UserService.RefreshToken:input_type -> user.RefreshTokenRequest
-	11, // 13: user.UserService.Logout:input_type -> user.LogoutRequest
-	13, // 14: user.UserService.SaveProfile:input_type -> user.SaveProfileRequest
-	15, // 15: user.UserService.GetUser:input_type -> user.GetUserRequest
-	17, // 16: user.UserService.GetProfile:input_type -> user.GetProfileRequest
-	6,  // 17: user.UserService.Register:output_type -> user.RegisterResponse
-	8,  // 18: user.UserService.Login:output_type -> user.LoginResponse
-	10, // 19: user.UserService.RefreshToken:output_type -> user.RefreshTokenResponse
-	12, // 20: user.UserService.Logout:output_type -> user.LogoutResponse
-	14, // 21: user.UserService.SaveProfile:output_type -> user.SaveProfileResponse
-	16, // 22: user.UserService.GetUser:output_type -> user.GetUserResponse
-	18, // 23: user.UserService.GetProfile:output_type -> user.GetProfileResponse
-	17, // [17:24] is the sub-list for method output_type
-	10, // [10:17] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	19, // 10: user.SaveWeightMeasurementResponse.measurement:type_name -> user.WeightMeasurement
+	19, // 11: user.GetWeightHistoryResponse.measurements:type_name -> user.WeightMeasurement
+	5,  // 12: user.UserService.Register:input_type -> user.RegisterRequest
+	7,  // 13: user.UserService.Login:input_type -> user.LoginRequest
+	9,  // 14: user.UserService.RefreshToken:input_type -> user.RefreshTokenRequest
+	11, // 15: user.UserService.Logout:input_type -> user.LogoutRequest
+	13, // 16: user.UserService.SaveProfile:input_type -> user.SaveProfileRequest
+	15, // 17: user.UserService.GetUser:input_type -> user.GetUserRequest
+	17, // 18: user.UserService.GetProfile:input_type -> user.GetProfileRequest
+	20, // 19: user.UserService.SaveWeightMeasurement:input_type -> user.SaveWeightMeasurementRequest
+	22, // 20: user.UserService.GetWeightHistory:input_type -> user.GetWeightHistoryRequest
+	6,  // 21: user.UserService.Register:output_type -> user.RegisterResponse
+	8,  // 22: user.UserService.Login:output_type -> user.LoginResponse
+	10, // 23: user.UserService.RefreshToken:output_type -> user.RefreshTokenResponse
+	12, // 24: user.UserService.Logout:output_type -> user.LogoutResponse
+	14, // 25: user.UserService.SaveProfile:output_type -> user.SaveProfileResponse
+	16, // 26: user.UserService.GetUser:output_type -> user.GetUserResponse
+	18, // 27: user.UserService.GetProfile:output_type -> user.GetProfileResponse
+	21, // 28: user.UserService.SaveWeightMeasurement:output_type -> user.SaveWeightMeasurementResponse
+	23, // 29: user.UserService.GetWeightHistory:output_type -> user.GetWeightHistoryResponse
+	21, // [21:30] is the sub-list for method output_type
+	12, // [12:21] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_user_proto_init() }
@@ -1516,7 +1796,7 @@ func file_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_proto_rawDesc), len(file_user_proto_rawDesc)),
 			NumEnums:      5,
-			NumMessages:   14,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

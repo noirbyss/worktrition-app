@@ -22,6 +22,8 @@ type ProfileUseCase interface {
 	SaveProfile(ctx context.Context, profile *domain.Profile) (*domain.Profile, error)
 	GetUser(ctx context.Context, userID string) (*domain.User, error)
 	GetProfile(ctx context.Context, userID string) (*domain.Profile, error)
+	SaveWeightMeasurement(ctx context.Context, userID string, weightKG float64) (*domain.WeightMeasurement, error)
+	GetWeightHistory(ctx context.Context, userID string, limit int) ([]domain.WeightMeasurement, error)
 }
 
 type Server struct {
@@ -154,6 +156,42 @@ func (s *Server) GetProfile(
 	return profileToProto(profile), nil
 }
 
+func (s *Server) SaveWeightMeasurement(
+	ctx context.Context,
+	req *userpb.SaveWeightMeasurementRequest,
+) (*userpb.SaveWeightMeasurementResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "request is required")
+	}
+
+	measurement, err := s.profile.SaveWeightMeasurement(ctx, req.GetUserId(), req.GetWeightKg())
+	if err != nil {
+		return nil, toStatusError(err)
+	}
+
+	return &userpb.SaveWeightMeasurementResponse{
+		Measurement: weightMeasurementToProto(measurement),
+	}, nil
+}
+
+func (s *Server) GetWeightHistory(
+	ctx context.Context,
+	req *userpb.GetWeightHistoryRequest,
+) (*userpb.GetWeightHistoryResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "request is required")
+	}
+
+	measurements, err := s.profile.GetWeightHistory(ctx, req.GetUserId(), int(req.GetLimit()))
+	if err != nil {
+		return nil, toStatusError(err)
+	}
+
+	return &userpb.GetWeightHistoryResponse{
+		Measurements: weightMeasurementsToProto(measurements),
+	}, nil
+}
+
 func profileFromProto(req *userpb.SaveProfileRequest) *domain.Profile {
 	var targetWeightKG *float64
 	if req.TargetWeightKg != nil {
@@ -257,6 +295,32 @@ func profileToProto(profile *domain.Profile) *userpb.GetProfileResponse {
 		TrainingDaysPerWeek: int32(profile.TrainingDaysPerWeek),
 		Equipment:           profile.Equipment,
 	}
+}
+
+func weightMeasurementToProto(measurement *domain.WeightMeasurement) *userpb.WeightMeasurement {
+	if measurement == nil {
+		return nil
+	}
+
+	return &userpb.WeightMeasurement{
+		UserId:     measurement.UserID,
+		MeasuredOn: measurement.MeasuredOn.Format(domain.BirthDateLayout),
+		WeightKg:   measurement.WeightKG,
+	}
+}
+
+func weightMeasurementsToProto(measurements []domain.WeightMeasurement) []*userpb.WeightMeasurement {
+	if measurements == nil {
+		return nil
+	}
+
+	result := make([]*userpb.WeightMeasurement, 0, len(measurements))
+	for _, measurement := range measurements {
+		measurementCopy := measurement
+		result = append(result, weightMeasurementToProto(&measurementCopy))
+	}
+
+	return result
 }
 
 func cloneStrings(values []string) []string {

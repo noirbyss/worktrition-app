@@ -1,6 +1,9 @@
 package domain
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type UserRepository interface {
 	Create(ctx context.Context, user *User) (string, error)
@@ -12,6 +15,8 @@ type UserRepository interface {
 type ProfileRepository interface {
 	Save(ctx context.Context, profile *Profile) error
 	GetByUserID(ctx context.Context, userID string) (*Profile, error)
+	SaveWeightMeasurement(ctx context.Context, userID string, weightKG float64, measuredOn time.Time) (*WeightMeasurement, error)
+	ListWeightMeasurements(ctx context.Context, userID string, limit int) ([]WeightMeasurement, error)
 }
 
 type RefreshTokenRepository interface {

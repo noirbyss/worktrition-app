@@ -19,13 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_Register_FullMethodName     = "/user.UserService/Register"
-	UserService_Login_FullMethodName        = "/user.UserService/Login"
-	UserService_RefreshToken_FullMethodName = "/user.UserService/RefreshToken"
-	UserService_Logout_FullMethodName       = "/user.UserService/Logout"
-	UserService_SaveProfile_FullMethodName  = "/user.UserService/SaveProfile"
-	UserService_GetUser_FullMethodName      = "/user.UserService/GetUser"
-	UserService_GetProfile_FullMethodName   = "/user.UserService/GetProfile"
+	UserService_Register_FullMethodName              = "/user.UserService/Register"
+	UserService_Login_FullMethodName                 = "/user.UserService/Login"
+	UserService_RefreshToken_FullMethodName          = "/user.UserService/RefreshToken"
+	UserService_Logout_FullMethodName                = "/user.UserService/Logout"
+	UserService_SaveProfile_FullMethodName           = "/user.UserService/SaveProfile"
+	UserService_GetUser_FullMethodName               = "/user.UserService/GetUser"
+	UserService_GetProfile_FullMethodName            = "/user.UserService/GetProfile"
+	UserService_SaveWeightMeasurement_FullMethodName = "/user.UserService/SaveWeightMeasurement"
+	UserService_GetWeightHistory_FullMethodName      = "/user.UserService/GetWeightHistory"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -39,6 +41,8 @@ type UserServiceClient interface {
 	SaveProfile(ctx context.Context, in *SaveProfileRequest, opts ...grpc.CallOption) (*SaveProfileResponse, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	GetProfile(ctx context.Context, in *GetProfileRequest, opts ...grpc.CallOption) (*GetProfileResponse, error)
+	SaveWeightMeasurement(ctx context.Context, in *SaveWeightMeasurementRequest, opts ...grpc.CallOption) (*SaveWeightMeasurementResponse, error)
+	GetWeightHistory(ctx context.Context, in *GetWeightHistoryRequest, opts ...grpc.CallOption) (*GetWeightHistoryResponse, error)
 }
 
 type userServiceClient struct {
@@ -119,6 +123,26 @@ func (c *userServiceClient) GetProfile(ctx context.Context, in *GetProfileReques
 	return out, nil
 }
 
+func (c *userServiceClient) SaveWeightMeasurement(ctx context.Context, in *SaveWeightMeasurementRequest, opts ...grpc.CallOption) (*SaveWeightMeasurementResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SaveWeightMeasurementResponse)
+	err := c.cc.Invoke(ctx, UserService_SaveWeightMeasurement_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetWeightHistory(ctx context.Context, in *GetWeightHistoryRequest, opts ...grpc.CallOption) (*GetWeightHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetWeightHistoryResponse)
+	err := c.cc.Invoke(ctx, UserService_GetWeightHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -130,6 +154,8 @@ type UserServiceServer interface {
 	SaveProfile(context.Context, *SaveProfileRequest) (*SaveProfileResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	GetProfile(context.Context, *GetProfileRequest) (*GetProfileResponse, error)
+	SaveWeightMeasurement(context.Context, *SaveWeightMeasurementRequest) (*SaveWeightMeasurementResponse, error)
+	GetWeightHistory(context.Context, *GetWeightHistoryRequest) (*GetWeightHistoryResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -160,6 +186,12 @@ func (UnimplementedUserServiceServer) GetUser(context.Context, *GetUserRequest) 
 }
 func (UnimplementedUserServiceServer) GetProfile(context.Context, *GetProfileRequest) (*GetProfileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetProfile not implemented")
+}
+func (UnimplementedUserServiceServer) SaveWeightMeasurement(context.Context, *SaveWeightMeasurementRequest) (*SaveWeightMeasurementResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SaveWeightMeasurement not implemented")
+}
+func (UnimplementedUserServiceServer) GetWeightHistory(context.Context, *GetWeightHistoryRequest) (*GetWeightHistoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetWeightHistory not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -308,6 +340,42 @@ func _UserService_GetProfile_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_SaveWeightMeasurement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveWeightMeasurementRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).SaveWeightMeasurement(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_SaveWeightMeasurement_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).SaveWeightMeasurement(ctx, req.(*SaveWeightMeasurementRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetWeightHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWeightHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetWeightHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetWeightHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetWeightHistory(ctx, req.(*GetWeightHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +410,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetProfile",
 			Handler:    _UserService_GetProfile_Handler,
+		},
+		{
+			MethodName: "SaveWeightMeasurement",
+			Handler:    _UserService_SaveWeightMeasurement_Handler,
+		},
+		{
+			MethodName: "GetWeightHistory",
+			Handler:    _UserService_GetWeightHistory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

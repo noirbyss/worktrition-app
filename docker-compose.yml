@@ -42,6 +42,54 @@ services:
       - "${GATEWAY_HTTP_PORT:-8080}:${GATEWAY_HTTP_PORT:-8080}"
     stop_grace_period: 10s
 
+  nutrition-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${NUTRITION_DB_USER}
+      POSTGRES_PASSWORD: ${NUTRITION_DB_PASSWORD}
+      POSTGRES_DB: ${NUTRITION_DB_NAME}
+    volumes:
+      - nutrition-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\"" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  nutrition-migrate:
+    image: migrate/migrate
+    depends_on:
+      nutrition-db:
+        condition: service_healthy
+    volumes:
+      - ./backend/nutrition-service/migrations:/migrations
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://${NUTRITION_DB_USER}:${NUTRITION_DB_PASSWORD}@${NUTRITION_DB_HOST}:${NUTRITION_DB_PORT}/${NUTRITION_DB_NAME}?sslmode=${NUTRITION_DB_SSL_MODE}"
+      - "up"
+    restart: on-failure
+
+  nutrition-service:
+    build:
+      context: ./backend/nutrition-service
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${NUTRITION_DB_USER}:${NUTRITION_DB_PASSWORD}@${NUTRITION_DB_HOST}:${NUTRITION_DB_PORT}/${NUTRITION_DB_NAME}?sslmode=${NUTRITION_DB_SSL_MODE}
+      GRPC_PORT: ${NUTRITION_GRPC_PORT:-50052}
+      GAMIFICATION_SERVICE_ADDR: ${NUTRITION_GAMIFICATION_SERVICE_ADDR}
+    depends_on:
+      nutrition-db:
+        condition: service_healthy
+      nutrition-migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    ports:
+      - "${NUTRITION_GRPC_PORT:-50052}:${NUTRITION_GRPC_PORT:-50052}"
+    stop_grace_period: 10s
+
   frontend:
     build:
       context: ./frontend
@@ -58,3 +106,4 @@ services:
 
 volumes:
   user-db-data:
+  nutrition-db-data:

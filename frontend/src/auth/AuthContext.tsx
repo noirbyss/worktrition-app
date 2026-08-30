@@ -11,6 +11,7 @@ import {
   ApiError,
   type AuthSession,
   type CurrentUser,
+  type GamificationCharacter,
   type GenerationResult,
   type LoginPayload,
   type NutritionDayPlan,
@@ -26,6 +27,7 @@ import {
   completeNutritionWater as completeNutritionWaterRequest,
   completeWorkoutTraining as completeWorkoutTrainingRequest,
   getGenerationStatus as getGenerationStatusRequest,
+  getGamificationCharacter as getGamificationCharacterRequest,
   getCurrentUser as fetchCurrentUser,
   getNutritionDayPlan as getNutritionDayPlanRequest,
   getNutritionStats as getNutritionStatsRequest,
@@ -48,6 +50,7 @@ interface AuthContextValue {
   completeNutritionWater: (amountMl: number) => Promise<void>
   completeWorkoutTraining: (dayOfWeek: number | string, durationSeconds: number) => Promise<void>
   getGenerationStatus: (generationId: string) => Promise<GenerationResult>
+  getGamificationCharacter: () => Promise<GamificationCharacter>
   getCurrentUser: () => Promise<CurrentUser>
   getNutritionDayPlan: (dayOfWeek: number | string) => Promise<NutritionDayPlan>
   getNutritionStats: () => Promise<NutritionStats>
@@ -217,6 +220,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [withAuthorizedSession],
   )
 
+  const getGamificationCharacter = useCallback(
+    () =>
+      withAuthorizedSession((activeSession) =>
+        getGamificationCharacterRequest(activeSession.accessToken),
+      ),
+    [withAuthorizedSession],
+  )
+
   const getProfile = useCallback(
     () => withAuthorizedSession((activeSession) => fetchProfile(activeSession.accessToken)),
     [withAuthorizedSession],
@@ -312,6 +323,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       completeNutritionWater,
       completeWorkoutTraining,
       getGenerationStatus,
+      getGamificationCharacter,
       getCurrentUser,
       getNutritionDayPlan,
       getNutritionStats,
@@ -334,6 +346,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       completeWorkoutTraining,
       getCurrentUser,
       getGenerationStatus,
+      getGamificationCharacter,
       getNutritionDayPlan,
       getNutritionStats,
       getProfile,

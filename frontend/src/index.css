@@ -2813,3 +2813,319 @@ select {
     margin-top: 12px;
   }
 }
+
+.g-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.ring-wrap--xl {
+  width: 148px;
+  height: 148px;
+}
+
+.ring-num--xl {
+  font-size: 46px;
+}
+
+.gamification-hero {
+  overflow: hidden;
+  background:
+    radial-gradient(420px 220px at 100% 0%, rgba(255, 122, 26, 0.12), transparent 70%),
+    radial-gradient(360px 200px at 0% 100%, rgba(47, 216, 255, 0.08), transparent 72%),
+    linear-gradient(180deg, rgba(27, 30, 44, 0.96), rgba(18, 20, 30, 0.98));
+}
+
+.gamification-hero__main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 26px;
+  align-items: center;
+}
+
+.gamification-hero__copy {
+  min-width: 0;
+}
+
+.gamification-hero__eyebrow {
+  color: #ffd9a6;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.gamification-hero__description {
+  max-width: 680px;
+  margin: 0 0 18px;
+}
+
+.gamification-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.gamification-chip {
+  min-width: 132px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+}
+
+.gamification-chip__label {
+  display: block;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.gamification-chip__value {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.gamification-hero__aside {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 18px 22px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gamification-hero__aside-label {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.gamification-hero__aside-value {
+  font-family: var(--font-display-alt);
+  font-size: 52px;
+  line-height: 0.9;
+  color: #ffd9a6;
+}
+
+.gamification-hero__aside-copy {
+  grid-column: 2;
+  margin: -8px 0 0;
+  color: var(--text-soft);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.gamification-mini-metrics {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.gamification-mini-metric {
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.gamification-mini-metric__label {
+  display: block;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.gamification-mini-metric__value {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.gamification-summary-grid .card {
+  min-height: 100%;
+}
+
+.gamification-section-copy {
+  margin-bottom: 20px;
+}
+
+.gamification-attribute {
+  padding: 15px 0;
+  border-top: 1px solid var(--line);
+}
+
+.gamification-attribute:first-of-type {
+  padding-top: 0;
+  border-top: none;
+}
+
+.gamification-attribute:last-child {
+  padding-bottom: 0;
+}
+
+.gamification-attribute .stat-row {
+  margin-bottom: 8px;
+}
+
+.gamification-attribute__description {
+  margin: 0;
+  padding-left: 134px;
+  color: var(--text-soft);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.gamification-quest {
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+
+.gamification-quest:first-of-type {
+  padding-top: 0;
+  border-top: none;
+}
+
+.gamification-quest__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.gamification-quest__label {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.gamification-quest__note {
+  margin: 8px 0 0;
+  color: var(--text-soft);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.gamification-reward {
+  margin-top: 20px;
+}
+
+.gamification-achievements,
+.gamification-tips {
+  display: grid;
+  gap: 12px;
+}
+
+.gamification-achievement {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.gamification-achievement.unlocked {
+  border-color: rgba(255, 122, 26, 0.24);
+  background: linear-gradient(90deg, rgba(255, 210, 63, 0.08), rgba(255, 122, 26, 0.06));
+}
+
+.gamification-achievement__icon {
+  min-height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffd9a6;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.gamification-achievement__title,
+.gamification-tip__title {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.gamification-achievement__note,
+.gamification-tip__copy {
+  margin: 5px 0 0;
+  color: var(--text-soft);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.gamification-tip {
+  padding: 15px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+@media (max-width: 1100px) {
+  .g-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  .gamification-hero__main,
+  .gamification-hero__aside {
+    grid-template-columns: 1fr;
+  }
+
+  .gamification-hero__aside-copy,
+  .gamification-mini-metrics {
+    grid-column: auto;
+  }
+
+  .gamification-attribute__description {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .g-4,
+  .gamification-mini-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .gamification-hero__main {
+    gap: 20px;
+  }
+
+  .ring-wrap--xl {
+    margin: 0 auto;
+  }
+
+  .gamification-hero__copy,
+  .gamification-hero__aside {
+    text-align: center;
+  }
+
+  .gamification-chip-row {
+    justify-content: center;
+  }
+
+  .gamification-hero__aside-value {
+    font-size: 44px;
+  }
+
+  .gamification-quest__top {
+    flex-direction: column;
+  }
+}

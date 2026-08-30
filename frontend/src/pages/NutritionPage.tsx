@@ -580,7 +580,7 @@ export function NutritionPage() {
         </section>
       ) : null}
 
-      <footer className="foot">worktrition · питание по дням недели · актуальные данные из backend</footer>
+      <footer className="foot">worktrition · питание по дням недели</footer>
         </>
       )}
     </AppFrame>

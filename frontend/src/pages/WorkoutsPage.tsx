@@ -24,7 +24,7 @@ const dayOptions = [
   { fullLabel: 'Воскресенье', shortLabel: 'Вс', value: 7 },
 ] as const
 
-const durationOptions = [20, 30, 45, 60] as const
+const durationOptions = [15, 20, 30, 45, 60, 75, 90] as const
 const generationPollIntervalMs = 2500
 const generationStateCheckIntervalMs = 400
 

@@ -92,6 +92,26 @@ interface WorkoutStatsDto {
   total_training_time_seconds: number
 }
 
+interface GamificationCharacterDto {
+  balance?: number
+  current_streak?: number
+  current_xp?: number
+  currentXp?: number
+  discipline?: number
+  endurance?: number
+  hp?: number
+  level?: number
+  next_level_xp?: number
+  nextLevelXp?: number
+  strength?: number
+  user_id?: string
+  userId?: string
+}
+
+interface GamificationCharacterResponseDto {
+  character?: GamificationCharacterDto | null
+}
+
 export interface LoginPayload {
   email: string
   password: string
@@ -204,6 +224,19 @@ export interface WorkoutStats {
   currentStreakDays: number
   percentagePlanFulfilled: number
   totalTrainingTimeSeconds: number
+}
+
+export interface GamificationCharacter {
+  balance: number
+  currentStreak: number
+  currentXp: number
+  discipline: number
+  endurance: number
+  hp: number
+  level: number
+  nextLevelXp: number
+  strength: number
+  userId: string
 }
 
 export class ApiError extends Error {
@@ -412,6 +445,19 @@ export async function getWorkoutStats(accessToken: string) {
   } satisfies WorkoutStats
 }
 
+export async function getGamificationCharacter(accessToken: string) {
+  const response = await request<GamificationCharacterResponseDto>('/gamification/character', {
+    accessToken,
+    method: 'GET',
+  })
+
+  if (!response.character) {
+    throw new Error('Character payload is missing.')
+  }
+
+  return mapGamificationCharacter(response.character)
+}
+
 export async function completeWorkoutTraining(
   accessToken: string,
   dayOfWeek: number | string,
@@ -481,6 +527,29 @@ function mapNutritionFacts(response?: NutritionFactsDto | null) {
     fat: response?.fat ?? 0,
     carb: response?.carb ?? 0,
   } satisfies NutritionFacts
+}
+
+function mapGamificationCharacter(response: GamificationCharacterDto) {
+  return {
+    balance: normalizeGamificationNumber(response.balance),
+    currentStreak: normalizeGamificationNumber(response.current_streak),
+    currentXp: normalizeGamificationNumber(response.current_xp ?? response.currentXp),
+    discipline: normalizeGamificationNumber(response.discipline),
+    endurance: normalizeGamificationNumber(response.endurance),
+    hp: normalizeGamificationNumber(response.hp),
+    level: Math.max(1, Math.round(normalizeGamificationNumber(response.level, 1))),
+    nextLevelXp: Math.max(1, Math.round(normalizeGamificationNumber(response.next_level_xp ?? response.nextLevelXp, 1))),
+    strength: normalizeGamificationNumber(response.strength),
+    userId: response.user_id ?? response.userId ?? '',
+  } satisfies GamificationCharacter
+}
+
+function normalizeGamificationNumber(value: number | undefined, fallback = 0) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return fallback
+  }
+
+  return value
 }
 
 function normalizeGenerationStatus(status: string): GenerationStatus {

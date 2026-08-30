@@ -13,6 +13,7 @@ const (
 	defaultHTTPPort               = 8080
 	defaultAllowedOrigin          = "http://localhost:5173"
 	defaultUserServiceAddr        = "localhost:50051"
+	defaultNutritionServiceAddr   = "localhost:50052"
 	defaultRefreshTokenCookieName = "refresh_token"
 )
 
@@ -21,6 +22,7 @@ type Config struct {
 	HTTPPort               int
 	AllowedOrigin          string
 	UserServiceAddr        string
+	NutritionServiceAddr   string
 	UserJWTSecret          string
 	RefreshTokenCookieName string
 }
@@ -41,6 +43,7 @@ func Load() (*Config, error) {
 		HTTPPort:               httpPort,
 		AllowedOrigin:          getString("ALLOWED_ORIGIN", defaultAllowedOrigin),
 		UserServiceAddr:        getString("USER_SERVICE_ADDR", defaultUserServiceAddr),
+		NutritionServiceAddr:   getString("NUTRITION_SERVICE_ADDR", defaultNutritionServiceAddr),
 		UserJWTSecret:          userJWTSecret,
 		RefreshTokenCookieName: getString("REFRESH_TOKEN_COOKIE_NAME", defaultRefreshTokenCookieName),
 	}, nil

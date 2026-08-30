@@ -17,6 +17,7 @@ docker compose up --build
 - фронтенд: `http://localhost:5173`
 - API gateway: `http://localhost:8080`
 - user-service gRPC: `localhost:50051`
+- nutrition-service gRPC: `localhost:50052`
 
 Для остановки:
 

@@ -6,6 +6,10 @@ type Service struct {
 	repo Repository
 }
 
+func New(repo Repository) *Service {
+	return &Service{repo: repo}
+}
+
 func (s *Service) SavePlan(ctx context.Context, r SaveGeneratedPlanRequest) error {
 	if err := r.validate(); err != nil {
 		return err

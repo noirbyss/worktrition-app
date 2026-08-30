@@ -17,7 +17,7 @@ type NutritionServiceServer struct {
 	gamificationServiceClient GamificationClient
 }
 
-func NewServer(service *service.Service, client *client.NutritionServiceClient) (*NutritionServiceServer, error) {
+func New(service *service.Service, client *client.NutritionServiceClient) (*NutritionServiceServer, error) {
 	if service == nil {
 		return nil, ErrNilPointerService
 	}

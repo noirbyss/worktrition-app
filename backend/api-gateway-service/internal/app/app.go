@@ -62,10 +62,15 @@ func Run() error {
 
 	userHandlers := userapi.New(userpb.NewUserServiceClient(userServiceConn), userapi.Config{
 		RefreshTokenCookieName: cfg.RefreshTokenCookieName,
+		RequestTimeout:         cfg.UpstreamRequestTimeout,
 		SecureCookies:          cfg.SecureCookies(),
 	})
-	nutritionHandlers := nutritionapi.New(nutritionpb.NewNutritionServiceClient(nutritionServiceConn))
-	workoutHandlers := workoutapi.New(workoutpb.NewWorkoutServiceClient(workoutServiceConn))
+	nutritionHandlers := nutritionapi.New(nutritionpb.NewNutritionServiceClient(nutritionServiceConn), nutritionapi.Config{
+		RequestTimeout: cfg.UpstreamRequestTimeout,
+	})
+	workoutHandlers := workoutapi.New(workoutpb.NewWorkoutServiceClient(workoutServiceConn), workoutapi.Config{
+		RequestTimeout: cfg.UpstreamRequestTimeout,
+	})
 
 	httpServer := &http.Server{
 		Addr:              cfg.HTTPAddress(),
@@ -86,6 +91,7 @@ func serveHTTP(ctx context.Context, cfg *config.Config, httpServer *http.Server)
 		"api-gateway-service started",
 		"environment", cfg.Environment,
 		"http_address", cfg.HTTPAddress(),
+		"upstream_request_timeout", cfg.UpstreamRequestTimeout,
 		"user_service_addr", cfg.UserServiceAddr,
 		"nutrition_service_addr", cfg.NutritionServiceAddr,
 		"workout_service_addr", cfg.WorkoutServiceAddr,

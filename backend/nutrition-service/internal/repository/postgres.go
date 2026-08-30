@@ -31,6 +31,14 @@ func (db *PostgresDB) SavePlan(ctx context.Context, plan service.SaveGeneratedPl
 	}
 	defer tx.Rollback(ctx)
 
+	if _, err := tx.Exec(ctx, `
+	UPDATE plan_templates
+	SET is_active = false
+	WHERE user_id = $1 AND is_active = true;
+	`, plan.UserID); err != nil {
+		return err
+	}
+
 	var planTemplateID int32
 	if err := tx.QueryRow(ctx, `
 	INSERT INTO plan_templates (user_id, generation_id, calories, protein, fat, carb, water_goal, is_active)

@@ -8,23 +8,31 @@ import (
 	userpb "github.com/noirbyss/worktrition-app/gen/user-service"
 )
 
-const grpcRequestTimeout = 5 * time.Second
+const defaultRequestTimeout = 15 * time.Second
 
 type Config struct {
 	RefreshTokenCookieName string
+	RequestTimeout         time.Duration
 	SecureCookies          bool
 }
 
 type Handler struct {
 	userClient             userpb.UserServiceClient
 	refreshTokenCookieName string
+	requestTimeout         time.Duration
 	secureCookies          bool
 }
 
 func New(userClient userpb.UserServiceClient, cfg Config) *Handler {
+	requestTimeout := cfg.RequestTimeout
+	if requestTimeout <= 0 {
+		requestTimeout = defaultRequestTimeout
+	}
+
 	return &Handler{
 		userClient:             userClient,
 		refreshTokenCookieName: cfg.RefreshTokenCookieName,
+		requestTimeout:         requestTimeout,
 		secureCookies:          cfg.SecureCookies,
 	}
 }
@@ -39,5 +47,5 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, authMiddleware func(http.Ha
 }
 
 func (h *Handler) grpcContext(r *http.Request) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(r.Context(), grpcRequestTimeout)
+	return context.WithTimeout(r.Context(), h.requestTimeout)
 }

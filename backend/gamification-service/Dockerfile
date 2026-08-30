@@ -23,6 +23,6 @@ WORKDIR /app
 
 COPY --from=builder /bin/gamification-service /usr/local/bin/gamification-service
 
-EXPOSE 9055
+EXPOSE 50055
 
 CMD ["gamification-service"]

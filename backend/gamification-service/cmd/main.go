@@ -19,12 +19,12 @@ import (
 func main() {
 	port := os.Getenv("GRPC_PORT")
 	if port == "" {
-		port = "9055"
+		port = "50055"
 	}
 
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		dbURL = "postgres://gamification:gamification@localhost:5432/gamification?sslmode=disable"
+		dbURL = "postgres://postgres:password@localhost:5432/gamification_db?sslmode=disable"
 	}
 
 	logger, _ := zap.NewDevelopment()

@@ -8,15 +8,26 @@ import (
 	workoutpb "github.com/noirbyss/worktrition-app/gen/workout-service"
 )
 
-const grpcRequestTimeout = 5 * time.Second
+const defaultRequestTimeout = 15 * time.Second
 
-type Handler struct {
-	workoutClient workoutpb.WorkoutServiceClient
+type Config struct {
+	RequestTimeout time.Duration
 }
 
-func New(workoutClient workoutpb.WorkoutServiceClient) *Handler {
+type Handler struct {
+	workoutClient  workoutpb.WorkoutServiceClient
+	requestTimeout time.Duration
+}
+
+func New(workoutClient workoutpb.WorkoutServiceClient, cfg Config) *Handler {
+	requestTimeout := cfg.RequestTimeout
+	if requestTimeout <= 0 {
+		requestTimeout = defaultRequestTimeout
+	}
+
 	return &Handler{
-		workoutClient: workoutClient,
+		workoutClient:  workoutClient,
+		requestTimeout: requestTimeout,
 	}
 }
 
@@ -27,5 +38,5 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, authMiddleware func(http.Ha
 }
 
 func (h *Handler) grpcContext(r *http.Request) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(r.Context(), grpcRequestTimeout)
+	return context.WithTimeout(r.Context(), h.requestTimeout)
 }

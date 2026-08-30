@@ -17,6 +17,6 @@ WORKDIR /root/
 
 COPY --from=builder /nutrition-service .
 
-EXPOSE 9056
+EXPOSE 50052
 
 CMD ["./nutrition-service"]

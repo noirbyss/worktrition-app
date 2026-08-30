@@ -8,15 +8,26 @@ import (
 	nutritionpb "github.com/noirbyss/worktrition-app/gen/nutrition-service"
 )
 
-const grpcRequestTimeout = 5 * time.Second
+const defaultRequestTimeout = 15 * time.Second
+
+type Config struct {
+	RequestTimeout time.Duration
+}
 
 type Handler struct {
 	nutritionClient nutritionpb.NutritionServiceClient
+	requestTimeout  time.Duration
 }
 
-func New(nutritionClient nutritionpb.NutritionServiceClient) *Handler {
+func New(nutritionClient nutritionpb.NutritionServiceClient, cfg Config) *Handler {
+	requestTimeout := cfg.RequestTimeout
+	if requestTimeout <= 0 {
+		requestTimeout = defaultRequestTimeout
+	}
+
 	return &Handler{
 		nutritionClient: nutritionClient,
+		requestTimeout:  requestTimeout,
 	}
 }
 
@@ -28,5 +39,5 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, authMiddleware func(http.Ha
 }
 
 func (h *Handler) grpcContext(r *http.Request) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(r.Context(), grpcRequestTimeout)
+	return context.WithTimeout(r.Context(), h.requestTimeout)
 }

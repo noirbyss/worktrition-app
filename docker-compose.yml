@@ -39,6 +39,8 @@ services:
         condition: service_started
       nutrition-service:
         condition: service_started
+      workout-service:
+        condition: service_started
     restart: unless-stopped
     ports:
       - "${GATEWAY_HTTP_PORT:-8080}:${GATEWAY_HTTP_PORT:-8080}"
@@ -87,6 +89,8 @@ services:
         condition: service_healthy
       nutrition-migrate:
         condition: service_completed_successfully
+      gamification-service:
+        condition: service_started
     restart: unless-stopped
     ports:
       - "${NUTRITION_GRPC_PORT:-50052}:${NUTRITION_GRPC_PORT:-50052}"
@@ -135,9 +139,43 @@ services:
         condition: service_healthy
       workout-migrate:
         condition: service_completed_successfully
+      gamification-service:
+        condition: service_started
     restart: unless-stopped
     ports:
       - "${WORKOUT_GRPC_PORT:-50054}:${WORKOUT_GRPC_PORT:-50054}"
+    stop_grace_period: 10s
+
+  gamification-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${GAMIFICATION_DB_USER}
+      POSTGRES_PASSWORD: ${GAMIFICATION_DB_PASSWORD}
+      POSTGRES_DB: ${GAMIFICATION_DB_NAME}
+    volumes:
+      - gamification-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\"" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  gamification-service:
+    build:
+      context: .
+      dockerfile: ./backend/gamification-service/Dockerfile
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${GAMIFICATION_DB_USER}:${GAMIFICATION_DB_PASSWORD}@${GAMIFICATION_DB_HOST}:${GAMIFICATION_DB_PORT}/${GAMIFICATION_DB_NAME}?sslmode=${GAMIFICATION_DB_SSL_MODE}
+      GRPC_PORT: ${GAMIFICATION_GRPC_PORT:-50055}
+    depends_on:
+      gamification-db:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "${GAMIFICATION_GRPC_PORT:-50055}:${GAMIFICATION_GRPC_PORT:-50055}"
     stop_grace_period: 10s
 
   frontend:
@@ -158,3 +196,4 @@ volumes:
   user-db-data:
   nutrition-db-data:
   workout-db-data:
+  gamification-db-data:

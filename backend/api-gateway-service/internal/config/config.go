@@ -14,6 +14,7 @@ const (
 	defaultAllowedOrigin          = "http://localhost:5173"
 	defaultUserServiceAddr        = "localhost:50051"
 	defaultNutritionServiceAddr   = "localhost:50052"
+	defaultWorkoutServiceAddr     = "localhost:50054"
 	defaultRefreshTokenCookieName = "refresh_token"
 )
 
@@ -23,6 +24,7 @@ type Config struct {
 	AllowedOrigin          string
 	UserServiceAddr        string
 	NutritionServiceAddr   string
+	WorkoutServiceAddr     string
 	UserJWTSecret          string
 	RefreshTokenCookieName string
 }
@@ -44,6 +46,7 @@ func Load() (*Config, error) {
 		AllowedOrigin:          getString("ALLOWED_ORIGIN", defaultAllowedOrigin),
 		UserServiceAddr:        getString("USER_SERVICE_ADDR", defaultUserServiceAddr),
 		NutritionServiceAddr:   getString("NUTRITION_SERVICE_ADDR", defaultNutritionServiceAddr),
+		WorkoutServiceAddr:     getString("WORKOUT_SERVICE_ADDR", defaultWorkoutServiceAddr),
 		UserJWTSecret:          userJWTSecret,
 		RefreshTokenCookieName: getString("REFRESH_TOKEN_COOKIE_NAME", defaultRefreshTokenCookieName),
 	}, nil

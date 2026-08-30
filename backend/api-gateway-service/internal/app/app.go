@@ -14,8 +14,10 @@ import (
 	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/gateway"
 	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/nutritionapi"
 	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/userapi"
+	"github.com/noirbyss/worktrition-app/backend/api-gateway-service/internal/workoutapi"
 	nutritionpb "github.com/noirbyss/worktrition-app/gen/nutrition-service"
 	userpb "github.com/noirbyss/worktrition-app/gen/user-service"
+	workoutpb "github.com/noirbyss/worktrition-app/gen/workout-service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -49,15 +51,25 @@ func Run() error {
 	}
 	defer nutritionServiceConn.Close()
 
+	workoutServiceConn, err := grpc.NewClient(
+		cfg.WorkoutServiceAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		return fmt.Errorf("create workout-service gRPC client: %w", err)
+	}
+	defer workoutServiceConn.Close()
+
 	userHandlers := userapi.New(userpb.NewUserServiceClient(userServiceConn), userapi.Config{
 		RefreshTokenCookieName: cfg.RefreshTokenCookieName,
 		SecureCookies:          cfg.SecureCookies(),
 	})
 	nutritionHandlers := nutritionapi.New(nutritionpb.NewNutritionServiceClient(nutritionServiceConn))
+	workoutHandlers := workoutapi.New(workoutpb.NewWorkoutServiceClient(workoutServiceConn))
 
 	httpServer := &http.Server{
 		Addr:              cfg.HTTPAddress(),
-		Handler:           gateway.New(cfg, userHandlers, nutritionHandlers),
+		Handler:           gateway.New(cfg, userHandlers, nutritionHandlers, workoutHandlers),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
@@ -76,6 +88,7 @@ func serveHTTP(ctx context.Context, cfg *config.Config, httpServer *http.Server)
 		"http_address", cfg.HTTPAddress(),
 		"user_service_addr", cfg.UserServiceAddr,
 		"nutrition_service_addr", cfg.NutritionServiceAddr,
+		"workout_service_addr", cfg.WorkoutServiceAddr,
 	)
 
 	select {

@@ -1094,6 +1094,33 @@ select {
   max-width: 720px;
 }
 
+.nutrition-refresh-loading {
+  min-height: 62vh;
+  display: grid;
+  place-items: center;
+}
+
+.nutrition-refresh-loading__spinner {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 6px solid rgba(255, 255, 255, 0.09);
+  border-top-color: var(--xp-b);
+  border-right-color: var(--xp-a);
+  box-shadow: 0 0 28px rgba(255, 122, 26, 0.16);
+  animation: nutrition-spin 0.9s linear infinite;
+}
+
+@keyframes nutrition-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .nutrition-meal-copy {
   margin: 0 0 6px;
 }
@@ -1115,6 +1142,98 @@ select {
 .nutrition-inline-empty {
   margin-top: 12px;
   padding-inline: 0;
+}
+
+.workout-copy {
+  margin: 0 0 10px;
+}
+
+.workout-inline-empty {
+  margin-top: 12px;
+  padding-inline: 0;
+}
+
+.workout-exercise {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.workout-exercise:last-child {
+  border-bottom: none;
+}
+
+.workout-exercise__index {
+  color: var(--xp-b);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.workout-exercise__name {
+  font-size: 13.5px;
+}
+
+.workout-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 180px) minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.workout-duration {
+  margin: 0;
+}
+
+.workout-duration__label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.workout-duration__select {
+  width: 100%;
+}
+
+.workout-complete-button {
+  width: 100%;
+  min-width: 0;
+  margin-top: auto;
+}
+
+.workout-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.workout-status-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.workout-status-card__label {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.workout-status-card__value {
+  display: block;
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .nutrition-water-goal {
@@ -2330,11 +2449,17 @@ select {
   }
 
   .nutrition-meal-button,
-  .nutrition-water-button {
+  .nutrition-water-button,
+  .workout-complete-button {
     width: 100%;
   }
 
   .nutrition-water-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .workout-actions,
+  .workout-status-grid {
     grid-template-columns: 1fr;
   }
 

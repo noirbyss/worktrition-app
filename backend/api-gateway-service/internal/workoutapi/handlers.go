@@ -31,6 +31,19 @@ type saveGeneratedPlanRequest struct {
 	WorkoutDays  []workoutDayRequest `json:"workout_days"`
 }
 
+type getDayPlanResponse struct {
+	DayOfWeek   int32    `json:"day_of_week"`
+	Type        string   `json:"type"`
+	Exercises   []string `json:"exercises"`
+	IsCompleted bool     `json:"is_completed"`
+}
+
+type getStatsResponse struct {
+	PercentagePlanFulfilled  float64 `json:"percentage_plan_fulfilled"`
+	CurrentStreakDays        int32   `json:"current_streak_days"`
+	TotalTrainingTimeSeconds int32   `json:"total_training_time_seconds"`
+}
+
 type completeTrainingRequest struct {
 	DayOfWeek       dayOfWeekValue `json:"day_of_week"`
 	DurationSeconds int32          `json:"duration_seconds"`
@@ -88,7 +101,11 @@ func (h *Handler) HandleGetStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpx.WriteJSON(w, http.StatusOK, resp)
+	httpx.WriteJSON(w, http.StatusOK, getStatsResponse{
+		PercentagePlanFulfilled:  resp.GetPercentagePlanFulfilled(),
+		CurrentStreakDays:        resp.GetCurrentStreakDays(),
+		TotalTrainingTimeSeconds: resp.GetTotalTrainingTimeSeconds(),
+	})
 }
 
 func (h *Handler) handleGetDayPlan(w http.ResponseWriter, r *http.Request) {
@@ -110,7 +127,12 @@ func (h *Handler) handleGetDayPlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpx.WriteJSON(w, http.StatusOK, resp)
+	httpx.WriteJSON(w, http.StatusOK, getDayPlanResponse{
+		DayOfWeek:   int32(resp.GetDayOfWeek()),
+		Type:        resp.GetType(),
+		Exercises:   resp.GetExercises(),
+		IsCompleted: resp.GetIsCompleted(),
+	})
 }
 
 func (h *Handler) handleSaveGeneratedPlan(w http.ResponseWriter, r *http.Request) {

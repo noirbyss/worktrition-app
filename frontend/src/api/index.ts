@@ -79,6 +79,19 @@ interface NutritionStatsDto {
   percentage_water_standard_fulfillment: number
 }
 
+interface WorkoutDayPlanDto {
+  day_of_week: number
+  exercises: string[]
+  is_completed: boolean
+  type: string
+}
+
+interface WorkoutStatsDto {
+  current_streak_days: number
+  percentage_plan_fulfilled: number
+  total_training_time_seconds: number
+}
+
 export interface LoginPayload {
   email: string
   password: string
@@ -178,6 +191,19 @@ export interface NutritionStats {
   percentageComplianceNutritionFacts: number
   percentagePlanFulfilled: number
   percentageWaterStandardFulfillment: number
+}
+
+export interface WorkoutDayPlan {
+  dayOfWeek: number
+  exercises: string[]
+  isCompleted: boolean
+  type: string
+}
+
+export interface WorkoutStats {
+  currentStreakDays: number
+  percentagePlanFulfilled: number
+  totalTrainingTimeSeconds: number
 }
 
 export class ApiError extends Error {
@@ -351,6 +377,51 @@ export async function completeNutritionWater(accessToken: string, amountMl: numb
     accessToken,
     body: {
       amount_ml: amountMl,
+    },
+    method: 'POST',
+  })
+}
+
+export async function getWorkoutDayPlan(accessToken: string, dayOfWeek: number | string) {
+  const response = await request<WorkoutDayPlanDto>(
+    `/workout/plan?day_of_week=${encodeURIComponent(String(dayOfWeek))}`,
+    {
+      accessToken,
+      method: 'GET',
+    },
+  )
+
+  return {
+    dayOfWeek: response.day_of_week,
+    exercises: response.exercises ?? [],
+    isCompleted: response.is_completed ?? false,
+    type: response.type,
+  } satisfies WorkoutDayPlan
+}
+
+export async function getWorkoutStats(accessToken: string) {
+  const response = await request<WorkoutStatsDto>('/workout/stats', {
+    accessToken,
+    method: 'GET',
+  })
+
+  return {
+    currentStreakDays: response.current_streak_days,
+    percentagePlanFulfilled: response.percentage_plan_fulfilled,
+    totalTrainingTimeSeconds: response.total_training_time_seconds,
+  } satisfies WorkoutStats
+}
+
+export async function completeWorkoutTraining(
+  accessToken: string,
+  dayOfWeek: number | string,
+  durationSeconds: number,
+) {
+  return request<{ success: boolean }>('/workout/training/complete', {
+    accessToken,
+    body: {
+      day_of_week: dayOfWeek,
+      duration_seconds: durationSeconds,
     },
     method: 'POST',
   })

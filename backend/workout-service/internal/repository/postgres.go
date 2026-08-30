@@ -89,6 +89,18 @@ func (db *PostgresDB) GetDayPlan(ctx context.Context, r service.GetDayPlanReques
 		return service.GetDayPlanResponse{}, err
 	}
 
+	var isCompleted bool
+	if err := tx.QueryRow(ctx, `
+	SELECT EXISTS (
+		SELECT 1
+		FROM training_completions tc
+		WHERE tc.training_template_id = $1
+		  AND tc.completed_at >= date_trunc('week', now() AT TIME ZONE 'UTC')
+	);
+	`, trainingTemplateID).Scan(&isCompleted); err != nil {
+		return service.GetDayPlanResponse{}, err
+	}
+
 	rows, err := tx.Query(ctx, `
 	SELECT name
 	FROM exercises
@@ -119,9 +131,10 @@ func (db *PostgresDB) GetDayPlan(ctx context.Context, r service.GetDayPlanReques
 	}
 
 	return service.GetDayPlanResponse{
-		DayOfWeek: r.DayOfWeek,
-		Type:      trainingType,
-		Exercises: exercises,
+		DayOfWeek:   r.DayOfWeek,
+		Type:        trainingType,
+		Exercises:   exercises,
+		IsCompleted: isCompleted,
 	}, nil
 }
 
@@ -135,6 +148,22 @@ func (db *PostgresDB) CompleteTraining(ctx context.Context, r service.CompleteTr
 	trainingTemplateID, trainingType, err := activeTrainingTemplate(ctx, tx, r.UserID, r.DayOfWeek)
 	if err != nil {
 		return "", err
+	}
+
+	var isCompleted bool
+	if err := tx.QueryRow(ctx, `
+	SELECT EXISTS (
+		SELECT 1
+		FROM training_completions tc
+		WHERE tc.training_template_id = $1
+		  AND tc.completed_at >= date_trunc('week', now() AT TIME ZONE 'UTC')
+	);
+	`, trainingTemplateID).Scan(&isCompleted); err != nil {
+		return "", err
+	}
+
+	if isCompleted {
+		return "", ErrTrainingAlreadyCompleted
 	}
 
 	if _, err := tx.Exec(ctx, `

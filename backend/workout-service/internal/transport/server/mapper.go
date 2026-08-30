@@ -50,9 +50,10 @@ func toServiceGetStatsRequest(pbr *pb.GetStatsRequest) service.GetStatsRequest {
 
 func toPBGetDayPlanResponse(sr service.GetDayPlanResponse) *pb.GetDayPlanResponse {
 	return &pb.GetDayPlanResponse{
-		DayOfWeek: pb.DaysOfWeek(sr.DayOfWeek),
-		Type:      sr.Type,
-		Exercises: sr.Exercises,
+		DayOfWeek:   pb.DaysOfWeek(sr.DayOfWeek),
+		Type:        sr.Type,
+		Exercises:   sr.Exercises,
+		IsCompleted: sr.IsCompleted,
 	}
 }
 

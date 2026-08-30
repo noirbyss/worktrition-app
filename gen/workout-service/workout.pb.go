@@ -263,6 +263,7 @@ type GetDayPlanResponse struct {
 	DayOfWeek     DaysOfWeek             `protobuf:"varint,1,opt,name=day_of_week,json=dayOfWeek,proto3,enum=workout.DaysOfWeek" json:"day_of_week,omitempty"`
 	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
 	Exercises     []string               `protobuf:"bytes,3,rep,name=exercises,proto3" json:"exercises,omitempty"`
+	IsCompleted   bool                   `protobuf:"varint,4,opt,name=is_completed,json=isCompleted,proto3" json:"is_completed,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -316,6 +317,13 @@ func (x *GetDayPlanResponse) GetExercises() []string {
 		return x.Exercises
 	}
 	return nil
+}
+
+func (x *GetDayPlanResponse) GetIsCompleted() bool {
+	if x != nil {
+		return x.IsCompleted
+	}
+	return false
 }
 
 type CompleteTrainingRequest struct {
@@ -497,11 +505,12 @@ const file_workout_proto_rawDesc = "" +
 	"\fworkout_days\x18\x03 \x03(\v2\x1a.workout.WorkoutDayRequestR\vworkoutDays\"a\n" +
 	"\x11GetDayPlanRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x123\n" +
-	"\vday_of_week\x18\x02 \x01(\x0e2\x13.workout.DaysOfWeekR\tdayOfWeek\"{\n" +
+	"\vday_of_week\x18\x02 \x01(\x0e2\x13.workout.DaysOfWeekR\tdayOfWeek\"\x9e\x01\n" +
 	"\x12GetDayPlanResponse\x123\n" +
 	"\vday_of_week\x18\x01 \x01(\x0e2\x13.workout.DaysOfWeekR\tdayOfWeek\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1c\n" +
-	"\texercises\x18\x03 \x03(\tR\texercises\"\x92\x01\n" +
+	"\texercises\x18\x03 \x03(\tR\texercises\x12!\n" +
+	"\fis_completed\x18\x04 \x01(\bR\visCompleted\"\x92\x01\n" +
 	"\x17CompleteTrainingRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x123\n" +
 	"\vday_of_week\x18\x02 \x01(\x0e2\x13.workout.DaysOfWeekR\tdayOfWeek\x12)\n" +

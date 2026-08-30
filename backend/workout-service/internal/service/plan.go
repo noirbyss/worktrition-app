@@ -98,7 +98,8 @@ func (r GetDayPlanRequest) validate() error {
 }
 
 type GetDayPlanResponse struct {
-	DayOfWeek DaysOfWeek
-	Type      string
-	Exercises []string
+	DayOfWeek   DaysOfWeek
+	Type        string
+	Exercises   []string
+	IsCompleted bool
 }

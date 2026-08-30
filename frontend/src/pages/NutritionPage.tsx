@@ -297,6 +297,8 @@ export function NutritionPage() {
   }
 
   const isGenerationInProgress = pendingGeneration !== null || isStartingGeneration
+  const isNutritionRefreshLoading =
+    isStartingGeneration || pendingGeneration?.planType === 'nutrition'
   const generationButtonLabel = isGenerationInProgress
     ? 'ГЕНЕРАЦИЯ ИДЁТ...'
     : dayPlan
@@ -323,6 +325,12 @@ export function NutritionPage() {
       isCurrentUserLoading={isLoadingUser}
       title="Питание"
     >
+      {isNutritionRefreshLoading ? (
+        <section className="nutrition-refresh-loading" aria-live="polite" aria-busy="true">
+          <div className="nutrition-refresh-loading__spinner" />
+        </section>
+      ) : (
+        <>
       {userLoadError ? <InlineMessage>{userLoadError}</InlineMessage> : null}
       {loadError ? <InlineMessage>{loadError}</InlineMessage> : null}
       {updateError ? <InlineMessage>{updateError}</InlineMessage> : null}
@@ -573,6 +581,8 @@ export function NutritionPage() {
       ) : null}
 
       <footer className="foot">worktrition · питание по дням недели · актуальные данные из backend</footer>
+        </>
+      )}
     </AppFrame>
   )
 }

@@ -20,13 +20,18 @@ import {
   type RegisterPayload,
   type SaveProfilePayload,
   type SaveProfileResult,
+  type WorkoutDayPlan,
+  type WorkoutStats,
   completeNutritionMeal as completeNutritionMealRequest,
   completeNutritionWater as completeNutritionWaterRequest,
+  completeWorkoutTraining as completeWorkoutTrainingRequest,
   getGenerationStatus as getGenerationStatusRequest,
   getCurrentUser as fetchCurrentUser,
   getNutritionDayPlan as getNutritionDayPlanRequest,
   getNutritionStats as getNutritionStatsRequest,
   getProfile as fetchProfile,
+  getWorkoutDayPlan as getWorkoutDayPlanRequest,
+  getWorkoutStats as getWorkoutStatsRequest,
   login as loginRequest,
   logout as logoutRequest,
   refresh as refreshRequest,
@@ -41,11 +46,14 @@ type AuthStatus = 'anonymous' | 'authenticated' | 'loading'
 interface AuthContextValue {
   completeNutritionMeal: (mealItemId: number) => Promise<void>
   completeNutritionWater: (amountMl: number) => Promise<void>
+  completeWorkoutTraining: (dayOfWeek: number | string, durationSeconds: number) => Promise<void>
   getGenerationStatus: (generationId: string) => Promise<GenerationResult>
   getCurrentUser: () => Promise<CurrentUser>
   getNutritionDayPlan: (dayOfWeek: number | string) => Promise<NutritionDayPlan>
   getNutritionStats: () => Promise<NutritionStats>
   getProfile: () => Promise<Profile>
+  getWorkoutDayPlan: (dayOfWeek: number | string) => Promise<WorkoutDayPlan>
+  getWorkoutStats: () => Promise<WorkoutStats>
   isAuthenticated: boolean
   login: (payload: LoginPayload) => Promise<AuthSession>
   logout: () => Promise<void>
@@ -261,6 +269,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [withAuthorizedSession],
   )
 
+  const getWorkoutDayPlan = useCallback(
+    (dayOfWeek: number | string) =>
+      withAuthorizedSession((activeSession) =>
+        getWorkoutDayPlanRequest(activeSession.accessToken, dayOfWeek),
+      ),
+    [withAuthorizedSession],
+  )
+
+  const getWorkoutStats = useCallback(
+    () => withAuthorizedSession((activeSession) => getWorkoutStatsRequest(activeSession.accessToken)),
+    [withAuthorizedSession],
+  )
+
+  const completeWorkoutTraining = useCallback(
+    async (dayOfWeek: number | string, durationSeconds: number) => {
+      await withAuthorizedSession((activeSession) =>
+        completeWorkoutTrainingRequest(activeSession.accessToken, dayOfWeek, durationSeconds),
+      )
+    },
+    [withAuthorizedSession],
+  )
+
   const saveProfile = useCallback(
     async (payload: SaveProfilePayload) => {
       const response = await withAuthorizedSession((activeSession) =>
@@ -280,11 +310,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       completeNutritionMeal,
       completeNutritionWater,
+      completeWorkoutTraining,
       getGenerationStatus,
       getCurrentUser,
       getNutritionDayPlan,
       getNutritionStats,
       getProfile,
+      getWorkoutDayPlan,
+      getWorkoutStats,
       isAuthenticated: status === 'authenticated',
       login,
       logout,
@@ -298,11 +331,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [
       completeNutritionMeal,
       completeNutritionWater,
+      completeWorkoutTraining,
       getCurrentUser,
       getGenerationStatus,
       getNutritionDayPlan,
       getNutritionStats,
       getProfile,
+      getWorkoutDayPlan,
+      getWorkoutStats,
       login,
       logout,
       refreshSession,

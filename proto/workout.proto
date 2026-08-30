@@ -45,6 +45,7 @@ message GetDayPlanResponse {
     DaysOfWeek day_of_week = 1;
     string type = 2;
     repeated string exercises = 3;
+    bool is_completed = 4;
 }
 
 message CompleteTrainingRequest {

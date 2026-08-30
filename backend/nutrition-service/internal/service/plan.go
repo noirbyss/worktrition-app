@@ -75,9 +75,10 @@ func (gdpr GetDayPlanRequest) validate() error {
 }
 
 type MealItemsResponse struct {
-	ID     int32
-	Name   string
-	Recipe string
+	ID          int32
+	Name        string
+	Recipe      string
+	IsCompleted bool
 	NutritionFacts
 }
 

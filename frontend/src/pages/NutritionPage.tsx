@@ -1,447 +1,597 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { ApiError, type NutritionDayPlan, type NutritionStats } from '../api'
+import { useAuth } from '../auth/useAuth'
 import { AppFrame } from '../components/app/AppFrame'
+import { InlineMessage } from '../components/auth/InlineMessage'
 import { NotchBar } from '../components/app/PlaceholderUi'
+import { useCurrentUserData } from '../hooks'
+import {
+  clearPendingPlanGeneration,
+  loadPendingPlanGeneration,
+  persistPendingPlanGeneration,
+  subscribePendingPlanGeneration,
+  type PendingPlanGeneration,
+} from '../store/plan-generation'
+import {
+  clearNutritionAccuracyPendingReset,
+  loadNutritionUiState,
+  markNutritionAccuracyPendingReset,
+  subscribeNutritionUiState,
+} from '../store/nutrition-ui'
+import { toErrorMessage } from '../utils'
 
-const sidebarProfile = {
-  badge: '7',
-  meta: '820 / 1000 XP',
-  name: 'Артём Ковалёв',
-}
+const dayOptions = [
+  { fullLabel: 'Понедельник', shortLabel: 'Пн', value: 1 },
+  { fullLabel: 'Вторник', shortLabel: 'Вт', value: 2 },
+  { fullLabel: 'Среда', shortLabel: 'Ср', value: 3 },
+  { fullLabel: 'Четверг', shortLabel: 'Чт', value: 4 },
+  { fullLabel: 'Пятница', shortLabel: 'Пт', value: 5 },
+  { fullLabel: 'Суббота', shortLabel: 'Сб', value: 6 },
+  { fullLabel: 'Воскресенье', shortLabel: 'Вс', value: 7 },
+] as const
 
-const dayOrder = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] as const
-
-type DayKey = (typeof dayOrder)[number]
-
-type Macro = {
-  prefix?: string
-  suffix: string
-  value: string
-}
-
-type Meal = {
-  items: string
-  macros: Macro[]
-  name: string
-  status: string
-  tone: 'done' | 'pending'
-}
-
-type NutritionPlan = {
-  calories: string
-  carbs: string
-  fats: string
-  meals: Meal[]
-  protein: string
-  title: string
-  totalStatus: string
-  water: string
-}
-
-const nutritionDays: Record<DayKey, NutritionPlan> = {
-  Пн: {
-    calories: '1590 / 2100 ккал',
-    carbs: '168 / 230 г',
-    fats: '48 / 65 г',
-    meals: [
-      {
-        items: 'Овсянка + банан',
-        macros: [
-          { suffix: 'ккал', value: '480' },
-          { prefix: 'Б', suffix: 'г', value: '22' },
-          { prefix: 'Ж', suffix: 'г', value: '14' },
-          { prefix: 'У', suffix: 'г', value: '66' },
-        ],
-        name: 'Завтрак',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Индейка + гречка + овощи',
-        macros: [
-          { suffix: 'ккал', value: '690' },
-          { prefix: 'Б', suffix: 'г', value: '47' },
-          { prefix: 'Ж', suffix: 'г', value: '18' },
-          { prefix: 'У', suffix: 'г', value: '74' },
-        ],
-        name: 'Обед',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Творог + ягоды',
-        macros: [
-          { suffix: 'ккал', value: '420' },
-          { prefix: 'Б', suffix: 'г', value: '34' },
-          { prefix: 'Ж', suffix: 'г', value: '16' },
-          { prefix: 'У', suffix: 'г', value: '28' },
-        ],
-        name: 'Ужин',
-        status: 'не отмечен',
-        tone: 'pending',
-      },
-    ],
-    protein: '103 / 140 г',
-    title: 'Рацион на понедельник',
-    totalStatus: '2 из 3 приёмов пищи',
-    water: '1.2 / 2.5 л',
-  },
-  Вт: {
-    calories: '1710 / 2100 ккал',
-    carbs: '174 / 230 г',
-    fats: '49 / 65 г',
-    meals: [
-      {
-        items: 'Сырники + йогурт',
-        macros: [
-          { suffix: 'ккал', value: '510' },
-          { prefix: 'Б', suffix: 'г', value: '24' },
-          { prefix: 'Ж', suffix: 'г', value: '17' },
-          { prefix: 'У', suffix: 'г', value: '63' },
-        ],
-        name: 'Завтрак',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Говядина + картофель + салат',
-        macros: [
-          { suffix: 'ккал', value: '760' },
-          { prefix: 'Б', suffix: 'г', value: '48' },
-          { prefix: 'Ж', suffix: 'г', value: '22' },
-          { prefix: 'У', suffix: 'г', value: '82' },
-        ],
-        name: 'Обед',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Лосось + брокколи',
-        macros: [
-          { suffix: 'ккал', value: '440' },
-          { prefix: 'Б', suffix: 'г', value: '36' },
-          { prefix: 'Ж', suffix: 'г', value: '14' },
-          { prefix: 'У', suffix: 'г', value: '29' },
-        ],
-        name: 'Ужин',
-        status: 'не отмечен',
-        tone: 'pending',
-      },
-    ],
-    protein: '108 / 140 г',
-    title: 'Рацион на вторник',
-    totalStatus: '2 из 3 приёмов пищи',
-    water: '1.5 / 2.5 л',
-  },
-  Ср: {
-    calories: '1680 / 2100 ккал',
-    carbs: '177 / 230 г',
-    fats: '51 / 65 г',
-    meals: [
-      {
-        items: 'Овсянка + яйца',
-        macros: [
-          { suffix: 'ккал', value: '500' },
-          { prefix: 'Б', suffix: 'г', value: '25' },
-          { prefix: 'Ж', suffix: 'г', value: '15' },
-          { prefix: 'У', suffix: 'г', value: '65' },
-        ],
-        name: 'Завтрак',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Курица + рис + овощи',
-        macros: [
-          { suffix: 'ккал', value: '700' },
-          { prefix: 'Б', suffix: 'г', value: '50' },
-          { prefix: 'Ж', suffix: 'г', value: '20' },
-          { prefix: 'У', suffix: 'г', value: '80' },
-        ],
-        name: 'Обед',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Рыба + овощи',
-        macros: [
-          { suffix: 'ккал', value: '480' },
-          { prefix: 'Б', suffix: 'г', value: '38' },
-          { prefix: 'Ж', suffix: 'г', value: '16' },
-          { prefix: 'У', suffix: 'г', value: '32' },
-        ],
-        name: 'Ужин',
-        status: 'не отмечен',
-        tone: 'pending',
-      },
-    ],
-    protein: '113 / 140 г',
-    title: 'Рацион на среду',
-    totalStatus: '2 из 3 приёмов пищи',
-    water: '1.4 / 2.5 л',
-  },
-  Чт: {
-    calories: '1620 / 2100 ккал',
-    carbs: '170 / 230 г',
-    fats: '47 / 65 г',
-    meals: [
-      {
-        items: 'Тосты + омлет',
-        macros: [
-          { suffix: 'ккал', value: '470' },
-          { prefix: 'Б', suffix: 'г', value: '23' },
-          { prefix: 'Ж', suffix: 'г', value: '15' },
-          { prefix: 'У', suffix: 'г', value: '58' },
-        ],
-        name: 'Завтрак',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Тунец + паста + овощи',
-        macros: [
-          { suffix: 'ккал', value: '710' },
-          { prefix: 'Б', suffix: 'г', value: '49' },
-          { prefix: 'Ж', suffix: 'г', value: '18' },
-          { prefix: 'У', suffix: 'г', value: '84' },
-        ],
-        name: 'Обед',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Индейка + салат',
-        macros: [
-          { suffix: 'ккал', value: '440' },
-          { prefix: 'Б', suffix: 'г', value: '35' },
-          { prefix: 'Ж', suffix: 'г', value: '14' },
-          { prefix: 'У', suffix: 'г', value: '28' },
-        ],
-        name: 'Ужин',
-        status: 'не отмечен',
-        tone: 'pending',
-      },
-    ],
-    protein: '107 / 140 г',
-    title: 'Рацион на четверг',
-    totalStatus: '2 из 3 приёмов пищи',
-    water: '1.3 / 2.5 л',
-  },
-  Пт: {
-    calories: '1765 / 2100 ккал',
-    carbs: '182 / 230 г',
-    fats: '54 / 65 г',
-    meals: [
-      {
-        items: 'Гранола + творог',
-        macros: [
-          { suffix: 'ккал', value: '520' },
-          { prefix: 'Б', suffix: 'г', value: '26' },
-          { prefix: 'Ж', suffix: 'г', value: '16' },
-          { prefix: 'У', suffix: 'г', value: '67' },
-        ],
-        name: 'Завтрак',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Курица терияки + рис',
-        macros: [
-          { suffix: 'ккал', value: '730' },
-          { prefix: 'Б', suffix: 'г', value: '51' },
-          { prefix: 'Ж', suffix: 'г', value: '21' },
-          { prefix: 'У', suffix: 'г', value: '85' },
-        ],
-        name: 'Обед',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Стейк + овощи',
-        macros: [
-          { suffix: 'ккал', value: '515' },
-          { prefix: 'Б', suffix: 'г', value: '40' },
-          { prefix: 'Ж', suffix: 'г', value: '17' },
-          { prefix: 'У', suffix: 'г', value: '30' },
-        ],
-        name: 'Ужин',
-        status: 'не отмечен',
-        tone: 'pending',
-      },
-    ],
-    protein: '117 / 140 г',
-    title: 'Рацион на пятницу',
-    totalStatus: '2 из 3 приёмов пищи',
-    water: '1.6 / 2.5 л',
-  },
-  Сб: {
-    calories: '1490 / 2100 ккал',
-    carbs: '153 / 230 г',
-    fats: '44 / 65 г',
-    meals: [
-      {
-        items: 'Блины + творог',
-        macros: [
-          { suffix: 'ккал', value: '490' },
-          { prefix: 'Б', suffix: 'г', value: '22' },
-          { prefix: 'Ж', suffix: 'г', value: '15' },
-          { prefix: 'У', suffix: 'г', value: '62' },
-        ],
-        name: 'Завтрак',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Паста + индейка',
-        macros: [
-          { suffix: 'ккал', value: '640' },
-          { prefix: 'Б', suffix: 'г', value: '43' },
-          { prefix: 'Ж', suffix: 'г', value: '16' },
-          { prefix: 'У', suffix: 'г', value: '74' },
-        ],
-        name: 'Обед',
-        status: 'не отмечен',
-        tone: 'pending',
-      },
-      {
-        items: 'Салат с тунцом',
-        macros: [
-          { suffix: 'ккал', value: '360' },
-          { prefix: 'Б', suffix: 'г', value: '31' },
-          { prefix: 'Ж', suffix: 'г', value: '13' },
-          { prefix: 'У', suffix: 'г', value: '17' },
-        ],
-        name: 'Ужин',
-        status: 'не отмечен',
-        tone: 'pending',
-      },
-    ],
-    protein: '96 / 140 г',
-    title: 'Рацион на субботу',
-    totalStatus: '1 из 3 приёмов пищи',
-    water: '1.1 / 2.5 л',
-  },
-  Вс: {
-    calories: '1380 / 2100 ккал',
-    carbs: '149 / 230 г',
-    fats: '41 / 65 г',
-    meals: [
-      {
-        items: 'Йогурт + мюсли',
-        macros: [
-          { suffix: 'ккал', value: '430' },
-          { prefix: 'Б', suffix: 'г', value: '19' },
-          { prefix: 'Ж', suffix: 'г', value: '12' },
-          { prefix: 'У', suffix: 'г', value: '54' },
-        ],
-        name: 'Завтрак',
-        status: 'выполнено',
-        tone: 'done',
-      },
-      {
-        items: 'Рыба + киноа',
-        macros: [
-          { suffix: 'ккал', value: '610' },
-          { prefix: 'Б', suffix: 'г', value: '41' },
-          { prefix: 'Ж', suffix: 'г', value: '16' },
-          { prefix: 'У', suffix: 'г', value: '62' },
-        ],
-        name: 'Обед',
-        status: 'не отмечен',
-        tone: 'pending',
-      },
-      {
-        items: 'Овощной суп + курица',
-        macros: [
-          { suffix: 'ккал', value: '340' },
-          { prefix: 'Б', suffix: 'г', value: '28' },
-          { prefix: 'Ж', suffix: 'г', value: '13' },
-          { prefix: 'У', suffix: 'г', value: '19' },
-        ],
-        name: 'Ужин',
-        status: 'не отмечен',
-        tone: 'pending',
-      },
-    ],
-    protein: '88 / 140 г',
-    title: 'Рацион на воскресенье',
-    totalStatus: '1 из 3 приёмов пищи',
-    water: '0.9 / 2.5 л',
-  },
-}
+const generationPollIntervalMs = 2500
+const generationStateCheckIntervalMs = 400
+const waterQuickActions = [250, 500] as const
 
 export function NutritionPage() {
-  const [activeDay, setActiveDay] = useState<DayKey>('Ср')
-  const activePlan = nutritionDays[activeDay]
+  const {
+    completeNutritionMeal,
+    completeNutritionWater,
+    getGenerationStatus,
+    getNutritionDayPlan,
+    getNutritionStats,
+    startGeneration,
+  } = useAuth()
+  const { isLoading: isLoadingUser, loadError: userLoadError, user } = useCurrentUserData()
+  const [activeDay, setActiveDay] = useState<number>(() => getCurrentDayValue())
+  const [dayPlan, setDayPlan] = useState<NutritionDayPlan | null>(null)
+  const [generationError, setGenerationError] = useState<string | null>(null)
+  const [isCompletingMealId, setIsCompletingMealId] = useState<number | null>(null)
+  const [isCompletingWaterAmount, setIsCompletingWaterAmount] = useState<number | null>(null)
+  const [isLoadingPlan, setIsLoadingPlan] = useState(true)
+  const [isStartingGeneration, setIsStartingGeneration] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [pendingGeneration, setPendingGeneration] = useState<PendingPlanGeneration | null>(() =>
+    loadPendingPlanGeneration(),
+  )
+  const [nutritionUiState, setNutritionUiState] = useState(() => loadNutritionUiState())
+  const [sessionWaterByDay, setSessionWaterByDay] = useState<Partial<Record<number, number>>>({})
+  const [stats, setStats] = useState<NutritionStats | null>(null)
+  const [updateError, setUpdateError] = useState<string | null>(null)
+
+  const activeDayOption = dayOptions.find((option) => option.value === activeDay) ?? dayOptions[0]
+  const todayDayValue = getCurrentDayValue()
+  const isTodaySelected = activeDay === todayDayValue
+  const generationActionLabel =
+    pendingGeneration?.planType === 'all' ? 'Собираем ваш стартовый план' : 'Собираем новый рацион'
+  const activeDaySessionWaterMl = sessionWaterByDay[activeDay] ?? 0
+  const shouldMaskNutritionAccuracy = nutritionUiState.awaitingFreshNutritionAccuracy
+
+  const readNutritionData = useCallback(
+    async (dayValue: number) => {
+      const [planResult, statsResult] = await Promise.allSettled([
+        getNutritionDayPlan(dayValue),
+        getNutritionStats(),
+      ])
+
+      let nextDayPlan: NutritionDayPlan | null = null
+      let nextStats: NutritionStats | null = null
+      let nextError: string | null = null
+
+      if (planResult.status === 'fulfilled') {
+        nextDayPlan = planResult.value
+      } else if (!(planResult.reason instanceof ApiError && planResult.reason.status === 404)) {
+        nextError = toErrorMessage(planResult.reason, 'Не удалось загрузить план питания.')
+      }
+
+      if (statsResult.status === 'fulfilled') {
+        nextStats = statsResult.value
+      } else if (!(statsResult.reason instanceof ApiError && statsResult.reason.status === 404)) {
+        nextError ??= toErrorMessage(statsResult.reason, 'Не удалось загрузить статистику питания.')
+      }
+
+      return {
+        dayPlan: nextDayPlan,
+        error: nextError,
+        stats: nextStats,
+      }
+    },
+    [getNutritionDayPlan, getNutritionStats],
+  )
+
+  const applyNutritionData = useCallback(
+    async (dayValue: number) => {
+      const snapshot = await readNutritionData(dayValue)
+      setDayPlan(snapshot.dayPlan)
+      setLoadError(snapshot.error)
+      setStats(snapshot.stats)
+    },
+    [readNutritionData],
+  )
+
+  useEffect(() => {
+    return subscribePendingPlanGeneration(() => {
+      setPendingGeneration(loadPendingPlanGeneration())
+    })
+  }, [])
+
+  useEffect(() => {
+    return subscribeNutritionUiState(() => {
+      setNutritionUiState(loadNutritionUiState())
+    })
+  }, [])
+
+  useEffect(() => {
+    let isCancelled = false
+
+    const loadPage = async () => {
+      setIsLoadingPlan(true)
+
+      try {
+        const snapshot = await readNutritionData(activeDay)
+
+        if (isCancelled) {
+          return
+        }
+
+        setDayPlan(snapshot.dayPlan)
+        setLoadError(snapshot.error)
+        setStats(snapshot.stats)
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingPlan(false)
+        }
+      }
+    }
+
+    void loadPage()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [activeDay, readNutritionData])
+
+  useEffect(() => {
+    if (!pendingGeneration) {
+      return
+    }
+
+    let isCancelled = false
+    let timeoutId: number | null = null
+
+    const monitorGeneration = async () => {
+      if (!pendingGeneration.generationId) {
+        timeoutId = window.setTimeout(() => {
+          if (!isCancelled) {
+            setPendingGeneration(loadPendingPlanGeneration())
+          }
+        }, generationStateCheckIntervalMs)
+        return
+      }
+
+      try {
+        const generation = await getGenerationStatus(pendingGeneration.generationId)
+
+        if (isCancelled) {
+          return
+        }
+
+        if (generation.status === 'done') {
+          if (pendingGeneration.planType === 'nutrition') {
+            markNutritionAccuracyPendingReset()
+          }
+          clearPendingPlanGeneration()
+          setGenerationError(null)
+          await applyNutritionData(activeDay)
+          return
+        }
+
+        if (generation.status === 'failed') {
+          clearPendingPlanGeneration()
+          setGenerationError(generation.errorMessage ?? 'Не удалось сгенерировать план питания.')
+          return
+        }
+
+        timeoutId = window.setTimeout(() => {
+          void monitorGeneration()
+        }, generationPollIntervalMs)
+      } catch (error) {
+        if (isCancelled) {
+          return
+        }
+
+        setGenerationError(toErrorMessage(error, 'Не удалось проверить статус генерации.'))
+        timeoutId = window.setTimeout(() => {
+          void monitorGeneration()
+        }, generationPollIntervalMs)
+      }
+    }
+
+    void monitorGeneration()
+
+    return () => {
+      isCancelled = true
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId)
+      }
+    }
+  }, [activeDay, applyNutritionData, getGenerationStatus, pendingGeneration])
+
+  const handleRegenerateNutrition = async () => {
+    try {
+      setGenerationError(null)
+      setIsStartingGeneration(true)
+      setUpdateError(null)
+
+      persistPendingPlanGeneration({
+        planType: 'nutrition',
+        status: 'starting',
+      })
+
+      const generation = await startGeneration('nutrition')
+
+      if (generation.status === 'failed') {
+        clearPendingPlanGeneration()
+        throw new Error(generation.errorMessage ?? 'Не удалось запустить обновление питания.')
+      }
+
+      if (generation.status === 'done') {
+        markNutritionAccuracyPendingReset()
+        clearPendingPlanGeneration()
+        await applyNutritionData(activeDay)
+      } else {
+        persistPendingPlanGeneration({
+          generationId: generation.generationId,
+          planType: 'nutrition',
+          status: 'pending',
+        })
+      }
+    } catch (error) {
+      clearPendingPlanGeneration()
+      setUpdateError(toErrorMessage(error, 'Не удалось обновить питание.'))
+    } finally {
+      setIsStartingGeneration(false)
+    }
+  }
+
+  const handleCompleteMeal = async (mealItemId: number) => {
+    try {
+      setIsCompletingMealId(mealItemId)
+      setUpdateError(null)
+      await completeNutritionMeal(mealItemId)
+      setDayPlan((current) =>
+        current
+          ? {
+              ...current,
+              meals: current.meals.map((meal) =>
+                meal.id === mealItemId ? { ...meal, isCompleted: true } : meal,
+              ),
+            }
+          : current,
+      )
+      clearNutritionAccuracyPendingReset()
+      await applyNutritionData(activeDay)
+    } catch (error) {
+      setUpdateError(toErrorMessage(error, 'Не удалось отметить приём пищи.'))
+    } finally {
+      setIsCompletingMealId(null)
+    }
+  }
+
+  const handleCompleteWater = async (amountMl: number) => {
+    try {
+      setIsCompletingWaterAmount(amountMl)
+      setUpdateError(null)
+      await completeNutritionWater(amountMl)
+      setSessionWaterByDay((current) => ({
+        ...current,
+        [activeDay]: (current[activeDay] ?? 0) + amountMl,
+      }))
+      await applyNutritionData(activeDay)
+    } catch (error) {
+      setUpdateError(toErrorMessage(error, 'Не удалось сохранить воду.'))
+    } finally {
+      setIsCompletingWaterAmount(null)
+    }
+  }
+
+  const isGenerationInProgress = pendingGeneration !== null || isStartingGeneration
+  const generationButtonLabel = isGenerationInProgress
+    ? 'ГЕНЕРАЦИЯ ИДЁТ...'
+    : dayPlan
+      ? 'ПОМЕНЯТЬ ПИТАНИЕ'
+      : 'СГЕНЕРИРОВАТЬ ПИТАНИЕ'
 
   return (
     <AppFrame
-      description="Рацион по дням недели, БЖУ и трекер воды."
+      actions={
+        <button
+          className="btn btn-secondary header-cta"
+          disabled={isGenerationInProgress}
+          onClick={() => {
+            void handleRegenerateNutrition()
+          }}
+          type="button"
+        >
+          {generationButtonLabel}
+        </button>
+      }
+      currentUser={user}
+      description="Рацион по дням недели, состав блюд и быстрые действия для фиксации питания и воды."
       eyebrow="Экран 03"
-      sidebarProfile={sidebarProfile}
+      isCurrentUserLoading={isLoadingUser}
       title="Питание"
     >
+      {userLoadError ? <InlineMessage>{userLoadError}</InlineMessage> : null}
+      {loadError ? <InlineMessage>{loadError}</InlineMessage> : null}
+      {updateError ? <InlineMessage>{updateError}</InlineMessage> : null}
+      {generationError ? <InlineMessage>{generationError}</InlineMessage> : null}
+
+      {pendingGeneration ? (
+        <section className="card frame placeholder-section nutrition-generation">
+          <div className="section-kicker">AI · В ПРОЦЕССЕ</div>
+          <h2 className="wizard-step-title nutrition-generation__title">{generationActionLabel}</h2>
+        </section>
+      ) : null}
+
+      {stats ? (
+        <section className="grid g-3 placeholder-section">
+          <SummaryCard
+            label="Точность по БЖУ"
+            note={
+              shouldMaskNutritionAccuracy
+                ? 'после смены питания статистика начнёт собираться заново'
+                : 'среднее попадание в дневные нормы'
+            }
+            value={formatPercent(stats.percentageComplianceNutritionFacts, shouldMaskNutritionAccuracy)}
+          />
+          <SummaryCard
+            label="Выполнение плана"
+            note="доля отмеченных приёмов пищи"
+            value={formatPercent(stats.percentagePlanFulfilled)}
+          />
+          <SummaryCard
+            label="Норма воды"
+            note="среднее соблюдение водного режима"
+            value={formatPercent(stats.percentageWaterStandardFulfillment)}
+          />
+        </section>
+      ) : null}
+
       <div className="day-tabs">
-        {dayOrder.map((day) => (
+        {dayOptions.map((day) => (
           <button
-            className={day === activeDay ? 'day-tab active' : 'day-tab'}
-            key={day}
-            onClick={() => setActiveDay(day)}
+            className={day.value === activeDay ? 'day-tab active' : 'day-tab'}
+            key={day.value}
+            onClick={() => {
+              setActiveDay(day.value)
+            }}
             type="button"
           >
-            {day}
+            {day.shortLabel}
           </button>
         ))}
       </div>
 
-      <section className="grid g-2">
-        <div className="card">
-          <div className="card-title">
-            {activePlan.title} <span className="pill done">{activePlan.totalStatus}</span>
+      {isLoadingPlan && !dayPlan ? (
+        <section className="card empty-state">
+          <div className="card-title">Загрузка</div>
+          <p className="panel-copy">
+            Подтягиваем рацион на {activeDayOption.fullLabel.toLowerCase()} и статистику питания.
+          </p>
+        </section>
+      ) : null}
+
+      {!isLoadingPlan && !dayPlan ? (
+        <section className="card empty-state">
+          <div className="card-title">План пока не готов</div>
+          <p className="panel-copy">
+            Для выбранного дня ещё нет сохранённого рациона. Можно дождаться текущей генерации или
+            запустить отдельное обновление питания.
+          </p>
+        </section>
+      ) : null}
+
+      {dayPlan ? (
+        <section className="grid g-2">
+          <div className="card frame">
+            <div className="card-title">
+              <span>Рацион на {activeDayOption.fullLabel.toLowerCase()}</span>
+              <span className="pill pending">{formatMealsCount(dayPlan.meals.length)}</span>
+            </div>
+
+            <p className="panel-copy nutrition-meal-copy">
+              Здесь собраны блюда на выбранный день. После еды можно сразу отметить приём пищи,
+              чтобы обновить общую статистику по плану.
+            </p>
+
+            {dayPlan.meals.length > 0 ? (
+              dayPlan.meals.map((meal) => {
+                const isCompleted = meal.isCompleted
+                const isSavingMeal = isCompletingMealId === meal.id
+
+                return (
+                  <div className="meal" key={meal.id}>
+                    <div className="meal-top">
+                      <span className="meal-name">{meal.name}</span>
+                      <span className={isCompleted ? 'pill done' : 'pill pending'}>
+                        {isCompleted ? 'отмечено' : 'в плане'}
+                      </span>
+                    </div>
+
+                    <p className="meal-items nutrition-meal-recipe">
+                      {meal.recipe.trim() || 'Рецепт для этого блюда не был передан backend.'}
+                    </p>
+
+                    <div className="macro-row">
+                      <span className="macro">
+                        <b>{formatNumber(meal.nutritionFacts.calories)}</b> ккал
+                      </span>
+                      <span className="macro">
+                        Б <b>{formatNumber(meal.nutritionFacts.protein)}</b> г
+                      </span>
+                      <span className="macro">
+                        Ж <b>{formatNumber(meal.nutritionFacts.fat)}</b> г
+                      </span>
+                      <span className="macro">
+                        У <b>{formatNumber(meal.nutritionFacts.carb)}</b> г
+                      </span>
+                    </div>
+
+                    <div className="nutrition-meal-actions">
+                      <button
+                        className="btn btn-secondary nutrition-meal-button"
+                        disabled={isCompleted || isSavingMeal}
+                        onClick={() => {
+                          void handleCompleteMeal(meal.id)
+                        }}
+                        type="button"
+                      >
+                        {isSavingMeal ? 'СОХРАНЯЕМ...' : isCompleted ? 'ОТМЕЧЕНО' : 'ОТМЕТИТЬ КАК СЪЕДЕНОЕ'}
+                      </button>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="empty-state nutrition-inline-empty">
+                <p className="panel-copy">Для выбранного дня backend пока не вернул ни одного блюда.</p>
+              </div>
+            )}
           </div>
 
-          {activePlan.meals.map((meal) => (
-            <div className="meal" key={meal.name}>
-              <div className="meal-top">
-                <span className="meal-name">{meal.name}</span>
-                <span className={`pill ${meal.tone}`}>{meal.status}</span>
-              </div>
-              <p className="meal-items">{meal.items}</p>
-              <div className="macro-row">
-                {meal.macros.map((macro) => (
-                  <span className="macro" key={`${meal.name}-${macro.prefix ?? 'ккал'}-${macro.value}`}>
-                    {macro.prefix ? `${macro.prefix} ` : null}
-                    <b>{macro.value}</b> {macro.suffix}
-                  </span>
-                ))}
+          <div className="status-stack">
+            <div className="card">
+              <div className="card-title">Норма на день</div>
+
+              <MacroBlock active={20} label="Калории" value={`${formatNumber(dayPlan.nutritionFacts.calories)} ккал`} />
+
+              <hr className="rule" />
+
+              <MacroBlock
+                active={20}
+                label="Белки"
+                value={`${formatNumber(dayPlan.nutritionFacts.protein)} г`}
+                variant="balance"
+              />
+              <MacroBlock
+                active={20}
+                label="Жиры"
+                marginTop
+                value={`${formatNumber(dayPlan.nutritionFacts.fat)} г`}
+                variant="balance"
+              />
+              <MacroBlock
+                active={20}
+                label="Углеводы"
+                marginTop
+                value={`${formatNumber(dayPlan.nutritionFacts.carb)} г`}
+                variant="balance"
+              />
+            </div>
+
+            <div className="card">
+              <div className="card-title">Прогресс по плану</div>
+
+              <MacroBlock
+                active={toNotchCount(stats?.percentageComplianceNutritionFacts ?? 0, shouldMaskNutritionAccuracy)}
+                label="Точность по БЖУ"
+                value={formatPercent(stats?.percentageComplianceNutritionFacts ?? 0, shouldMaskNutritionAccuracy)}
+                variant="balance"
+              />
+              <MacroBlock
+                active={toNotchCount(stats?.percentagePlanFulfilled ?? 0)}
+                label="Выполнение плана"
+                marginTop
+                value={formatPercent(stats?.percentagePlanFulfilled ?? 0)}
+              />
+              <MacroBlock
+                active={toNotchCount(stats?.percentageWaterStandardFulfillment ?? 0)}
+                label="Вода"
+                marginTop
+                value={formatPercent(stats?.percentageWaterStandardFulfillment ?? 0)}
+                variant="water"
+              />
+
+              <div className="reward">
+                <b>{formatMealsCount(dayPlan.meals.length)}</b>
+                <span>в дневном рационе. Статистика справа обновляется после отметок о еде и воде.</span>
               </div>
             </div>
-          ))}
-        </div>
 
-        <div className="card">
-          <div className="card-title">Норма на день</div>
+            <div className="card">
+              <div className="card-title">Вода</div>
+              <div className="nutrition-water-day">
+                <div>
+                  <div className="nutrition-water-day__label">Открыт день</div>
+                  <div className="nutrition-water-day__value">{activeDayOption.fullLabel}</div>
+                </div>
+                <span className={isTodaySelected ? 'pill done' : 'pill pending'}>
+                  {isTodaySelected ? 'сегодня' : 'просмотр'}
+                </span>
+              </div>
 
-          <MacroBlock active={16} label="Калории" value={activePlan.calories} />
+              <div className="nutrition-water-goal">{formatWaterGoal(dayPlan.waterGoalMl)} в день</div>
 
-          <hr className="rule" />
+              <div className="nutrition-water-stats">
+                <div className="nutrition-water-stat">
+                  <span className="nutrition-water-stat__label">Цель для дня</span>
+                  <strong className="nutrition-water-stat__value">{formatWaterGoal(dayPlan.waterGoalMl)}</strong>
+                </div>
+                <div className="nutrition-water-stat">
+                  <span className="nutrition-water-stat__label">Добавлено в этой сессии</span>
+                  <strong className="nutrition-water-stat__value">{formatWaterGoal(activeDaySessionWaterMl)}</strong>
+                </div>
+              </div>
 
-          <MacroBlock active={16} label="Белки" value={activePlan.protein} variant="balance" />
-          <MacroBlock active={16} label="Жиры" marginTop value={activePlan.fats} variant="balance" />
-          <MacroBlock active={15} label="Углеводы" marginTop value={activePlan.carbs} variant="balance" />
+              <p className="panel-copy nutrition-water-note">
+                {isTodaySelected
+                  ? 'Добавляйте воду быстрыми кнопками для выбранного дня.'
+                  : 'Для этого дня показана отдельная цель по воде.'}
+              </p>
 
-          <hr className="rule" />
+              <div className="button-row nutrition-water-actions">
+                {waterQuickActions.map((amountMl) => (
+                  <button
+                    className="btn btn-secondary nutrition-water-button"
+                    disabled={!isTodaySelected || isCompletingWaterAmount !== null}
+                    key={amountMl}
+                    onClick={() => {
+                      void handleCompleteWater(amountMl)
+                    }}
+                    type="button"
+                  >
+                    {isCompletingWaterAmount === amountMl ? 'СОХРАНЯЕМ...' : `+ ${amountMl} МЛ`}
+                  </button>
+                ))}
+              </div>
 
-          <MacroBlock active={11} label="Вода" value={activePlan.water} variant="water" />
-
-          <div className="reward">
-            <b>+20 XP</b>
-            <span>за дневную норму воды, когда счётчик дойдет до конца</span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
-      <footer className="foot">ФОРМА — пример интерфейса для хакатона · экран nutrition</footer>
+      <footer className="foot">worktrition · питание по дням недели · актуальные данные из backend</footer>
     </AppFrame>
+  )
+}
+
+function SummaryCard({
+  label,
+  note,
+  value,
+}: {
+  label: string
+  note: string
+  value: string
+}) {
+  return (
+    <div className="card info-card">
+      <div className="info-label">{label}</div>
+      <div className="info-value">{value}</div>
+      <div className="info-sub">{note}</div>
+    </div>
   )
 }
 
@@ -467,4 +617,66 @@ function MacroBlock({
       <NotchBar active={active} total={20} variant={variant} />
     </div>
   )
+}
+
+function getCurrentDayValue() {
+  const day = new Date().getDay()
+
+  if (day === 0) {
+    return 7
+  }
+
+  return day
+}
+
+function toNotchCount(percentage: number, maskValue = false) {
+  if (maskValue) {
+    return 0
+  }
+
+  return Math.max(0, Math.min(20, Math.round((normalizePercentage(percentage) / 100) * 20)))
+}
+
+function normalizePercentage(value: number) {
+  if (!Number.isFinite(value)) {
+    return 0
+  }
+
+  return Math.max(0, Math.min(100, value))
+}
+
+function formatPercent(value: number, maskValue = false) {
+  if (maskValue) {
+    return 'Нет данных'
+  }
+
+  return `${Math.round(normalizePercentage(value))}%`
+}
+
+function formatNumber(value: number) {
+  if (Number.isInteger(value)) {
+    return String(value)
+  }
+
+  return value.toFixed(1)
+}
+
+function formatMealsCount(count: number) {
+  if (count === 1) {
+    return '1 приём пищи'
+  }
+
+  if (count >= 2 && count <= 4) {
+    return `${count} приёма пищи`
+  }
+
+  return `${count} приёмов пищи`
+}
+
+function formatWaterGoal(value: number) {
+  if (value >= 1000) {
+    return `${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)} л`
+  }
+
+  return `${value} мл`
 }

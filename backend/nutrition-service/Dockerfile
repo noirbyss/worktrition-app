@@ -1,22 +1,28 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.25.3-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY gen ./gen
+COPY backend/nutrition-service/go.mod backend/nutrition-service/go.sum ./backend/nutrition-service/
+
+WORKDIR /app/backend/nutrition-service
+
 RUN go mod download
 
-COPY . .
+COPY backend/nutrition-service/cmd ./cmd
+COPY backend/nutrition-service/internal ./internal
+COPY backend/nutrition-service/migrations ./migrations
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /nutrition-service ./cmd
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/nutrition-service ./cmd
 
-FROM alpine:latest
+FROM alpine:3.22
 
-RUN apk --no-cache add ca-certificates
+RUN apk add --no-cache ca-certificates
 
-WORKDIR /root/
+WORKDIR /app
 
-COPY --from=builder /nutrition-service .
+COPY --from=builder /bin/nutrition-service /usr/local/bin/nutrition-service
 
 EXPOSE 50052
 
-CMD ["./nutrition-service"]
+CMD ["nutrition-service"]

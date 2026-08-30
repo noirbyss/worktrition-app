@@ -2,6 +2,8 @@ module nutrition-service
 
 go 1.25.3
 
+replace github.com/noirbyss/worktrition-app/gen => ../../gen
+
 require (
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.10.0

@@ -78,8 +78,8 @@ services:
 
   nutrition-service:
     build:
-      context: ./backend/nutrition-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./backend/nutrition-service/Dockerfile
     container_name: worktrition-nutrition-service
     env_file:
       - .env

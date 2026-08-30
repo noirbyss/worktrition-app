@@ -62,6 +62,7 @@ message MealItemsResponse {
     string name = 2;
     string recipe = 3;
     NutritionFacts nutrition_facts = 4;
+    bool is_completed = 5;
 }
 
 message GetDayPlanResponse {

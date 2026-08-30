@@ -53,7 +53,11 @@ function App() {
         return <Redirect replace to={questionnairePath} />
     }
 
-    if (pathname === '/login' || pathname === '/register' || pathname === questionnairePath) {
+    if (pathname === '/login' || pathname === '/register') {
+        return <Redirect replace to={defaultAuthenticatedPath} />
+    }
+
+    if (pathname === questionnairePath) {
         return <Redirect replace to={defaultAuthenticatedPath} />
     }
 

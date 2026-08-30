@@ -11,25 +11,40 @@ import {
   ApiError,
   type AuthSession,
   type CurrentUser,
+  type GenerationResult,
   type LoginPayload,
+  type NutritionDayPlan,
+  type NutritionStats,
+  type PlanType,
   type Profile,
   type RegisterPayload,
   type SaveProfilePayload,
   type SaveProfileResult,
+  completeNutritionMeal as completeNutritionMealRequest,
+  completeNutritionWater as completeNutritionWaterRequest,
+  getGenerationStatus as getGenerationStatusRequest,
   getCurrentUser as fetchCurrentUser,
+  getNutritionDayPlan as getNutritionDayPlanRequest,
+  getNutritionStats as getNutritionStatsRequest,
   getProfile as fetchProfile,
   login as loginRequest,
   logout as logoutRequest,
   refresh as refreshRequest,
   register as registerRequest,
   saveProfile as saveProfileRequest,
+  startGeneration as startGenerationRequest,
 } from '../api'
 import { loadAuthSession, persistAuthSession } from './auth-storage'
 
 type AuthStatus = 'anonymous' | 'authenticated' | 'loading'
 
 interface AuthContextValue {
+  completeNutritionMeal: (mealItemId: number) => Promise<void>
+  completeNutritionWater: (amountMl: number) => Promise<void>
+  getGenerationStatus: (generationId: string) => Promise<GenerationResult>
   getCurrentUser: () => Promise<CurrentUser>
+  getNutritionDayPlan: (dayOfWeek: number | string) => Promise<NutritionDayPlan>
+  getNutritionStats: () => Promise<NutritionStats>
   getProfile: () => Promise<Profile>
   isAuthenticated: boolean
   login: (payload: LoginPayload) => Promise<AuthSession>
@@ -38,6 +53,7 @@ interface AuthContextValue {
   register: (payload: RegisterPayload) => Promise<AuthSession>
   saveProfile: (payload: SaveProfilePayload) => Promise<SaveProfileResult>
   session: AuthSession | null
+  startGeneration: (planType: PlanType) => Promise<GenerationResult>
   status: AuthStatus
 }
 
@@ -198,6 +214,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [withAuthorizedSession],
   )
 
+  const startGeneration = useCallback(
+    (planType: PlanType) =>
+      withAuthorizedSession((activeSession) =>
+        startGenerationRequest(activeSession.accessToken, planType),
+      ),
+    [withAuthorizedSession],
+  )
+
+  const getGenerationStatus = useCallback(
+    (generationId: string) =>
+      withAuthorizedSession((activeSession) =>
+        getGenerationStatusRequest(activeSession.accessToken, generationId),
+      ),
+    [withAuthorizedSession],
+  )
+
+  const getNutritionDayPlan = useCallback(
+    (dayOfWeek: number | string) =>
+      withAuthorizedSession((activeSession) =>
+        getNutritionDayPlanRequest(activeSession.accessToken, dayOfWeek),
+      ),
+    [withAuthorizedSession],
+  )
+
+  const getNutritionStats = useCallback(
+    () => withAuthorizedSession((activeSession) => getNutritionStatsRequest(activeSession.accessToken)),
+    [withAuthorizedSession],
+  )
+
+  const completeNutritionMeal = useCallback(
+    async (mealItemId: number) => {
+      await withAuthorizedSession((activeSession) =>
+        completeNutritionMealRequest(activeSession.accessToken, mealItemId),
+      )
+    },
+    [withAuthorizedSession],
+  )
+
+  const completeNutritionWater = useCallback(
+    async (amountMl: number) => {
+      await withAuthorizedSession((activeSession) =>
+        completeNutritionWaterRequest(activeSession.accessToken, amountMl),
+      )
+    },
+    [withAuthorizedSession],
+  )
+
   const saveProfile = useCallback(
     async (payload: SaveProfilePayload) => {
       const response = await withAuthorizedSession((activeSession) =>
@@ -215,7 +278,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthContextValue>(
     () => ({
+      completeNutritionMeal,
+      completeNutritionWater,
+      getGenerationStatus,
       getCurrentUser,
+      getNutritionDayPlan,
+      getNutritionStats,
       getProfile,
       isAuthenticated: status === 'authenticated',
       login,
@@ -224,9 +292,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       saveProfile,
       session,
+      startGeneration,
       status,
     }),
-    [getCurrentUser, getProfile, login, logout, refreshSession, register, saveProfile, session, status],
+    [
+      completeNutritionMeal,
+      completeNutritionWater,
+      getCurrentUser,
+      getGenerationStatus,
+      getNutritionDayPlan,
+      getNutritionStats,
+      getProfile,
+      login,
+      logout,
+      refreshSession,
+      register,
+      saveProfile,
+      session,
+      startGeneration,
+      status,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

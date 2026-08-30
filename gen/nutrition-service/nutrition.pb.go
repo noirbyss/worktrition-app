@@ -408,6 +408,7 @@ type MealItemsResponse struct {
 	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Recipe         string                 `protobuf:"bytes,3,opt,name=recipe,proto3" json:"recipe,omitempty"`
 	NutritionFacts *NutritionFacts        `protobuf:"bytes,4,opt,name=nutrition_facts,json=nutritionFacts,proto3" json:"nutrition_facts,omitempty"`
+	IsCompleted    bool                   `protobuf:"varint,5,opt,name=is_completed,json=isCompleted,proto3" json:"is_completed,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -468,6 +469,13 @@ func (x *MealItemsResponse) GetNutritionFacts() *NutritionFacts {
 		return x.NutritionFacts
 	}
 	return nil
+}
+
+func (x *MealItemsResponse) GetIsCompleted() bool {
+	if x != nil {
+		return x.IsCompleted
+	}
+	return false
 }
 
 type GetDayPlanResponse struct {
@@ -765,12 +773,13 @@ const file_nutrition_proto_rawDesc = "" +
 	"\rwater_goal_ml\x18\x05 \x01(\x05R\vwaterGoalMl\"c\n" +
 	"\x11GetDayPlanRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x125\n" +
-	"\vday_of_week\x18\x02 \x01(\x0e2\x15.nutrition.DaysOfWeekR\tdayOfWeek\"\x93\x01\n" +
+	"\vday_of_week\x18\x02 \x01(\x0e2\x15.nutrition.DaysOfWeekR\tdayOfWeek\"\xb6\x01\n" +
 	"\x11MealItemsResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
 	"\x06recipe\x18\x03 \x01(\tR\x06recipe\x12B\n" +
-	"\x0fnutrition_facts\x18\x04 \x01(\v2\x19.nutrition.NutritionFactsR\x0enutritionFacts\"\xb9\x01\n" +
+	"\x0fnutrition_facts\x18\x04 \x01(\v2\x19.nutrition.NutritionFactsR\x0enutritionFacts\x12!\n" +
+	"\fis_completed\x18\x05 \x01(\bR\visCompleted\"\xb9\x01\n" +
 	"\x12GetDayPlanResponse\x12;\n" +
 	"\n" +
 	"meal_items\x18\x01 \x03(\v2\x1c.nutrition.MealItemsResponseR\tmealItems\x12B\n" +

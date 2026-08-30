@@ -135,9 +135,14 @@ func (db *PostgresDB) GetDayPlan(ctx context.Context, r service.GetDayPlanReques
 	meals := make([]service.MealItemsResponse, 0)
 
 	rows, err := tx.Query(ctx, `
-	SELECT id, name, recipe, calories, protein, fat, carb
-	FROM meal_items
-	WHERE meal_template_id = $1;
+	SELECT mi.id, mi.name, mi.recipe, mi.calories, mi.protein, mi.fat, mi.carb,
+	EXISTS (
+		SELECT 1
+		FROM meal_completions mc
+		WHERE mc.meal_item_id = mi.id
+	) AS is_completed
+	FROM meal_items mi
+	WHERE mi.meal_template_id = $1;
 	`, mealTemplateID)
 	if err != nil {
 		return service.GetDayPlanResponse{}, err
@@ -150,6 +155,7 @@ func (db *PostgresDB) GetDayPlan(ctx context.Context, r service.GetDayPlanReques
 		if err := rows.Scan(
 			&meal.ID, &meal.Name, &meal.Recipe,
 			&meal.NutritionFacts.Calories, &meal.NutritionFacts.Protein, &meal.NutritionFacts.Fat, &meal.NutritionFacts.Carb,
+			&meal.IsCompleted,
 		); err != nil {
 			return service.GetDayPlanResponse{}, err
 		}
@@ -194,6 +200,21 @@ func (db *PostgresDB) CompleteMeal(ctx context.Context, r service.CompleteMealRe
 
 	if !exists {
 		return ErrMealItemNotFound
+	}
+
+	var alreadyCompleted bool
+	if err := tx.QueryRow(ctx, `
+	SELECT EXISTS(
+		SELECT 1
+		FROM meal_completions
+		WHERE meal_item_id = $1
+	);
+	`, r.MealItemID).Scan(&alreadyCompleted); err != nil {
+		return err
+	}
+
+	if alreadyCompleted {
+		return tx.Commit(ctx)
 	}
 
 	if _, err := tx.Exec(ctx, `

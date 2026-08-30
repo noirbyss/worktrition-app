@@ -103,6 +103,7 @@ func toPBMealItemsResponse(sr service.MealItemsResponse) *pb.MealItemsResponse {
 		Name:           sr.Name,
 		Recipe:         sr.Recipe,
 		NutritionFacts: toPBNutritionFacts(sr.NutritionFacts),
+		IsCompleted:    sr.IsCompleted,
 	}
 }
 

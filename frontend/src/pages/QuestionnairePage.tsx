@@ -4,6 +4,7 @@ import type { CurrentUser, SaveProfilePayload } from '../api'
 import { useAuth } from '../auth/useAuth'
 import { InlineMessage } from '../components/auth/InlineMessage'
 import { navigate } from '../router'
+import { clearPendingPlanGeneration, persistPendingPlanGeneration } from '../store/plan-generation'
 import { mapErrorToFieldErrors, toErrorMessage } from '../utils'
 
 type QuestionnaireField =
@@ -102,7 +103,7 @@ const fieldStepMap: Record<QuestionnaireField, number> = {
 }
 
 export function QuestionnairePage() {
-  const { getCurrentUser, logout, saveProfile } = useAuth()
+  const { getCurrentUser, logout, saveProfile, startGeneration } = useAuth()
   const [currentStep, setCurrentStep] = useState(0)
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
   const [draftValues, setDraftValues] = useState(initialDraftState)
@@ -261,8 +262,31 @@ export function QuestionnairePage() {
     try {
       setIsSubmitting(true)
       await saveProfile(validationResult.payload)
-      navigate('/profile', { replace: true })
+      persistPendingPlanGeneration({
+        planType: 'all',
+        status: 'starting',
+      })
+
+      const generation = await startGeneration('all')
+
+      if (generation.status === 'failed') {
+        clearPendingPlanGeneration()
+        throw new Error(generation.errorMessage ?? 'Не удалось запустить генерацию плана.')
+      }
+
+      if (generation.status === 'done') {
+        clearPendingPlanGeneration()
+      } else {
+        persistPendingPlanGeneration({
+          generationId: generation.generationId,
+          planType: 'all',
+          status: 'pending',
+        })
+      }
+
+      navigate('/app', { replace: true })
     } catch (error) {
+      clearPendingPlanGeneration()
       const mappedErrors = mapErrorToFieldErrors(error, fieldMap)
       setFieldErrors(mappedErrors.fieldErrors)
       setSubmitError(mappedErrors.formError)

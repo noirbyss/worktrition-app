@@ -46,6 +46,39 @@ interface SaveProfileResponseDto {
   profile_completed: boolean
 }
 
+interface GenerationResponseDto {
+  error_message?: string
+  generation_id: string
+  status: string
+}
+
+interface NutritionFactsDto {
+  calories: number
+  protein: number
+  fat: number
+  carb: number
+}
+
+interface NutritionMealDto {
+  id: number
+  is_completed?: boolean
+  name: string
+  recipe: string
+  nutrition_facts?: NutritionFactsDto | null
+}
+
+interface NutritionDayPlanDto {
+  meal_items?: NutritionMealDto[]
+  nutrition_facts?: NutritionFactsDto | null
+  water_goal_ml: number
+}
+
+interface NutritionStatsDto {
+  percentage_compliance_nutrition_facts: number
+  percentage_plan_fulfilled: number
+  percentage_water_standard_fulfillment: number
+}
+
 export interface LoginPayload {
   email: string
   password: string
@@ -108,6 +141,43 @@ export interface Profile {
 export interface SaveProfileResult {
   bmi: number
   profileCompleted: boolean
+}
+
+export type PlanType = 'all' | 'nutrition' | 'workout'
+
+export type GenerationStatus = 'done' | 'failed' | 'pending' | 'unspecified'
+
+export interface GenerationResult {
+  errorMessage?: string
+  generationId: string
+  status: GenerationStatus
+}
+
+export interface NutritionFacts {
+  calories: number
+  protein: number
+  fat: number
+  carb: number
+}
+
+export interface NutritionMeal {
+  id: number
+  isCompleted: boolean
+  name: string
+  nutritionFacts: NutritionFacts
+  recipe: string
+}
+
+export interface NutritionDayPlan {
+  meals: NutritionMeal[]
+  nutritionFacts: NutritionFacts
+  waterGoalMl: number
+}
+
+export interface NutritionStats {
+  percentageComplianceNutritionFacts: number
+  percentagePlanFulfilled: number
+  percentageWaterStandardFulfillment: number
 }
 
 export class ApiError extends Error {
@@ -207,6 +277,85 @@ export async function saveProfile(accessToken: string, payload: SaveProfilePaylo
   } satisfies SaveProfileResult
 }
 
+export async function startGeneration(accessToken: string, planType: PlanType) {
+  const response = await request<GenerationResponseDto>('/ai/generations', {
+    accessToken,
+    body: {
+      plan_type: planType,
+    },
+    method: 'POST',
+  })
+
+  return mapGenerationResponse(response)
+}
+
+export async function getGenerationStatus(accessToken: string, generationId: string) {
+  const response = await request<GenerationResponseDto>(
+    `/ai/generations/${encodeURIComponent(generationId)}`,
+    {
+      accessToken,
+      method: 'GET',
+    },
+  )
+
+  return mapGenerationResponse(response)
+}
+
+export async function getNutritionDayPlan(accessToken: string, dayOfWeek: number | string) {
+  const response = await request<NutritionDayPlanDto>(
+    `/nutrition/plan?day_of_week=${encodeURIComponent(String(dayOfWeek))}`,
+    {
+      accessToken,
+      method: 'GET',
+    },
+  )
+
+  return {
+    meals: (response.meal_items ?? []).map((meal) => ({
+      id: meal.id,
+      isCompleted: meal.is_completed ?? false,
+      name: meal.name,
+      nutritionFacts: mapNutritionFacts(meal.nutrition_facts),
+      recipe: meal.recipe,
+    })),
+    nutritionFacts: mapNutritionFacts(response.nutrition_facts),
+    waterGoalMl: response.water_goal_ml,
+  } satisfies NutritionDayPlan
+}
+
+export async function getNutritionStats(accessToken: string) {
+  const response = await request<NutritionStatsDto>('/nutrition/stats', {
+    accessToken,
+    method: 'GET',
+  })
+
+  return {
+    percentageComplianceNutritionFacts: response.percentage_compliance_nutrition_facts,
+    percentagePlanFulfilled: response.percentage_plan_fulfilled,
+    percentageWaterStandardFulfillment: response.percentage_water_standard_fulfillment,
+  } satisfies NutritionStats
+}
+
+export async function completeNutritionMeal(accessToken: string, mealItemId: number) {
+  return request<{ success: boolean }>('/nutrition/meals/complete', {
+    accessToken,
+    body: {
+      meal_item_id: mealItemId,
+    },
+    method: 'POST',
+  })
+}
+
+export async function completeNutritionWater(accessToken: string, amountMl: number) {
+  return request<{ success: boolean }>('/nutrition/water/complete', {
+    accessToken,
+    body: {
+      amount_ml: amountMl,
+    },
+    method: 'POST',
+  })
+}
+
 async function request<T>(path: string, options: RequestOptions) {
   const headers = new Headers()
   const method = options.method ?? 'GET'
@@ -244,6 +393,31 @@ function mapAuthResponse(response: AuthResponseDto) {
     profileCompleted: response.profile_completed,
     userId: response.user_id,
   } satisfies AuthSession
+}
+
+function mapGenerationResponse(response: GenerationResponseDto) {
+  return {
+    errorMessage: response.error_message,
+    generationId: response.generation_id,
+    status: normalizeGenerationStatus(response.status),
+  } satisfies GenerationResult
+}
+
+function mapNutritionFacts(response?: NutritionFactsDto | null) {
+  return {
+    calories: response?.calories ?? 0,
+    protein: response?.protein ?? 0,
+    fat: response?.fat ?? 0,
+    carb: response?.carb ?? 0,
+  } satisfies NutritionFacts
+}
+
+function normalizeGenerationStatus(status: string): GenerationStatus {
+  if (status === 'done' || status === 'failed' || status === 'pending') {
+    return status
+  }
+
+  return 'unspecified'
 }
 
 function getErrorMessage(payload: unknown, status: number) {

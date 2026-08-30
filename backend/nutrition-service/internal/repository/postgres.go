@@ -127,7 +127,7 @@ func (db *PostgresDB) GetDayPlan(ctx context.Context, r service.GetDayPlanReques
 	meals := make([]service.MealItemsResponse, 0)
 
 	rows, err := tx.Query(ctx, `
-	SELECT id, name, recipe
+	SELECT id, name, recipe, calories, protein, fat, carb
 	FROM meal_items
 	WHERE meal_template_id = $1;
 	`, mealTemplateID)
@@ -139,7 +139,10 @@ func (db *PostgresDB) GetDayPlan(ctx context.Context, r service.GetDayPlanReques
 	for rows.Next() {
 		var meal service.MealItemsResponse
 
-		if err := rows.Scan(&meal.ID, &meal.Name, &meal.Recipe); err != nil {
+		if err := rows.Scan(
+			&meal.ID, &meal.Name, &meal.Recipe,
+			&meal.NutritionFacts.Calories, &meal.NutritionFacts.Protein, &meal.NutritionFacts.Fat, &meal.NutritionFacts.Carb,
+		); err != nil {
 			return service.GetDayPlanResponse{}, err
 		}
 

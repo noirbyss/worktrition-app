@@ -24,20 +24,16 @@ service WorkoutService {
     rpc GetStats(GetStatsRequest) returns (GetStatsResponse);
 }
 
-message ExerciseTemplateRequest {
-    string name = 1;
-    string description = 2;
-}
-
-message TrainingTemplateRequest {
+message WorkoutDayRequest {
     DaysOfWeek day_of_week = 1;
-    repeated ExerciseTemplateRequest exercises = 2;
+    string type = 2;
+    repeated string exercises = 3;
 }
 
 message SaveGeneratedPlanRequest {
     string user_id = 1;
     string generation_id = 2;
-    repeated TrainingTemplateRequest trainings = 3;
+    repeated WorkoutDayRequest workout_days = 3;
 }
 
 message GetDayPlanRequest {
@@ -45,20 +41,16 @@ message GetDayPlanRequest {
     DaysOfWeek day_of_week = 2;
 }
 
-message ExerciseTemplateResponse {
-    int32 id = 1;
-    string name = 2;
-    string description = 3;
-}
-
 message GetDayPlanResponse {
-    repeated ExerciseTemplateResponse exercises = 1;
+    DaysOfWeek day_of_week = 1;
+    string type = 2;
+    repeated string exercises = 3;
 }
 
 message CompleteTrainingRequest {
     string user_id = 1;
-    int32 exercise_template_id = 2;
-    int32 time_duration = 3;
+    DaysOfWeek day_of_week = 2;
+    int32 duration_seconds = 3;
 }
 
 message GetStatsRequest {

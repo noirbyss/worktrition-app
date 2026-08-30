@@ -86,28 +86,29 @@ func (DaysOfWeek) EnumDescriptor() ([]byte, []int) {
 	return file_workout_proto_rawDescGZIP(), []int{0}
 }
 
-type ExerciseTemplateRequest struct {
+type WorkoutDayRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	DayOfWeek     DaysOfWeek             `protobuf:"varint,1,opt,name=day_of_week,json=dayOfWeek,proto3,enum=workout.DaysOfWeek" json:"day_of_week,omitempty"`
+	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Exercises     []string               `protobuf:"bytes,3,rep,name=exercises,proto3" json:"exercises,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ExerciseTemplateRequest) Reset() {
-	*x = ExerciseTemplateRequest{}
+func (x *WorkoutDayRequest) Reset() {
+	*x = WorkoutDayRequest{}
 	mi := &file_workout_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ExerciseTemplateRequest) String() string {
+func (x *WorkoutDayRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ExerciseTemplateRequest) ProtoMessage() {}
+func (*WorkoutDayRequest) ProtoMessage() {}
 
-func (x *ExerciseTemplateRequest) ProtoReflect() protoreflect.Message {
+func (x *WorkoutDayRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_workout_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -119,71 +120,26 @@ func (x *ExerciseTemplateRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ExerciseTemplateRequest.ProtoReflect.Descriptor instead.
-func (*ExerciseTemplateRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use WorkoutDayRequest.ProtoReflect.Descriptor instead.
+func (*WorkoutDayRequest) Descriptor() ([]byte, []int) {
 	return file_workout_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ExerciseTemplateRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *ExerciseTemplateRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-type TrainingTemplateRequest struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	DayOfWeek     DaysOfWeek                 `protobuf:"varint,1,opt,name=day_of_week,json=dayOfWeek,proto3,enum=workout.DaysOfWeek" json:"day_of_week,omitempty"`
-	Exercises     []*ExerciseTemplateRequest `protobuf:"bytes,2,rep,name=exercises,proto3" json:"exercises,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *TrainingTemplateRequest) Reset() {
-	*x = TrainingTemplateRequest{}
-	mi := &file_workout_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TrainingTemplateRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TrainingTemplateRequest) ProtoMessage() {}
-
-func (x *TrainingTemplateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TrainingTemplateRequest.ProtoReflect.Descriptor instead.
-func (*TrainingTemplateRequest) Descriptor() ([]byte, []int) {
-	return file_workout_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *TrainingTemplateRequest) GetDayOfWeek() DaysOfWeek {
+func (x *WorkoutDayRequest) GetDayOfWeek() DaysOfWeek {
 	if x != nil {
 		return x.DayOfWeek
 	}
 	return DaysOfWeek_DAYS_OF_WEEK_UNSPECIFIED
 }
 
-func (x *TrainingTemplateRequest) GetExercises() []*ExerciseTemplateRequest {
+func (x *WorkoutDayRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *WorkoutDayRequest) GetExercises() []string {
 	if x != nil {
 		return x.Exercises
 	}
@@ -191,17 +147,17 @@ func (x *TrainingTemplateRequest) GetExercises() []*ExerciseTemplateRequest {
 }
 
 type SaveGeneratedPlanRequest struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	UserId        string                     `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	GenerationId  string                     `protobuf:"bytes,2,opt,name=generation_id,json=generationId,proto3" json:"generation_id,omitempty"`
-	Trainings     []*TrainingTemplateRequest `protobuf:"bytes,3,rep,name=trainings,proto3" json:"trainings,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	GenerationId  string                 `protobuf:"bytes,2,opt,name=generation_id,json=generationId,proto3" json:"generation_id,omitempty"`
+	WorkoutDays   []*WorkoutDayRequest   `protobuf:"bytes,3,rep,name=workout_days,json=workoutDays,proto3" json:"workout_days,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SaveGeneratedPlanRequest) Reset() {
 	*x = SaveGeneratedPlanRequest{}
-	mi := &file_workout_proto_msgTypes[2]
+	mi := &file_workout_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -213,7 +169,7 @@ func (x *SaveGeneratedPlanRequest) String() string {
 func (*SaveGeneratedPlanRequest) ProtoMessage() {}
 
 func (x *SaveGeneratedPlanRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_proto_msgTypes[2]
+	mi := &file_workout_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -226,7 +182,7 @@ func (x *SaveGeneratedPlanRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SaveGeneratedPlanRequest.ProtoReflect.Descriptor instead.
 func (*SaveGeneratedPlanRequest) Descriptor() ([]byte, []int) {
-	return file_workout_proto_rawDescGZIP(), []int{2}
+	return file_workout_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *SaveGeneratedPlanRequest) GetUserId() string {
@@ -243,9 +199,9 @@ func (x *SaveGeneratedPlanRequest) GetGenerationId() string {
 	return ""
 }
 
-func (x *SaveGeneratedPlanRequest) GetTrainings() []*TrainingTemplateRequest {
+func (x *SaveGeneratedPlanRequest) GetWorkoutDays() []*WorkoutDayRequest {
 	if x != nil {
-		return x.Trainings
+		return x.WorkoutDays
 	}
 	return nil
 }
@@ -260,7 +216,7 @@ type GetDayPlanRequest struct {
 
 func (x *GetDayPlanRequest) Reset() {
 	*x = GetDayPlanRequest{}
-	mi := &file_workout_proto_msgTypes[3]
+	mi := &file_workout_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -272,7 +228,7 @@ func (x *GetDayPlanRequest) String() string {
 func (*GetDayPlanRequest) ProtoMessage() {}
 
 func (x *GetDayPlanRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_proto_msgTypes[3]
+	mi := &file_workout_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -285,7 +241,7 @@ func (x *GetDayPlanRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDayPlanRequest.ProtoReflect.Descriptor instead.
 func (*GetDayPlanRequest) Descriptor() ([]byte, []int) {
-	return file_workout_proto_rawDescGZIP(), []int{3}
+	return file_workout_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetDayPlanRequest) GetUserId() string {
@@ -302,76 +258,18 @@ func (x *GetDayPlanRequest) GetDayOfWeek() DaysOfWeek {
 	return DaysOfWeek_DAYS_OF_WEEK_UNSPECIFIED
 }
 
-type ExerciseTemplateResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ExerciseTemplateResponse) Reset() {
-	*x = ExerciseTemplateResponse{}
-	mi := &file_workout_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ExerciseTemplateResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ExerciseTemplateResponse) ProtoMessage() {}
-
-func (x *ExerciseTemplateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ExerciseTemplateResponse.ProtoReflect.Descriptor instead.
-func (*ExerciseTemplateResponse) Descriptor() ([]byte, []int) {
-	return file_workout_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *ExerciseTemplateResponse) GetId() int32 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *ExerciseTemplateResponse) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *ExerciseTemplateResponse) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
 type GetDayPlanResponse struct {
-	state         protoimpl.MessageState      `protogen:"open.v1"`
-	Exercises     []*ExerciseTemplateResponse `protobuf:"bytes,1,rep,name=exercises,proto3" json:"exercises,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DayOfWeek     DaysOfWeek             `protobuf:"varint,1,opt,name=day_of_week,json=dayOfWeek,proto3,enum=workout.DaysOfWeek" json:"day_of_week,omitempty"`
+	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Exercises     []string               `protobuf:"bytes,3,rep,name=exercises,proto3" json:"exercises,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetDayPlanResponse) Reset() {
 	*x = GetDayPlanResponse{}
-	mi := &file_workout_proto_msgTypes[5]
+	mi := &file_workout_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -383,7 +281,7 @@ func (x *GetDayPlanResponse) String() string {
 func (*GetDayPlanResponse) ProtoMessage() {}
 
 func (x *GetDayPlanResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_proto_msgTypes[5]
+	mi := &file_workout_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -396,10 +294,24 @@ func (x *GetDayPlanResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDayPlanResponse.ProtoReflect.Descriptor instead.
 func (*GetDayPlanResponse) Descriptor() ([]byte, []int) {
-	return file_workout_proto_rawDescGZIP(), []int{5}
+	return file_workout_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetDayPlanResponse) GetExercises() []*ExerciseTemplateResponse {
+func (x *GetDayPlanResponse) GetDayOfWeek() DaysOfWeek {
+	if x != nil {
+		return x.DayOfWeek
+	}
+	return DaysOfWeek_DAYS_OF_WEEK_UNSPECIFIED
+}
+
+func (x *GetDayPlanResponse) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *GetDayPlanResponse) GetExercises() []string {
 	if x != nil {
 		return x.Exercises
 	}
@@ -407,17 +319,17 @@ func (x *GetDayPlanResponse) GetExercises() []*ExerciseTemplateResponse {
 }
 
 type CompleteTrainingRequest struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	UserId             string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	ExerciseTemplateId int32                  `protobuf:"varint,2,opt,name=exercise_template_id,json=exerciseTemplateId,proto3" json:"exercise_template_id,omitempty"`
-	TimeDuration       int32                  `protobuf:"varint,3,opt,name=time_duration,json=timeDuration,proto3" json:"time_duration,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	UserId          string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DayOfWeek       DaysOfWeek             `protobuf:"varint,2,opt,name=day_of_week,json=dayOfWeek,proto3,enum=workout.DaysOfWeek" json:"day_of_week,omitempty"`
+	DurationSeconds int32                  `protobuf:"varint,3,opt,name=duration_seconds,json=durationSeconds,proto3" json:"duration_seconds,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *CompleteTrainingRequest) Reset() {
 	*x = CompleteTrainingRequest{}
-	mi := &file_workout_proto_msgTypes[6]
+	mi := &file_workout_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -429,7 +341,7 @@ func (x *CompleteTrainingRequest) String() string {
 func (*CompleteTrainingRequest) ProtoMessage() {}
 
 func (x *CompleteTrainingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_proto_msgTypes[6]
+	mi := &file_workout_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -442,7 +354,7 @@ func (x *CompleteTrainingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompleteTrainingRequest.ProtoReflect.Descriptor instead.
 func (*CompleteTrainingRequest) Descriptor() ([]byte, []int) {
-	return file_workout_proto_rawDescGZIP(), []int{6}
+	return file_workout_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CompleteTrainingRequest) GetUserId() string {
@@ -452,16 +364,16 @@ func (x *CompleteTrainingRequest) GetUserId() string {
 	return ""
 }
 
-func (x *CompleteTrainingRequest) GetExerciseTemplateId() int32 {
+func (x *CompleteTrainingRequest) GetDayOfWeek() DaysOfWeek {
 	if x != nil {
-		return x.ExerciseTemplateId
+		return x.DayOfWeek
 	}
-	return 0
+	return DaysOfWeek_DAYS_OF_WEEK_UNSPECIFIED
 }
 
-func (x *CompleteTrainingRequest) GetTimeDuration() int32 {
+func (x *CompleteTrainingRequest) GetDurationSeconds() int32 {
 	if x != nil {
-		return x.TimeDuration
+		return x.DurationSeconds
 	}
 	return 0
 }
@@ -475,7 +387,7 @@ type GetStatsRequest struct {
 
 func (x *GetStatsRequest) Reset() {
 	*x = GetStatsRequest{}
-	mi := &file_workout_proto_msgTypes[7]
+	mi := &file_workout_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -487,7 +399,7 @@ func (x *GetStatsRequest) String() string {
 func (*GetStatsRequest) ProtoMessage() {}
 
 func (x *GetStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_proto_msgTypes[7]
+	mi := &file_workout_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -500,7 +412,7 @@ func (x *GetStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetStatsRequest) Descriptor() ([]byte, []int) {
-	return file_workout_proto_rawDescGZIP(), []int{7}
+	return file_workout_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetStatsRequest) GetUserId() string {
@@ -521,7 +433,7 @@ type GetStatsResponse struct {
 
 func (x *GetStatsResponse) Reset() {
 	*x = GetStatsResponse{}
-	mi := &file_workout_proto_msgTypes[8]
+	mi := &file_workout_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -533,7 +445,7 @@ func (x *GetStatsResponse) String() string {
 func (*GetStatsResponse) ProtoMessage() {}
 
 func (x *GetStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_workout_proto_msgTypes[8]
+	mi := &file_workout_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -546,7 +458,7 @@ func (x *GetStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStatsResponse.ProtoReflect.Descriptor instead.
 func (*GetStatsResponse) Descriptor() ([]byte, []int) {
-	return file_workout_proto_rawDescGZIP(), []int{8}
+	return file_workout_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetStatsResponse) GetPercentagePlanFulfilled() float64 {
@@ -574,30 +486,26 @@ var File_workout_proto protoreflect.FileDescriptor
 
 const file_workout_proto_rawDesc = "" +
 	"\n" +
-	"\rworkout.proto\x12\aworkout\x1a\x1bgoogle/protobuf/empty.proto\"O\n" +
-	"\x17ExerciseTemplateRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\"\x8e\x01\n" +
-	"\x17TrainingTemplateRequest\x123\n" +
-	"\vday_of_week\x18\x01 \x01(\x0e2\x13.workout.DaysOfWeekR\tdayOfWeek\x12>\n" +
-	"\texercises\x18\x02 \x03(\v2 .workout.ExerciseTemplateRequestR\texercises\"\x98\x01\n" +
+	"\rworkout.proto\x12\aworkout\x1a\x1bgoogle/protobuf/empty.proto\"z\n" +
+	"\x11WorkoutDayRequest\x123\n" +
+	"\vday_of_week\x18\x01 \x01(\x0e2\x13.workout.DaysOfWeekR\tdayOfWeek\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1c\n" +
+	"\texercises\x18\x03 \x03(\tR\texercises\"\x97\x01\n" +
 	"\x18SaveGeneratedPlanRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12#\n" +
-	"\rgeneration_id\x18\x02 \x01(\tR\fgenerationId\x12>\n" +
-	"\ttrainings\x18\x03 \x03(\v2 .workout.TrainingTemplateRequestR\ttrainings\"a\n" +
+	"\rgeneration_id\x18\x02 \x01(\tR\fgenerationId\x12=\n" +
+	"\fworkout_days\x18\x03 \x03(\v2\x1a.workout.WorkoutDayRequestR\vworkoutDays\"a\n" +
 	"\x11GetDayPlanRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x123\n" +
-	"\vday_of_week\x18\x02 \x01(\x0e2\x13.workout.DaysOfWeekR\tdayOfWeek\"`\n" +
-	"\x18ExerciseTemplateResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"U\n" +
-	"\x12GetDayPlanResponse\x12?\n" +
-	"\texercises\x18\x01 \x03(\v2!.workout.ExerciseTemplateResponseR\texercises\"\x89\x01\n" +
+	"\vday_of_week\x18\x02 \x01(\x0e2\x13.workout.DaysOfWeekR\tdayOfWeek\"{\n" +
+	"\x12GetDayPlanResponse\x123\n" +
+	"\vday_of_week\x18\x01 \x01(\x0e2\x13.workout.DaysOfWeekR\tdayOfWeek\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1c\n" +
+	"\texercises\x18\x03 \x03(\tR\texercises\"\x92\x01\n" +
 	"\x17CompleteTrainingRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x120\n" +
-	"\x14exercise_template_id\x18\x02 \x01(\x05R\x12exerciseTemplateId\x12#\n" +
-	"\rtime_duration\x18\x03 \x01(\x05R\ftimeDuration\"*\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x123\n" +
+	"\vday_of_week\x18\x02 \x01(\x0e2\x13.workout.DaysOfWeekR\tdayOfWeek\x12)\n" +
+	"\x10duration_seconds\x18\x03 \x01(\x05R\x0fdurationSeconds\"*\n" +
 	"\x0fGetStatsRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"\xbd\x01\n" +
 	"\x10GetStatsResponse\x12:\n" +
@@ -634,39 +542,37 @@ func file_workout_proto_rawDescGZIP() []byte {
 }
 
 var file_workout_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_workout_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_workout_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_workout_proto_goTypes = []any{
 	(DaysOfWeek)(0),                  // 0: workout.DaysOfWeek
-	(*ExerciseTemplateRequest)(nil),  // 1: workout.ExerciseTemplateRequest
-	(*TrainingTemplateRequest)(nil),  // 2: workout.TrainingTemplateRequest
-	(*SaveGeneratedPlanRequest)(nil), // 3: workout.SaveGeneratedPlanRequest
-	(*GetDayPlanRequest)(nil),        // 4: workout.GetDayPlanRequest
-	(*ExerciseTemplateResponse)(nil), // 5: workout.ExerciseTemplateResponse
-	(*GetDayPlanResponse)(nil),       // 6: workout.GetDayPlanResponse
-	(*CompleteTrainingRequest)(nil),  // 7: workout.CompleteTrainingRequest
-	(*GetStatsRequest)(nil),          // 8: workout.GetStatsRequest
-	(*GetStatsResponse)(nil),         // 9: workout.GetStatsResponse
-	(*emptypb.Empty)(nil),            // 10: google.protobuf.Empty
+	(*WorkoutDayRequest)(nil),        // 1: workout.WorkoutDayRequest
+	(*SaveGeneratedPlanRequest)(nil), // 2: workout.SaveGeneratedPlanRequest
+	(*GetDayPlanRequest)(nil),        // 3: workout.GetDayPlanRequest
+	(*GetDayPlanResponse)(nil),       // 4: workout.GetDayPlanResponse
+	(*CompleteTrainingRequest)(nil),  // 5: workout.CompleteTrainingRequest
+	(*GetStatsRequest)(nil),          // 6: workout.GetStatsRequest
+	(*GetStatsResponse)(nil),         // 7: workout.GetStatsResponse
+	(*emptypb.Empty)(nil),            // 8: google.protobuf.Empty
 }
 var file_workout_proto_depIdxs = []int32{
-	0,  // 0: workout.TrainingTemplateRequest.day_of_week:type_name -> workout.DaysOfWeek
-	1,  // 1: workout.TrainingTemplateRequest.exercises:type_name -> workout.ExerciseTemplateRequest
-	2,  // 2: workout.SaveGeneratedPlanRequest.trainings:type_name -> workout.TrainingTemplateRequest
-	0,  // 3: workout.GetDayPlanRequest.day_of_week:type_name -> workout.DaysOfWeek
-	5,  // 4: workout.GetDayPlanResponse.exercises:type_name -> workout.ExerciseTemplateResponse
-	3,  // 5: workout.WorkoutService.SaveGeneratedPlan:input_type -> workout.SaveGeneratedPlanRequest
-	4,  // 6: workout.WorkoutService.GetDayPlan:input_type -> workout.GetDayPlanRequest
-	7,  // 7: workout.WorkoutService.CompleteTraining:input_type -> workout.CompleteTrainingRequest
-	8,  // 8: workout.WorkoutService.GetStats:input_type -> workout.GetStatsRequest
-	10, // 9: workout.WorkoutService.SaveGeneratedPlan:output_type -> google.protobuf.Empty
-	6,  // 10: workout.WorkoutService.GetDayPlan:output_type -> workout.GetDayPlanResponse
-	10, // 11: workout.WorkoutService.CompleteTraining:output_type -> google.protobuf.Empty
-	9,  // 12: workout.WorkoutService.GetStats:output_type -> workout.GetStatsResponse
-	9,  // [9:13] is the sub-list for method output_type
-	5,  // [5:9] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	0, // 0: workout.WorkoutDayRequest.day_of_week:type_name -> workout.DaysOfWeek
+	1, // 1: workout.SaveGeneratedPlanRequest.workout_days:type_name -> workout.WorkoutDayRequest
+	0, // 2: workout.GetDayPlanRequest.day_of_week:type_name -> workout.DaysOfWeek
+	0, // 3: workout.GetDayPlanResponse.day_of_week:type_name -> workout.DaysOfWeek
+	0, // 4: workout.CompleteTrainingRequest.day_of_week:type_name -> workout.DaysOfWeek
+	2, // 5: workout.WorkoutService.SaveGeneratedPlan:input_type -> workout.SaveGeneratedPlanRequest
+	3, // 6: workout.WorkoutService.GetDayPlan:input_type -> workout.GetDayPlanRequest
+	5, // 7: workout.WorkoutService.CompleteTraining:input_type -> workout.CompleteTrainingRequest
+	6, // 8: workout.WorkoutService.GetStats:input_type -> workout.GetStatsRequest
+	8, // 9: workout.WorkoutService.SaveGeneratedPlan:output_type -> google.protobuf.Empty
+	4, // 10: workout.WorkoutService.GetDayPlan:output_type -> workout.GetDayPlanResponse
+	8, // 11: workout.WorkoutService.CompleteTraining:output_type -> google.protobuf.Empty
+	7, // 12: workout.WorkoutService.GetStats:output_type -> workout.GetStatsResponse
+	9, // [9:13] is the sub-list for method output_type
+	5, // [5:9] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_workout_proto_init() }
@@ -680,7 +586,7 @@ func file_workout_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_workout_proto_rawDesc), len(file_workout_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   9,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

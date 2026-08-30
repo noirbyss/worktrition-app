@@ -90,6 +90,54 @@ services:
       - "${NUTRITION_GRPC_PORT:-50052}:${NUTRITION_GRPC_PORT:-50052}"
     stop_grace_period: 10s
 
+  workout-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${WORKOUT_DB_USER}
+      POSTGRES_PASSWORD: ${WORKOUT_DB_PASSWORD}
+      POSTGRES_DB: ${WORKOUT_DB_NAME}
+    volumes:
+      - workout-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\"" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  workout-migrate:
+    image: migrate/migrate
+    depends_on:
+      workout-db:
+        condition: service_healthy
+    volumes:
+      - ./backend/workout-service/migrations:/migrations
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://${WORKOUT_DB_USER}:${WORKOUT_DB_PASSWORD}@${WORKOUT_DB_HOST}:${WORKOUT_DB_PORT}/${WORKOUT_DB_NAME}?sslmode=${WORKOUT_DB_SSL_MODE}"
+      - "up"
+    restart: on-failure
+
+  workout-service:
+    build:
+      context: .
+      dockerfile: ./backend/workout-service/Dockerfile
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${WORKOUT_DB_USER}:${WORKOUT_DB_PASSWORD}@${WORKOUT_DB_HOST}:${WORKOUT_DB_PORT}/${WORKOUT_DB_NAME}?sslmode=${WORKOUT_DB_SSL_MODE}
+      GRPC_PORT: ${WORKOUT_GRPC_PORT:-50054}
+      GAMIFICATION_SERVICE_ADDR: ${WORKOUT_GAMIFICATION_SERVICE_ADDR}
+    depends_on:
+      workout-db:
+        condition: service_healthy
+      workout-migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    ports:
+      - "${WORKOUT_GRPC_PORT:-50054}:${WORKOUT_GRPC_PORT:-50054}"
+    stop_grace_period: 10s
+
   frontend:
     build:
       context: ./frontend
@@ -107,3 +155,4 @@ services:
 volumes:
   user-db-data:
   nutrition-db-data:
+  workout-db-data:

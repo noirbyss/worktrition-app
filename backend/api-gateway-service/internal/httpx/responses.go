@@ -30,6 +30,10 @@ func WriteGRPCError(w http.ResponseWriter, err error) {
 		WriteError(w, http.StatusNotFound, message)
 	case codes.AlreadyExists:
 		WriteError(w, http.StatusConflict, message)
+	case codes.DeadlineExceeded:
+		WriteError(w, http.StatusGatewayTimeout, "user-service request timed out")
+	case codes.Unavailable:
+		WriteError(w, http.StatusServiceUnavailable, "user-service is unavailable")
 	case codes.Internal, codes.Unknown:
 		WriteError(w, http.StatusInternalServerError, message)
 	default:

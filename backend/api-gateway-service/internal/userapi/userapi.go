@@ -1,10 +1,14 @@
 package userapi
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	userpb "github.com/noirbyss/worktrition-app/gen/user-service"
 )
+
+const grpcRequestTimeout = 5 * time.Second
 
 type Config struct {
 	RefreshTokenCookieName string
@@ -32,4 +36,8 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, authMiddleware func(http.Ha
 	mux.HandleFunc("/auth/logout", h.HandleLogout)
 	mux.Handle("/users/me", authMiddleware(http.HandlerFunc(h.HandleGetCurrentUser)))
 	mux.Handle("/profile", authMiddleware(http.HandlerFunc(h.HandleProfile)))
+}
+
+func (h *Handler) grpcContext(r *http.Request) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(r.Context(), grpcRequestTimeout)
 }

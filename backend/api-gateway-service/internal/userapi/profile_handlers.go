@@ -13,7 +13,10 @@ func (h *Handler) HandleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.userClient.GetUser(r.Context(), &userpb.GetUserRequest{
+	ctx, cancel := h.grpcContext(r)
+	defer cancel()
+
+	resp, err := h.userClient.GetUser(ctx, &userpb.GetUserRequest{
 		UserId: authn.UserIDFromContext(r.Context()),
 	})
 	if err != nil {
@@ -36,7 +39,10 @@ func (h *Handler) HandleProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleGetProfile(w http.ResponseWriter, r *http.Request) {
-	resp, err := h.userClient.GetProfile(r.Context(), &userpb.GetProfileRequest{
+	ctx, cancel := h.grpcContext(r)
+	defer cancel()
+
+	resp, err := h.userClient.GetProfile(ctx, &userpb.GetProfileRequest{
 		UserId: authn.UserIDFromContext(r.Context()),
 	})
 	if err != nil {
@@ -54,7 +60,10 @@ func (h *Handler) handleSaveProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	req.UserId = authn.UserIDFromContext(r.Context())
 
-	resp, err := h.userClient.SaveProfile(r.Context(), &req)
+	ctx, cancel := h.grpcContext(r)
+	defer cancel()
+
+	resp, err := h.userClient.SaveProfile(ctx, &req)
 	if err != nil {
 		httpx.WriteGRPCError(w, err)
 		return

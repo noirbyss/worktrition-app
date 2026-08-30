@@ -3,7 +3,6 @@ import { ApiError, type Profile } from '../api'
 import { useAuth } from '../auth/useAuth'
 import { AppFrame } from '../components/app/AppFrame'
 import { InlineMessage } from '../components/auth/InlineMessage'
-import { AppLink } from '../components/navigation/AppLink'
 import { useCurrentUserData } from '../hooks'
 import { toErrorMessage } from '../utils'
 
@@ -37,7 +36,7 @@ const trainingLocationLabels: Record<number, string> = {
 }
 
 export function ProfilePage() {
-    const { getProfile, session } = useAuth()
+    const { getProfile } = useAuth()
     const { isLoading: isLoadingUser, loadError: userLoadError, user } = useCurrentUserData()
     const [isLoadingProfile, setIsLoadingProfile] = useState(true)
     const [profile, setProfile] = useState<Profile | null>(null)
@@ -82,7 +81,6 @@ export function ProfilePage() {
 
     const avatarInitials = getInitials(user?.name)
     const birthDate = user ? formatShortDate(user.birthDate) : '—'
-    const ageLabel = profile ? `${profile.age} лет` : '—'
     const isLoading = isLoadingUser || isLoadingProfile
 
     return (

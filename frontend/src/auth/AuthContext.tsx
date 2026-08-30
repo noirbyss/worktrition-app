@@ -47,9 +47,13 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(initialSession)
-  const [status, setStatus] = useState<AuthStatus>(() =>
-    isSessionFresh(initialSession) ? 'authenticated' : 'loading',
-  )
+  const [status, setStatus] = useState<AuthStatus>(() => {
+    if (!initialSession) {
+      return 'anonymous'
+    }
+
+    return isSessionFresh(initialSession) ? 'authenticated' : 'loading'
+  })
   const refreshPromiseRef = useRef<Promise<AuthSession> | null>(null)
   const sessionRef = useRef<AuthSession | null>(initialSession)
 
@@ -108,17 +112,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [applySession, clearSession])
 
   useEffect(() => {
-    if (isSessionFresh(sessionRef.current)) {
+    const currentSession = sessionRef.current
+
+    if (!currentSession) {
+      setStatus('anonymous')
+      void refreshSession().catch(() => {
+        if (!sessionRef.current) {
+          setStatus('anonymous')
+        }
+      })
+      return
+    }
+
+    if (isSessionFresh(currentSession)) {
       setStatus('authenticated')
       return
     }
 
     void refreshSession().catch(() => {
-      if (!sessionRef.current) {
-        setStatus('anonymous')
-      }
+      clearSession()
     })
-  }, [refreshSession])
+  }, [clearSession, refreshSession])
 
   const getValidSession = useCallback(async () => {
     const currentSession = sessionRef.current

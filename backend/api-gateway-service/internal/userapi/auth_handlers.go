@@ -24,7 +24,10 @@ func (h *Handler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.userClient.Register(r.Context(), &req)
+	ctx, cancel := h.grpcContext(r)
+	defer cancel()
+
+	resp, err := h.userClient.Register(ctx, &req)
 	if err != nil {
 		httpx.WriteGRPCError(w, err)
 		return
@@ -49,7 +52,10 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.userClient.Login(r.Context(), &req)
+	ctx, cancel := h.grpcContext(r)
+	defer cancel()
+
+	resp, err := h.userClient.Login(ctx, &req)
 	if err != nil {
 		httpx.WriteGRPCError(w, err)
 		return
@@ -74,7 +80,10 @@ func (h *Handler) HandleRefresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.userClient.RefreshToken(r.Context(), &userpb.RefreshTokenRequest{
+	ctx, cancel := h.grpcContext(r)
+	defer cancel()
+
+	resp, err := h.userClient.RefreshToken(ctx, &userpb.RefreshTokenRequest{
 		RefreshToken: refreshToken,
 	})
 	if err != nil {
@@ -101,7 +110,10 @@ func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := h.userClient.Logout(r.Context(), &userpb.LogoutRequest{
+	ctx, cancel := h.grpcContext(r)
+	defer cancel()
+
+	if _, err := h.userClient.Logout(ctx, &userpb.LogoutRequest{
 		RefreshToken: refreshToken,
 	}); err != nil {
 		httpx.WriteGRPCError(w, err)
